@@ -32,61 +32,61 @@ function andList(a, sep) {
    the published KSBs of the standards and a sanitised line would score better
    than a real one — which would flatter the tool. */
 var TEAM = [
-  { id: 1, name: 'Priya N.', role: 'Stock controller', yrs: 4,
+  { id: 1, name: 'Priya N.', role: 'Stock controller', yrs: 4, dept: 'Stock control', deptSize: 3,
     note: 'Owns stock accuracy for the whole store; no formal management training',
     jd: ['Monitor the stock management system and investigate shrinkage',
          'Run weekly counts and reconcile discrepancies with head office',
          'Order replenishment against forecast demand and promotions',
          'Brief the replenishment team on priorities at the start of each shift'] },
-  { id: 2, name: 'Marcus W.', role: 'Senior sales assistant', yrs: 5,
+  { id: 2, name: 'Marcus W.', role: 'Senior sales assistant', yrs: 5, dept: 'Sales floor', deptSize: 14,
     note: 'Knows the customer base better than anyone; has never been given a team',
     jd: ['Serve customers and resolve complaints at the point of sale',
          'Hit personal and departmental sales targets',
          'Maintain product knowledge across ranges and promotions',
          'Coach new starters on the shop floor during their first weeks'] },
-  { id: 3, name: 'Leah M.', role: 'Checkout supervisor', yrs: 6,
+  { id: 3, name: 'Leah M.', role: 'Checkout supervisor', yrs: 6, dept: 'Checkout', deptSize: 18,
     note: 'Longest serving on the list; already supervises without the title',
     jd: ['Supervise checkout staff and set the rota for the front end',
          'Handle escalated customer complaints and refunds',
          'Monitor till performance and queue times against targets',
          'Carry out return-to-work and absence conversations'] },
-  { id: 4, name: 'Tom B.', role: 'Visual merchandiser', yrs: 2,
+  { id: 4, name: 'Tom B.', role: 'Visual merchandiser', yrs: 2, dept: 'Visual merchandising', deptSize: 4,
     note: 'Drives the merchandising plan; works largely alone',
     jd: ['Implement the merchandising plan across departments',
          'Build promotional displays for product launches',
          'Track the sales impact of layout changes',
          'Keep brand standards consistent across the store'] },
-  { id: 5, name: 'Aisha R.', role: 'Customer service lead', yrs: 3,
+  { id: 5, name: 'Aisha R.', role: 'Customer service lead', yrs: 3, dept: 'Customer service', deptSize: 7,
     note: 'Fields every escalation in the building',
     jd: ['Lead the customer service desk and its daily workload',
          'Resolve escalated complaints and authorise goodwill',
          'Communicate policy changes to colleagues across departments',
          'Report service metrics to the store manager weekly'] },
-  { id: 6, name: 'Dan F.', role: 'Night replenishment lead', yrs: 3,
+  { id: 6, name: 'Dan F.', role: 'Night replenishment lead', yrs: 3, dept: 'Night replenishment', deptSize: 11,
     note: 'Runs the night shift unsupervised; no daytime visibility',
     jd: ['Direct the overnight replenishment team to the morning deadline',
          'Allocate labour hours across aisles against delivery volume',
          'Complete health and safety checks and incident reports',
          'Hand over outstanding issues to the day management team'] },
-  { id: 7, name: 'Ellie C.', role: 'Department assistant, Home', yrs: 1,
+  { id: 7, name: 'Ellie C.', role: 'Department assistant, Home', yrs: 1, dept: 'Home', deptSize: 9,
     note: 'Strong with customers, newest on the list',
     jd: ['Serve customers and advise on product ranges',
          'Replenish and face the department through the day',
          'Process deliveries and check them against paperwork',
          'Support promotional changeovers'] },
-  { id: 8, name: 'Nia K.', role: 'Click and collect co-ordinator', yrs: 2,
+  { id: 8, name: 'Nia K.', role: 'Click and collect co-ordinator', yrs: 2, dept: 'Click and collect', deptSize: 5,
     note: 'Owns the fastest-growing part of the store end to end',
     jd: ['Co-ordinate online order picking against collection slots',
          'Resolve order shortfalls and customer substitutions',
          'Monitor pick accuracy and on-time collection rates',
          'Liaise with the transport provider on failed deliveries'] },
-  { id: 9, name: 'Jordan A.', role: 'Goods-in lead', yrs: 4,
+  { id: 9, name: 'Jordan A.', role: 'Goods-in lead', yrs: 4, dept: 'Goods-in', deptSize: 8,
     note: 'Knows the supply chain inside out; rarely leaves the backroom',
     jd: ['Receive and check deliveries against purchase orders',
          'Manage backroom stock location and capacity',
          'Raise and chase supplier claims for damages and shortages',
          'Sequence put-away against replenishment priorities for the day'] },
-  { id: 10, name: 'Sam O.', role: 'Store administrator', yrs: 2,
+  { id: 10, name: 'Sam O.', role: 'Store administrator', yrs: 2, dept: 'Store administration', deptSize: 3,
     note: 'Does the payroll, rotas and reporting for 180 colleagues',
     jd: ['Produce accurate records, rotas and payroll submissions',
          'Maintain internal policies and compliance paperwork',
@@ -925,6 +925,49 @@ function pct(y) { return (y / YEARS * 100) + '%'; }
    So the comparison is Brayford against its OWN levy: how many it is
    developing, against how many that levy would carry. Both numbers are
    derived here, neither is a standard. */
+/* The ceiling that actually binds is local. A chain-wide ratio of 3 in 1,340
+   looks like nothing, but if all three sat in one team of eight it would be
+   38% of that team out for a morning a week. So the rule is applied per
+   department — and it is the author's operating rule, not a published
+   standard, which the panel says in those words. */
+function deptCheck() {
+  var cap = PW.ratio.ceilingPct;
+  var byDept = {};
+  chosen().forEach(function (p) {
+    var d = byDept[p.dept] || (byDept[p.dept] = { size: p.deptSize, who: [] });
+    d.who.push(p.name);
+  });
+  var rows = Object.keys(byDept).map(function (name) {
+    var d = byDept[name];
+    var share = d.who.length / d.size;
+    var over = share > cap;
+    return '<tr' + (over ? ' class="indent"' : '') + '><td>' + esc(name) +
+      ' <span style="color:var(--muted-2)">· ' + d.who.map(esc).join(', ') + '</span></td>' +
+      '<td style="color:' + (over ? 'var(--bad)' : 'var(--good)') + '">' +
+      d.who.length + ' of ' + d.size + ' · ' + Math.round(share * 100) + '%' +
+      (over ? ' — over' : '') + '</td></tr>';
+  }).join('');
+  var breaches = Object.keys(byDept).filter(function (k) {
+    return byDept[k].who.length / byDept[k].size > cap;
+  });
+
+  return '<p class="subhead">The ceiling, applied where it bites</p>' +
+    '<p class="sub">A chain-wide ratio hides the thing that actually stops a programme. Three in ' +
+    '1,340 is nothing; three out of one team of eight is a morning a week with a third of that ' +
+    'team gone. So the limit is <b>' + Math.round(cap * 100) + '% of any one department</b>, not ' +
+    'of the workforce.</p>' +
+    '<table class="funnel" style="max-width:620px">' + rows + '</table>' +
+    '<p class="caveat"><b>This rule is mine, not a published standard.</b> There is no statutory ' +
+    'departmental limit. It is here because it is the constraint a real operator hits first &mdash; ' +
+    'and because a ratio measured only across a whole workforce will tell you everything is fine ' +
+    'right up until a department cannot open.</p>' +
+    (breaches.length
+      ? '<p class="caveat" style="color:var(--bad)">This cohort puts <b>' +
+        andList(breaches.map(esc)) + '</b> over the limit.</p>'
+      : '<p class="caveat" style="color:var(--good)">This cohort clears it &mdash; the ' +
+        chosen().length + ' sit in ' + Object.keys(byDept).length + ' different departments.</p>');
+}
+
 function affordable(std) {
   return (std && std.band) ? Math.floor(levy.annual / std.band) : 0;
 }
@@ -979,7 +1022,8 @@ function ratioBlock(n, std) {
       var wk = o.otjHours / (o.months * 52 / 12);
       return (wk * target / 37.5).toFixed(0);
     })() + ' full-time equivalents</b> off the shop floor, permanently. That is the constraint ' +
-    'that binds first.</p>';
+    'that binds first.</p>' +
+    deptCheck();
 }
 
 function drawStep7() {
