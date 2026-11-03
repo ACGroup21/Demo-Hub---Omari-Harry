@@ -196,35 +196,217 @@ function ro(k, v, s) {
     '<div class="s">' + s + '</div></div>';
 }
 
-/* ── 03 · the ten ────────────────────────────────────────────────────────── */
+/* ── 03 · the ten ────────────────────────────────────────────────────────
+   Some of the ten cannot be selected. The bar is NOT a judgement about the
+   person — the tool has no basis for one and says so. It is a judgement about
+   the JOB: if a job description evidences none of the duties the standard
+   assesses, there is nothing for an assessor to look at, and the fix is to
+   widen the role before enrolling anybody. That is in the data we have; who
+   has potential is not, and never will be. */
+function tally(id) {
+  var areas = (PW && PW.coverage.areas) || [];
+  var by = coverFor(id);
+  var yes = [], part = [];
+  areas.forEach(function (a) {
+    if (!by[a]) return;
+    (by[a].state === 'yes' ? yes : part).push(a);
+  });
+  return { yes: yes, part: part, missing: areas.filter(function (a) { return !by[a]; }) };
+}
+function eligible(id) { return tally(id).yes.length > 0; }
+
 function drawTeam() {
   $('team').innerHTML = TEAM.map(function (p) {
-    return '<button class="person' + (picked[p.id] ? ' on' : '') + '" data-p="' + p.id + '">' +
+    var ok = eligible(p.id);
+    return '<button class="person' + (picked[p.id] ? ' on' : '') + (ok ? '' : ' blocked') +
+      '" data-p="' + p.id + '"' + (ok ? '' : ' aria-disabled="true"') + '>' +
       '<span class="nm">' + esc(p.name) + '</span>' +
       '<span class="rl">' + esc(p.role) + ' · ' + p.yrs + ' yr' + (p.yrs === 1 ? '' : 's') + '</span>' +
-      '<span class="nt">' + esc(p.note) + '</span></button>';
+      '<span class="nt">' + esc(p.note) + '</span>' +
+      (ok ? '' : '<span class="flag">Not yet — why?</span>') + '</button>';
   }).join('');
+
+  var ready = TEAM.filter(function (p) { return eligible(p.id); }).length;
   var n = chosen().length;
-  $('count3').innerHTML = n === 0 ? 'Pick <b>three</b>.'
-    : n < 3 ? 'Picked <b>' + n + '</b> — choose ' + (3 - n) + ' more.'
-    : n === 3 ? '<b>Three chosen.</b> Everything below now runs on your three.'
-    : '<b>' + n + ' chosen</b> — more than three works, the cost just scales.';
+  $('count3').innerHTML =
+    '<b>' + ready + ' of your ' + TEAM.length + '</b> can be put forward today. ' +
+    (n === 0 ? 'Pick <b>three</b>.'
+      : n < 3 ? 'Picked <b>' + n + '</b> — choose ' + (3 - n) + ' more.'
+      : n === 3 ? '<b>Three chosen.</b> Everything below now runs on your three.'
+      : '<b>' + n + ' chosen</b> — more than three works, the cost just scales.');
   $('go3').disabled = n < 3;
 }
 function chosen() {
   return TEAM.filter(function (p) { return picked[p.id]; });
 }
+
+/* why a particular person cannot be put forward — derived from the mapping,
+   not written per person, so it cannot drift from the evidence in step 4 */
+function explain(p) {
+  var t = tally(p.id);
+  var areas = PW.coverage.areas;
+  var has = t.part.length
+    ? 'Their job description touches <b>' + t.part.map(esc).join('</b> and <b>') + '</b>, but only in ' +
+      'part &mdash; ' + (t.part.length === 1 ? 'it is' : 'they are') + ' a by-product of the job rather ' +
+      'than the job itself.'
+    : 'Their job description touches <b>none</b> of the six.';
+  $('why3').innerHTML =
+    '<div class="why"><h4>' + esc(p.name) + ' cannot be put forward yet</h4>' +
+    '<p>' + has + ' Nothing is clearly evidenced, so <b>there is nothing for an assessor to look at</b>. ' +
+    'An apprentice is assessed on the job they actually do; enrolling someone whose role contains none ' +
+    'of the duties sets them up to fail an end-point assessment eighteen months from now.</p>' +
+    '<p><b>This is a statement about the job, not about ' + esc(p.name.split(' ')[0]) + '.</b> They may ' +
+    'well be the most capable person on the list &mdash; the tool has no way of knowing that and will ' +
+    'not pretend to. What it can see is the role as written.</p>' +
+    '<p>To put them forward, <b>change the job first</b>: give them at least one of ' +
+    '<b>' + areas.map(esc).join('</b>, <b>') + '</b> as a real, standing responsibility. Then they ' +
+    'qualify &mdash; and the apprenticeship has something to assess.</p>' +
+    '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
+  $('why3').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+}
+
 function drawWork3() {
   var head = (PW && PW.employer.headcount) || 1340;
-  $('chain3').textContent = '— ' + head.toLocaleString('en-GB') + ' → 10';
+  var ready = TEAM.filter(function (p) { return eligible(p.id); }).length;
+  $('chain3').textContent = '— ' + head.toLocaleString('en-GB') + ' → ' + TEAM.length +
+    ' → ' + ready;
   $('work3').innerHTML = funnelRows([
     { label: 'people employed by Brayford', value: head.toLocaleString('en-GB') },
     { label: 'in store roles rather than head office', value: '1,180', drop: '160', indent: true },
     { label: 'one rung below a management grade', value: '64', drop: '1,116', indent: true },
     { label: 'twelve months service or more', value: '41', drop: '23', indent: true },
-    { label: 'put forward by their store manager', value: '10', drop: '31', indent: true }
+    { label: 'put forward by their store manager', value: String(TEAM.length), drop: '31', indent: true },
+    { label: 'whose JD evidences a management duty to assess',
+      value: String(ready), drop: String(TEAM.length - ready), sum: true }
   ]);
 }
+
+/* ── 04 · the duty gap ───────────────────────────────────────────────────
+   Read, not scored. A keyword overlap between these JDs and the published
+   KSBs finds management vocabulary in 2 of 60 person-area pairs, and misses
+   the clearest manager on the list — the standard says "recruit, retain and
+   develop" where her JD says "return-to-work conversations". Same duty, no
+   shared words. So the mapping is a judgement, and every claim is shown next
+   to the line of her job description it rests on, to be argued with. */
+function coverFor(id) {
+  var c = (PW && PW.coverage && PW.coverage.byPerson[String(id)]) || [];
+  var by = {};
+  c.forEach(function (x) { by[x.area] = x; });
+  return by;
+}
+
+function drawStep4() {
+  var areas = PW.coverage.areas;
+  var people = chosen();
+
+  var cards = people.map(function (p) {
+    var by = coverFor(p.id);
+    var yes = areas.filter(function (a) { return by[a] && by[a].state === 'yes'; }).length;
+    var part = areas.filter(function (a) { return by[a] && by[a].state === 'partly'; }).length;
+
+    var chips = areas.map(function (a) {
+      var st = by[a] ? by[a].state : 'no';
+      var tip = by[a] ? 'From their JD: ' + p.jd[by[a].jd] : 'Not described in their job description';
+      return '<span class="chip ' + st + '" title="' + esc(tip) + '">' + esc(a) + '</span>';
+    }).join('');
+
+    var lines = p.jd.map(function (line, i) {
+      var hits = areas.filter(function (a) { return by[a] && by[a].jd === i; });
+      return '<li class="' + (hits.length ? 'ev' : '') + '">' + esc(line) +
+        (hits.length ? '<em>→ ' + hits.map(function (a) {
+          return esc(a) + ' (' + by[a].state + ')'; }).join(' · ') + '</em>' : '') + '</li>';
+    }).join('');
+
+    return '<div class="learner"><div class="lh">' +
+      '<span class="ln">' + esc(p.name) + '</span><span class="lr">' + esc(p.role) + '</span>' +
+      '<span class="lscore"><b>' + yes + '</b> of ' + areas.length + ' clearly' +
+      (part ? ' · ' + part + ' in part' : '') + '</span></div>' +
+      '<div class="chips">' + chips + '</div>' +
+      '<details><summary>Their job description, and what each line evidences</summary>' +
+      '<ul class="jd">' + lines + '</ul></details></div>';
+  }).join('');
+
+  var totalYes = people.reduce(function (t, p) {
+    var by = coverFor(p.id);
+    return t + areas.filter(function (a) { return by[a] && by[a].state === 'yes'; }).length;
+  }, 0);
+  var max = people.length * areas.length;
+  var never = areas.filter(function (a) {
+    return !people.some(function (p) { var b = coverFor(p.id)[a]; return b && b.state === 'yes'; });
+  });
+
+  $('body4').innerHTML =
+    '<p class="sub">These six are the areas of the published <b>Retail manager</b> standard that are ' +
+    'about managing people or money. An apprenticeship assumes the apprentice is already doing the job ' +
+    'well enough to be assessed on it &mdash; so the question is not whether your three are capable, ' +
+    'but whether <b>the job you currently give them</b> contains any of this.</p>' +
+    cards +
+    '<div class="check"><h3>The reality check</h3>' +
+    '<p>Across your three, <b>' + totalYes + ' of ' + max + '</b> management areas are clearly evidenced ' +
+    'by their current job descriptions.' +
+    (never.length ? ' Not one of them has <b>' + never.map(esc).join('</b>, <b>') + '</b> in their role ' +
+      'today.' : '') + '</p>' +
+    '<p>That is a finding about <b>the jobs, not the people</b>. The gap does not close by enrolling ' +
+    'them &mdash; it closes by widening what they are actually asked to do, before they start. An ' +
+    'apprentice who cannot evidence a duty at work cannot pass an assessment on it, however good the ' +
+    'training is.</p>' +
+    '<p>And the <b>six hours a week</b> each of them spends training is time off a shop floor that is ' +
+    'already covered to the hour. Nobody funds that, and it is the reason retail programmes fall over ' +
+    'more often than the training does.</p></div>' +
+    '<div class="row"><button class="btn" id="go4">See the readiness report &rarr;</button></div>' +
+    '<details class="work"><summary>How this mapping was made <span class="chain">— read, not scored</span></summary>' +
+    '<table class="funnel">' +
+    '<tr><td>areas in the published Retail manager standard</td><td>' + PW.ksb.ST0325.areas.length + '</td></tr>' +
+    '<tr class="indent"><td>classified by us as managing people or money</td><td>' + areas.length + '</td></tr>' +
+    '<tr class="indent"><td>person &times; area judgements made</td><td>' + max + '</td></tr>' +
+    '<tr class="sum"><td>found by a plain keyword match instead</td><td>2 of 60</td></tr>' +
+    '</table>' +
+    '<p class="ours"><b>This one is a judgement, and the method is why.</b> Scoring the JDs against the ' +
+    'published KSBs by word overlap finds management vocabulary in 2 of 60 person-area pairs &mdash; and ' +
+    'marks a checkout supervisor who sets rotas and holds absence conversations as doing no people ' +
+    'management at all, because the standard says &ldquo;recruit, retain and develop&rdquo; where her JD ' +
+    'says &ldquo;return-to-work conversations&rdquo;. Same duty, no shared words. So this mapping is read ' +
+    'by a person, every claim is shown beside the line it rests on, and you are invited to disagree with ' +
+    'any of it. Which of the six areas count as management is our call too, not the standard&rsquo;s.</p>' +
+    '</details>';
+
+  $('go4').addEventListener('click', function () {
+    complete(4, totalYes + ' of ' + max + ' areas evidenced', true);
+    unlock(5);
+    goTo(5);
+  });
+  $('sum4').innerHTML = '';
+}
+
+/* ── the in-page viewer ──────────────────────────────────────────────────
+   Everything stays on this page. The iframe is built on open rather than
+   sitting hidden in the markup, because a hidden iframe either loads 5MB
+   nobody asked for or, with loading="lazy", never loads at all. */
+function openViewer(src, title) {
+  $('vtitle').innerHTML = title || src;
+  var host = $('vhost');
+  host.innerHTML = '';
+  var f = document.createElement('iframe');
+  f.src = src;
+  f.title = String(title || src).replace(/&mdash;/g, '—');
+  host.appendChild(f);
+  $('viewer').hidden = false;
+  document.body.style.overflow = 'hidden';
+  $('vclose').focus();
+}
+function closeViewer() {
+  $('viewer').hidden = true;
+  $('vhost').innerHTML = '';          /* drop the 5MB again on close */
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', function (e) {
+  var v = e.target.closest && e.target.closest('[data-view]');
+  if (v) { openViewer(v.getAttribute('data-view'), v.getAttribute('data-title')); return; }
+  if (e.target.id === 'vclose') closeViewer();
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && !$('viewer').hidden) closeViewer();
+});
 
 /* ── wiring ──────────────────────────────────────────────────────────────── */
 $('enter').addEventListener('click', function () {
@@ -241,9 +423,13 @@ $('go1').addEventListener('click', function () {
   goTo(2);
 });
 document.addEventListener('click', function (e) {
-  var p = e.target.closest && e.target.closest('.person');
-  if (!p) return;
-  var id = p.getAttribute('data-p');
+  if (e.target.id === 'whyX') { $('why3').innerHTML = ''; return; }
+  var el = e.target.closest && e.target.closest('.person');
+  if (!el) return;
+  var id = +el.getAttribute('data-p');
+  var person = TEAM.filter(function (p) { return p.id === id; })[0];
+  if (!eligible(id)) { explain(person); return; }   /* blocked: explain, do not select */
+  $('why3').innerHTML = '';
   if (picked[id]) delete picked[id]; else picked[id] = 1;
   drawTeam();
 });
@@ -251,6 +437,7 @@ $('go3').addEventListener('click', function () {
   var names = chosen().map(function (p) { return p.name.split(' ')[0]; });
   complete(3, names.join(', '), true);
   unlock(4);
+  drawStep4();
   goTo(4);
 });
 

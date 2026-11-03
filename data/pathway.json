@@ -312,5 +312,164 @@
         }
       ]
     }
+  },
+  "coverage": {
+    "_note": "Which of the six management areas each person's CURRENT job description evidences, and which line of it is the evidence. `jd` indexes that person's jd array. Anything absent is \"not in the job description\" - a claim about the JD, not about the person.",
+    "_method": "READ, not scored. A keyword overlap between these JDs and the published KSBs finds management vocabulary in only 2 of 60 person-area pairs, and misses a checkout supervisor who sets rotas and holds absence conversations, because the standard says \"recruit, retain and develop\" where her JD says \"return-to-work conversations\". Same duty, no shared words. The page states that this mapping is a judgement and shows the evidence line beside every claim so a reader can disagree with it.",
+    "_areas": "The six are the areas of the published Retail manager standard that WE classify as being about managing people or money. That classification is ours, not the standard's.",
+    "areas": [
+      "Financial",
+      "Leadership",
+      "Communication",
+      "Sales and promotions",
+      "Developing self",
+      "Team performance"
+    ],
+    "byPerson": {
+      "1": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 2
+        },
+        {
+          "area": "Communication",
+          "state": "partly",
+          "jd": 3
+        }
+      ],
+      "2": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 1
+        },
+        {
+          "area": "Sales and promotions",
+          "state": "partly",
+          "jd": 1
+        },
+        {
+          "area": "Developing self",
+          "state": "yes",
+          "jd": 3
+        },
+        {
+          "area": "Team performance",
+          "state": "partly",
+          "jd": 3
+        }
+      ],
+      "3": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 2
+        },
+        {
+          "area": "Leadership",
+          "state": "yes",
+          "jd": 0
+        },
+        {
+          "area": "Communication",
+          "state": "partly",
+          "jd": 1
+        },
+        {
+          "area": "Sales and promotions",
+          "state": "partly",
+          "jd": 2
+        },
+        {
+          "area": "Team performance",
+          "state": "yes",
+          "jd": 3
+        }
+      ],
+      "4": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 2
+        },
+        {
+          "area": "Sales and promotions",
+          "state": "partly",
+          "jd": 1
+        }
+      ],
+      "5": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 1
+        },
+        {
+          "area": "Leadership",
+          "state": "yes",
+          "jd": 0
+        },
+        {
+          "area": "Communication",
+          "state": "yes",
+          "jd": 2
+        }
+      ],
+      "6": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 1
+        },
+        {
+          "area": "Leadership",
+          "state": "yes",
+          "jd": 0
+        },
+        {
+          "area": "Communication",
+          "state": "partly",
+          "jd": 3
+        }
+      ],
+      "7": [],
+      "8": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 2
+        },
+        {
+          "area": "Communication",
+          "state": "partly",
+          "jd": 3
+        }
+      ],
+      "9": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 2
+        },
+        {
+          "area": "Leadership",
+          "state": "partly",
+          "jd": 3
+        }
+      ],
+      "10": [
+        {
+          "area": "Financial",
+          "state": "partly",
+          "jd": 2
+        },
+        {
+          "area": "Communication",
+          "state": "partly",
+          "jd": 3
+        }
+      ]
+    }
   }
 }

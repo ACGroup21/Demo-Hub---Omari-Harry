@@ -76,6 +76,9 @@ h1 em{font-style:normal;color:var(--cyan)}
 .reopen{margin-left:auto;background:none;border:0;color:var(--muted-2);font:inherit;font-size:12px;
   cursor:pointer;text-decoration:underline;padding:0}
 .reopen:hover{color:var(--cyan)}
+.linklike{background:none;border:0;padding:0;font:inherit;color:var(--cyan);cursor:pointer;
+  text-decoration:underline;text-underline-offset:2px}
+.linklike:hover{filter:brightness(1.2)}
 .step.folded .card-body{display:none}
 .sub{margin:6px 0 16px;color:var(--muted);font-size:14px;max-width:74ch}
 .sub b{color:var(--ink);font-weight:600}
@@ -128,6 +131,20 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   background:rgba(159,177,202,.035);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
 .person:hover{border-color:var(--cyan-dim)}
 .person.on{border-color:var(--cyan);background:var(--cyan-ghost)}
+.person.blocked{border-style:dashed;opacity:.5;cursor:help}
+.person.blocked:hover{opacity:.78;border-color:var(--warm)}
+.person.blocked .nm{color:var(--muted)}
+.person .flag{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--warm);margin-top:7px}
+.why{margin-top:14px;border:1px solid var(--warm);border-radius:13px;padding:15px 17px;
+  background:rgba(240,163,92,.06)}
+.why h4{margin:0 0 7px;font-size:14px;font-weight:700;color:var(--warm)}
+.why p{margin:0 0 8px;font-size:13.5px;color:var(--muted);max-width:76ch}
+.why p:last-child{margin-bottom:0}
+.why b{color:var(--ink)}
+.why .dismiss{background:none;border:0;padding:0;font:inherit;font-size:12px;color:var(--muted-2);
+  cursor:pointer;text-decoration:underline}
+.why .dismiss:hover{color:var(--cyan)}
 .person .nm{font-weight:700;font-size:14.5px}
 .person.on .nm{color:var(--cyan)}
 .person .rl{font-size:12.5px;color:var(--muted)}
@@ -135,6 +152,46 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .count{margin:15px 0 0;font-size:14px;color:var(--muted)}
 .count b{color:var(--ink)}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
+
+/* ── step 4 · duty coverage ───────────────────────────────────────────── */
+.learner{border:1px solid var(--line);border-radius:13px;padding:15px 17px;margin-top:11px;
+  background:rgba(159,177,202,.03)}
+.lh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.lh .ln{font-weight:700;font-size:15px;color:var(--cyan)}
+.lh .lr{font-size:12.5px;color:var(--muted)}
+.lh .lscore{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.lh .lscore b{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;padding:4px 9px;border-radius:999px;
+  border:1px solid var(--line);color:var(--muted-2);white-space:nowrap}
+.chip.yes{background:var(--cyan);border-color:var(--cyan);color:#001314;font-weight:600}
+.chip.partly{border-color:var(--cyan-dim);color:var(--cyan)}
+.chip.no{text-decoration:line-through;opacity:.6}
+.jd{list-style:none;margin:12px 0 0;padding:0;font-size:13px}
+.jd li{padding:5px 0 5px 15px;border-left:2px solid var(--line);color:var(--muted);margin-bottom:3px}
+.jd li.ev{border-left-color:var(--cyan);color:var(--ink)}
+.jd li em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--cyan);
+  display:block;margin-top:2px}
+.learner details{margin-top:11px}
+.learner details>summary{cursor:pointer;font-size:12px;color:var(--muted-2);list-style:none}
+.learner details>summary::-webkit-details-marker{display:none}
+.learner details>summary:hover{color:var(--cyan)}
+.check{margin-top:20px;border:1px solid var(--warm);border-radius:13px;padding:16px 18px;
+  background:rgba(240,163,92,.06)}
+.check h3{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--warm);letter-spacing:.01em}
+.check p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:76ch}
+.check p:last-child{margin-bottom:0}
+.check b{color:var(--ink)}
+
+/* ── in-page viewer ───────────────────────────────────────────────────── */
+#viewer{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.93);display:flex;flex-direction:column}
+#viewer[hidden]{display:none}
+.vbar{display:flex;align-items:center;gap:14px;padding:11px 16px;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:12px;color:var(--muted);flex:0 0 auto}
+.vbar b{color:var(--cyan);font-weight:500}
+.vbar .sp{flex:1}
+#vhost{flex:1 1 auto;min-height:0}
+#vhost iframe{width:100%;height:100%;border:0;background:#05080f}
 
 footer{margin:56px 0 70px;padding-top:22px;border-top:1px solid var(--line);
   color:var(--muted-2);font-size:13px;display:flex;gap:18px;flex-wrap:wrap;justify-content:space-between}
@@ -230,10 +287,14 @@ footer b{color:var(--muted)}
         <p class="fold-sum" id="sum3"></p>
         <button class="reopen" data-open="3" hidden>change</button></div>
       <div class="card-body">
-        <p class="sub">Ten people one rung below management. <b>Pick three</b> for their first step into
-        managing. You choose, not the tool &mdash; working out who has potential is a judgement an
-        employer makes, and software pretending to do it would be a feature that does not exist.</p>
+        <p class="sub">Ten people one rung below management. <b>Pick three.</b> Which of them has
+        potential is your call &mdash; this tool will not guess at that, and software pretending to
+        would be a feature that does not exist. What it will tell you is whose <b>current job</b>
+        gives an assessor something to look at, because that is written in a job description rather
+        than carried around in someone&rsquo;s head. Some of these ten cannot be put forward yet.
+        Click one to see why.</p>
         <div class="team" id="team"></div>
+        <div id="why3"></div>
         <p class="count" id="count3"></p>
         <div class="row"><button class="btn" id="go3" disabled>Match their job descriptions &rarr;</button></div>
         <details class="work"><summary>Why these ten <span class="chain" id="chain3"></span></summary>
@@ -288,11 +349,20 @@ footer b{color:var(--muted)}
 
   <footer>
     <span><b>Sandbox by Omari Harry</b> &middot; powered by Fundable. Invented employer, real funding rules.</span>
-    <span>The full calculator this was cut from is
-      <a href="apps/fundable.html" target="_blank" rel="noopener">Fundable</a> &mdash; open it and run
-      the 58 golden cases yourself.</span>
+    <span>The full calculator this was cut from opens
+      <button class="linklike" data-view="apps/fundable.html" data-title="Fundable &mdash; the full calculator">here
+      in this page</button> &mdash; run the 58 golden cases yourself.</span>
   </footer>
 
+</div>
+
+<div id="viewer" hidden>
+  <div class="vbar">
+    <b id="vtitle"></b><span class="sp"></span>
+    <span>opens inside Sandbox &mdash; you have not left the page</span>
+    <button class="btn ghost" id="vclose">Close &times;</button>
+  </div>
+  <div id="vhost"></div>
 </div>
 
 <script src="journey.js?v=1"></script>
