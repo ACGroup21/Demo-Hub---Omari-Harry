@@ -2136,8 +2136,12 @@ function liveStep() {
 }
 
 function aimBlocked() {
+  /* the splash blocks only while it is actually on screen. Reading the class
+     alone was enough until something took the splash away by another route,
+     and then the pointer stayed off for the rest of the run with nothing to
+     show why -- so ask whether it is laid out at all as well. */
   var sp = $('splash');
-  if (sp && !sp.classList.contains('gone')) return true;
+  if (sp && sp.offsetParent !== null && !sp.classList.contains('gone')) return true;
   if ($('recap')) return true;
   var v = $('viewer');
   if (v && !v.hidden) return true;
@@ -2227,6 +2231,88 @@ document.addEventListener('toggle', function () { setTimeout(aim, 0); }, true);
 setInterval(aim, 160);
 aim();
 
+
+
+/* -- the cohort constellation --------------------------------------------
+   Points drifting, drawing a line to whichever neighbours come close enough:
+   a network forming and dissolving. Chosen out of the seven in lab/, and it
+   was the one carrying a standing objection: long, bright, horizontal lines
+   are the shape of a line of text, so it fights the reading.
+
+   First attempt answered that by dimming the lines to a third. It worked,
+   and it was the wrong fix -- what was left read as dust, not as a network,
+   so the thing chosen was not the thing shipped. The objection is specific:
+   lines BEHIND BODY COPY. So the fix is structural instead. The card surface
+   was rgba(11,20,38,.5), half transparent, which is what put the drawing
+   under the paragraphs in the first place; at .9 the text sits on its own
+   ground and the constellation lives in the gutters and the rail column,
+   where it can be as bright as it likes. Lines are back up to .15 and reach
+   135px, and they cross no text at all.
+
+   Contrast was measured too, against real body copy, and it was never the
+   question: every size passes both bare and through a card by a factor of
+   two or more. The lab page found the same thing about all seven.
+
+   It draws one frame synchronously before asking for any, so a surface that
+   never composites -- see the pointer -- still gets a constellation rather
+   than an empty canvas. Under prefers-reduced-motion that single frame is
+   all it ever draws. */
+(function () {
+  var C = document.getElementById('bg');
+  if (!C || !C.getContext) return;
+  var X = C.getContext('2d');
+  var W = 0, H = 0, DPR = 1, nodes = [];
+  var LINK = 135, LINE_A = 0.15;   /* both settled by looking, see above */
+
+  function size() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    /* clientWidth, not innerWidth: innerWidth counts the scrollbar, so the
+       bitmap came out 15px wider than the box it is drawn into and the whole
+       field was squashed 1.5% horizontally. */
+    W = C.clientWidth; H = C.clientHeight;
+    C.width = Math.round(W * DPR); C.height = Math.round(H * DPR);
+    X.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var n = Math.max(18, Math.min(70, Math.round(W * H / 29000)));
+    while (nodes.length > n) nodes.pop();
+    while (nodes.length < n) nodes.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.17, vy: (Math.random() - 0.5) * 0.17
+    });
+    draw(false);
+  }
+
+  function draw(move) {
+    X.clearRect(0, 0, W, H);
+    for (var i = 0; i < nodes.length; i++) {
+      var a = nodes[i];
+      if (move) {
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0 || a.x > W) a.vx *= -1;
+        if (a.y < 0 || a.y > H) a.vy *= -1;
+      }
+      for (var j = i + 1; j < nodes.length; j++) {
+        var b = nodes[j], dx = a.x - b.x, dy = a.y - b.y;
+        var d = Math.sqrt(dx * dx + dy * dy);
+        if (d >= LINK) continue;
+        X.strokeStyle = 'rgba(0,201,204,' + ((1 - d / LINK) * LINE_A).toFixed(4) + ')';
+        X.lineWidth = 1;
+        X.beginPath(); X.moveTo(a.x, a.y); X.lineTo(b.x, b.y); X.stroke();
+      }
+      X.fillStyle = 'rgba(190,214,236,.22)';
+      X.beginPath(); X.arc(a.x, a.y, 1.4, 0, 6.3); X.fill();
+    }
+  }
+
+  size();
+  window.addEventListener('resize', size, { passive: true });
+  if (reduced()) return;           /* the one frame above is the whole of it */
+
+  (function frame() {
+    requestAnimationFrame(frame);
+    if (document.visibilityState === 'hidden') return;
+    draw(true);
+  })();
+})();
 
 /* ── wiring ──────────────────────────────────────────────────────────────── */
 $('enter').addEventListener('click', function () {
