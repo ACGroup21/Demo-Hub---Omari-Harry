@@ -1,146 +1,101 @@
-# Portfolio — Omari Harry
+# Sandbox — Omari Harry
 
-Working software for UK apprenticeship funding and delivery. Every app here is a
-single self-contained HTML file: no build step, no framework, no server. Open one
-and it runs.
+**[Open it](https://acgroup21.github.io/Demo-Hub---Omari-Harry/)** — it runs in the page, nothing to
+install.
 
-The through-line is **numbers you can check**. These tools tell employers what
-training will cost them, and a figure that is merely plausible is worthless — so
-the work is built to be audited rather than trusted.
+A retail chain with forty-two stores, a £30m pay bill and five years to build its own managers.
+Seven steps, each unlocking the next: here is your levy, here is what it actually buys, choose who
+to develop, find out what their jobs don't yet evidence, read the report, pick the apprenticeship,
+see the five-year pathway.
 
----
-
-## What that means in practice
-
-**A golden-case suite, run inside the app.** 58 cases reproduce gov.uk's own
-worked examples to the penny — levy calculation, co-investment at every
-age/employer combination, fund expiry, the 80/20 drawdown, projection
-arithmetic. Anyone can open the app and run them.
-
-**Every figure explains itself.** Click a number and it shows its arithmetic,
-names the funding rule it came from, and gives the date that rule was last
-verified against gov.uk.
-
-**One governed source of truth.** Funding constants live in a single JSON file
-that every app fetches at runtime and applies over its own defaults. Each
-constant carries its gov.uk source URL and verification date. A quarterly
-routine re-checks them and stamps the result — *including when nothing has
-changed*, because an unstamped "no change" is indistinguishable from nobody
-looking.
-
-**That discipline catches real money.** In one pass it found the app was
-overstating employer co-investment **five-fold** (charging 25% where the rules
-say 5%), still applying a **10% government top-up that had been abolished**, and
-treating 22–24 year-olds as chargeable when they had become fully funded. Two of
-the test cases were themselves pinning the removed rule — which is why the suite
-had stayed green while the number was wrong.
+The employer is invented. **Everything else is real and dated** — the levy arithmetic, the funding
+bands, the published duties, and which apprenticeships you can still buy.
 
 ---
 
-## The demos
+## The idea behind it
 
-**[Open the hub](https://acgroup21.github.io/Demo-Hub---Omari-Harry/)** — each one runs in the
-page, no download.
+These tools tell employers what training will cost them, and a figure that is merely plausible is
+worthless. So the work is built to be **audited rather than trusted**, and that shows up in three
+habits.
 
-### Sandbox — a team of ten, costed
+**Every narrowing shows its working.** When the page puts four apprenticeships in front of you, it
+shows how it got there from 322 — funded for new starts, right level, right route, properly indexed
+— with live counts that move if the library moves. Nothing in that chain is typed into the page.
 
-The one I built for this repository rather than extracted from the product. It gives you a
-situation instead of a form: you run a team of ten, five of them need developing, *what does
-that actually cost you?* You pick your five, choose from ten apprenticeship standards drawn from
-the real library of 322 — or paste a job description and let it match — and read the bill.
+**Where a judgement is mine, the page says so, in those words.** The last hop in every filter is
+editorial and is coloured differently and labelled. Two of the four options on screen were removed
+by the tool's own filters and put back deliberately, and it says which filter removed each and why
+they are still there. The classification of which published duties count as "management" is mine,
+and the page says that too.
 
-The first step is deliberately **a choice, not an assessment**. Working out which of your people
-has potential is talent mapping; I have not built it, and a demo that faked it would be
-advertising a capability that does not exist, which is the one thing a tool about trustworthy
-numbers must not do. So the visitor chooses, and every figure downstream runs on the five they
-picked. The same honesty governs the final panel: alongside the funded training cost it shows
-the **off-the-job time nobody funds** — six hours a week per apprentice, which on most plans is
-larger than the training itself. It is the number employers are surprised by, which is exactly
-why it is on screen.
+**It refuses to guess.** Picking who has potential is a judgement an employer makes; the tool will
+not fake it. What it will do is say whose *current job* evidences a duty an assessor could look at,
+because that is written in a job description rather than carried around in someone's head. Five of
+the ten are blocked on that basis, and clicking one explains that the finding is about the job, not
+the person — and what would have to change.
 
-### Levy Expiry Clock
+## What it caught
 
-A forecasting problem with a consequence attached. Unused apprenticeship levy now expires
-**12 months** after it lands, down from 24, so an employer sitting on an untouched account is
-losing a month of contributions off the far end every month. Move the pay bill slider and the
-loss moves with it: a £25m pay bill puts roughly **£110,000 a year** back with the Treasury.
+Building it turned up things worth more than the demo:
 
-The useful part is the distinction the tool insists on — an account still building is in a
-different position from a mature one, and collapsing the two would make the headline number
-wrong for half the people reading it. The expiry window, the levy rate and the £15,000 allowance
-are all read from the governed rulebook and shown with their source, not typed into the page.
+**Team leader L3 was defunded for new starts on 1 September 2026.** It was going to be the "right
+answer" in the walkthrough. Checking Skills England rather than assuming meant the whole scenario
+changed — and the real story is better: the *generic* management ladder lost funding (Team leader,
+Operations manager, Chartered manager, Coaching professional) while the *sector-specific* retail one
+did not. The standards library here now carries funding status for all 322, and ten of them are
+flagged.
 
-### JD Matcher
+**A keyword match on job descriptions is not good enough for this.** Scoring the JDs against
+published KSBs by word overlap finds management vocabulary in 2 of 60 person-area pairs, and marks a
+checkout supervisor who sets rotas and holds absence conversations as doing no people management at
+all — because the standard says *"recruit, retain and develop"* where her JD says *"return-to-work
+conversations"*. Same duty, no shared words. So that mapping is read rather than scored, every claim
+sits beside the line of the JD it rests on, and the page reports the failed experiment as the reason.
 
-A ranking problem, not a lookup. A pasted job description is scored against **322 standards**,
-and each result reports how much of your JD it actually covered rather than just asserting a
-winner. Terms are weighted by **how distinctive they are** — `log(1 + N/df)`, so a word that
-appears in every standard contributes almost nothing while a rare one carries the match, and
-the role title is weighted separately because a JD that covers a standard's *name* is saying
-something a body-text overlap is not. Two earlier scoring approaches were built and thrown away
-before this worked; a straight overlap count just returns whichever standard has the longest
-vocabulary.
+**The filter chain threw out its own best answer.** Retail manager carried a five-word summary index
+rather than published KSBs, so the honest chain dropped it. That was the filter working, not failing.
+Its index was rebuilt from source and it now survives on merit.
 
-This one is the first generation, kept as it shipped: a 42-term index per standard, which is
-enough for a shortlist. **The second generation is in Sandbox**, and the two sitting side by
-side is the point — it indexes every standard's **published Knowledge, Skills and Behaviours**
-instead, because that is the vocabulary the role is really described in; it names the terms it
-matched on rather than counting them; it flags a standard whose index is thin instead of quietly
-scoring it the same; and it has a score floor, so it will answer **"no good match"** instead of
-returning its least-bad guess. That last one is the failure mode that makes a matcher
-untrustworthy, and finding it took feeding the thing five deliberately messy job descriptions
-rather than the six I had written myself, which it passed 6/6.
+## The numbers it lands on
 
-### What can you claim?
+A £30m pay bill is £135,000 of levy a year. Three colleagues on two programmes across five years
+commits £30,000 of £675,000 — so **£645,000 expires unused**, enough for another 129 people, because
+the money has already left the payroll. And the training the levy pays for is matched almost pound
+for pound by **off-the-job hours nobody funds**: 348 published hours per apprentice, about 4.5 a week,
+off a shop floor already covered to the hour.
 
-A governed rules engine with a plain-English front end. Set the details of one hire — salary,
-age, levy status, care leaver, EHC plan, new or existing staff — and it lists **every grant,
-incentive and saving**, each with the condition that unlocks it and a link to the gov.uk page
-it came from. Levers you do not qualify for stay visible with their condition shown, because
-"you get nothing" is a much less useful answer than "you get nothing *because*".
+## The full calculator
 
-The amounts are not written into the page. Every lever's value comes from the shared engine,
-which overlays the canonical rulebook over its own defaults on load — so a corrected rule
-reaches this app the next time someone opens it, with no redeploy. This is the clearest small
-example of the architecture behind all of these: the apps are views, and the rules live
-somewhere they can be versioned, sourced and verified.
+Sandbox was cut from [`apps/fundable.html`](apps/fundable.html) — a single 5MB file carrying 35
+navigable functions. It opens inside Sandbox rather than in a new tab. It is where the claims above
+are checkable: **open it and press the button to run 58 golden cases** that reproduce gov.uk's own
+worked examples to the penny, and click any figure to see its arithmetic, the funding rule behind it
+and the date that rule was last verified.
 
-### Fundable — the full tool
-
-The calculator the three lite demos were cut from, in
-[`apps/fundable.html`](apps/fundable.html): a single 5.0 MB HTML file carrying **35 navigable
-functions across ten sections**, from levy forecasting and cohort planning through to a report
-builder — press `/` or `Ctrl-K` inside it and the command palette lists all 35, plus five
-app-level commands. It is where
-the claims at the top of this page are actually demonstrable — **the 58-case golden suite runs
-from inside the app** (open it and press the button; it reports 58/58 against gov.uk's published
-worked examples), and the per-figure provenance lets you click any number and see its
-arithmetic, its governing rule and the date that rule was last checked.
-
-It is included unabridged, warts included, because a tidied-up excerpt would prove less than the
-real thing. The three lite demos share one `engine.js`, left as a separate file on purpose — one
-engine behind three apps is the architecture, and inlining it would hide it.
+Funding constants live in a single JSON file every app fetches at runtime and applies over its own
+defaults. That discipline once found the app overstating employer co-investment **five-fold**, still
+applying a **10% government top-up that had been abolished**, and treating 22–24 year-olds as
+chargeable after they became fully funded — with two test cases pinning the removed rule, which is
+why the suite had stayed green while the number was wrong.
 
 ## Notes
 
-**A standalone work sample.** These were built in-house for Arthur Curtis Education, a
-levy-funded apprenticeship consultancy, and are shown here as examples of my work. The demos
-have had their cross-tool navigation, outbound links and email capture removed, so there is
-nothing to sign up to and nothing is collected.
+**A standalone work sample.** Built in-house for Arthur Curtis Education, a levy-funded
+apprenticeship consultancy, and shown here as an example of my work. There is nothing to sign up to
+and nothing is collected.
 
-**All data is invented.** No real employer, learner or provider appears anywhere in this
-repository.
+**All data is invented.** Brayford Stores and its ten colleagues are written. No real employer,
+learner or provider appears anywhere.
 
 **Client work is not published here.** Several of these tools run live for named organisations.
 Those instances, their branding and their data stay private.
 
-**The standards library is partial, and the apps say so.** It carries 8 of the 15 occupational
-routes — business, digital, health and science, legal and finance, sales, care, hospitality,
-transport and logistics — with **no construction or engineering**. Sandbox prints that in its
-header rather than letting a visitor discover it by getting a bad answer.
+**The standards library is partial, and the page says so.** It carries 8 of the 15 occupational
+routes, with no construction or engineering.
 
 ## Stack
 
-Vanilla JavaScript, HTML and CSS. No dependencies beyond what is vendored in the
-file. Deployed as static pages. The constraint is deliberate — these go to small
-employers and training providers who need a link that works, not an install.
+Vanilla JavaScript, HTML and CSS. No build step, no framework, no dependencies beyond what is in the
+file. Deployed as static pages. The constraint is deliberate — these go to small employers and
+training providers who need a link that works, not an install.
