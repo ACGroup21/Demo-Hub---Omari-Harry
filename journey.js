@@ -124,11 +124,18 @@ function complete(n, summary, foldable) {
   s.classList.remove('active');
   s.classList.add('done');
   if (summary != null) $('sum' + n).innerHTML = summary;
-  if (foldable) {
-    s.classList.add('folded');
-    var b = s.querySelector('.reopen');
-    if (b) b.hidden = false;
+  if (foldable) s.classList.add('folded');
+  /* every finished step can be reopened, not just the two that happened to
+     have a button in the markup. Injected rather than hand-added five times. */
+  var b = s.querySelector('.reopen');
+  if (!b) {
+    b = document.createElement('button');
+    b.className = 'reopen';
+    b.setAttribute('data-open', String(n));
+    b.textContent = 'review';
+    s.querySelector('.card-h').appendChild(b);
   }
+  b.hidden = false;
   lightActs();
 }
 function goTo(n) {
@@ -142,6 +149,35 @@ function reduced() {
   return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/* ── the marker's journey ────────────────────────────────────────────────
+   The rail runs red at the top to cyan-green at the bottom, so the spine
+   itself reads as heat cooling off: you arrive not knowing what any of it
+   costs, you leave with a plan. The node you are ON lights orange, then
+   settles into its position colour once done.
+
+   Worth noting it cuts across the page's other colour rule, where cyan means
+   funded and warm means your own cost. These nodes are chrome, not data —
+   they are a gradient down a rail, which is why they read as position rather
+   than as a verdict. */
+var RAIL_STOPS = [[232, 112, 95], [240, 163, 92], [0, 201, 204], [79, 214, 160]];
+function stepColour(n, total) {
+  var t = (n - 1) / Math.max(1, (total || 7) - 1);
+  var seg = Math.min(RAIL_STOPS.length - 2, Math.floor(t * (RAIL_STOPS.length - 1)));
+  var f = t * (RAIL_STOPS.length - 1) - seg;
+  var a = RAIL_STOPS[seg], b = RAIL_STOPS[seg + 1];
+  return 'rgb(' + a.map(function (v, i) {
+    return Math.round(v + (b[i] - v) * f);
+  }).join(',') + ')';
+}
+function paintRail() {
+  var steps = document.querySelectorAll('.step');
+  [].forEach.call(steps, function (s, i) {
+    var c = stepColour(i + 1, steps.length);
+    s.style.setProperty('--stepc', c);
+    s.style.setProperty('--stepc-next', stepColour(Math.min(i + 2, steps.length), steps.length));
+  });
+}
+
 /* An act lights once anything inside it is reachable, so the three labels on
    the rail fill in as you descend rather than all being lit from the start. */
 var ACT_FIRST = { 'The money': 1, 'The people': 3, 'The decision': 6 };
@@ -150,6 +186,7 @@ function lightActs() {
     var first = ACT_FIRST[a.getAttribute('data-act')];
     var s = step(first);
     a.classList.toggle('lit', !!s && !s.classList.contains('locked'));
+    a.style.setProperty('--stepc', stepColour(first, document.querySelectorAll('.step').length));
   });
 }
 
@@ -318,6 +355,11 @@ function tally(id) {
   return { yes: yes, part: part, missing: areas.filter(function (a) { return !by[a]; }) };
 }
 function eligible(id) { return tally(id).yes.length > 0; }
+/* Eligible is not the same as selectable. Of those whose job evidences
+   anything, the thinnest two are held back for a year rather than blocked
+   outright - the difference matters, and the panel says what to do with the
+   year instead of just refusing. */
+function selectable(id) { return eligible(id) && !isWeaker(id); }
 
 /* Among those who CAN be put forward, some are better bets than others — and
    that is a ranking, not a gate. The tool advises and the employer decides;
@@ -347,15 +389,16 @@ function avatar(name) {
 
 function drawTeam() {
   $('team').innerHTML = TEAM.map(function (p) {
-    var ok = eligible(p.id);
-    return '<button class="person' + (picked[p.id] ? ' on' : '') + (ok ? '' : ' blocked') +
+    var ok = selectable(p.id);
+    var soon = eligible(p.id) && !ok;
+    return '<button class="person' + (picked[p.id] ? ' on' : '') + (ok ? '' : ' blocked') + (soon ? ' soon' : '') +
       '" data-p="' + p.id + '"' + (ok ? '' : ' aria-disabled="true"') + '>' +
       avatar(p.name) +
       '<span class="nm">' + esc(p.name) + '</span>' +
       '<span class="rl">' + esc(p.role) + ' · ' + p.yrs + ' yr' + (p.yrs === 1 ? '' : 's') + '</span>' +
       '<span class="nt">' + esc(p.note) + '</span>' +
-      (ok ? (isWeaker(p.id) ? '<span class="flag soft">Thinner evidence</span>' : '')
-          : '<span class="flag">Not yet — why?</span>') + '</button>';
+      (ok ? '' : soon ? '<span class="flag soft">Not this year — what could you do?</span>'
+                     : '<span class="flag">Nothing to assess — why?</span>') + '</button>';
   }).join('');
 
   var ready = TEAM.filter(function (p) { return eligible(p.id); }).length;
@@ -396,6 +439,83 @@ function explain(p) {
     '<p><b>Change the job first</b>, and they qualify immediately: one of ' +
     '<b>' + andList(areas.map(esc)) + '</b> as a real, standing responsibility. Not mastery of it ' +
     '&mdash; just the chance to do it badly at first, which is the whole point.</p>' +
+    '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
+  $('why3').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+}
+
+/* The units explainer opens and closes in place. It is a digression from the
+   walkthrough, so it is a disclosure rather than a step — and nothing about
+   it navigates anywhere. */
+function unitsPack() {
+  var U = PW.units;
+  return '<div class="infopack"><div class="ip-h"><b>' + esc(U.name) + '</b>' +
+    '<button class="dismiss" id="unitsClose">Close</button></div>' +
+    '<table class="funnel">' + U.facts.map(function (f) {
+      return '<tr><td style="white-space:nowrap;color:var(--cyan)">' + esc(f[0]) +
+        '</td><td style="text-align:left;color:var(--muted);white-space:normal">' +
+        esc(f[1]) + '</td></tr>';
+    }).join('') + '</table>' +
+    '<p class="ip-why">' + esc(U.whyHere) + '</p>' +
+    '<p class="ip-src"><a href="' + esc(U.source) + '" target="_blank" rel="noopener">' +
+    esc(U.sourceName) + '</a> &middot; checked ' + esc(U.checked) + '</p></div>';
+}
+document.addEventListener('click', function (e) {
+  if (e.target && e.target.id === 'unitsOpen') {
+    var h = $('unitsPack');
+    h.innerHTML = h.innerHTML ? '' : unitsPack();
+    return;
+  }
+  if (e.target && e.target.id === 'unitsClose') { $('unitsPack').innerHTML = ''; }
+});
+
+/* ── what you could do ───────────────────────────────────────────────────
+   The two thinnest are held back for a year, so the panel owes them a year's
+   worth of plan rather than a refusal. Each suggestion targets a gap the data
+   actually found, and none of them makes a funding claim — these are things
+   an employer does with a rota and a job description, not things they buy. */
+function couldDo(p) {
+  var t = tally(p.id);
+  var areas = PW.coverage.areas;
+  /* the areas NOBODY in the eligible pool clearly evidences — the real hole */
+  var holes = areas.filter(function (a) {
+    return !TEAM.filter(function (q) { return eligible(q.id); })
+      .some(function (q) { return tally(q.id).yes.indexOf(a) > -1; });
+  });
+  var first = esc(p.name.split(' ')[0]);
+
+  $('why3').innerHTML =
+    '<div class="why"><h4>' + esc(p.name) + ' &mdash; not this year. What you could do instead</h4>' +
+    '<p>Their job evidences <b>' + t.yes.length + '</b> of the six clearly' +
+    (t.part.length ? ' and touches <b>' + t.part.length + '</b> in part' : '') +
+    ' &mdash; enough to learn from, but the thinnest of those who could go. Put them in now and ' +
+    'most of the eighteen months goes on building a job for the apprenticeship to assess. ' +
+    '<b>Spend the year building it first</b>, and ' + first + ' starts next cohort already ahead.</p>' +
+
+    '<p><b>1. Give them a dotted line.</b> One or two colleagues reporting to ' + first +
+    ' informally &mdash; not a promotion, not a pay change, just somebody whose work they are ' +
+    'accountable for. That one change turns <b>Team performance</b> and <b>Developing self</b> from ' +
+    'theory into something an assessor can look at.</p>' +
+
+    '<p><b>2. Hand them a project with a budget.</b>' +
+    (holes.length
+      ? ' Across everyone you could put forward, <b>' + andList(holes.map(esc)) + '</b> ' +
+        (holes.length === 1 ? 'appears' : 'appear') + ' in nobody’s role at all. A defined ' +
+        'piece of work with a number attached and a date to finish is the cheapest way to create it.'
+      : ' A defined piece of work with a number attached and a date to finish evidences financial ' +
+        'and planning duties that a day job rarely does.') + '</p>' +
+
+    '<p><b>3. Buy them an apprenticeship unit in the meantime.</b> Weeks rather than eighteen ' +
+    'months, out of the same levy you already pay, aimed at the exact duties their job does not ' +
+    'cover yet. <button class="linklike" id="unitsOpen">What is an apprenticeship unit?</button></p>' +
+    '<div id="unitsPack"></div>' +
+
+    '<p><b>4. Book them into next year’s cohort now.</b> Not a vague promise &mdash; a named ' +
+    'place, twelve months out, with the three changes above as the conditions. People leave because ' +
+    'the next step is invisible, and this is the cheapest thing on the page.</p>' +
+
+    '<p style="color:var(--muted-2);font-size:12.5px">This is advice, not a rule. Nothing stops you ' +
+    'enrolling ' + first + ' anyway &mdash; the tool simply will not pretend it is the same bet as ' +
+    'the other three.</p>' +
     '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
   $('why3').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
 }
@@ -1351,7 +1471,8 @@ document.addEventListener('click', function (e) {
   if (!el) return;
   var id = +el.getAttribute('data-p');
   var person = TEAM.filter(function (p) { return p.id === id; })[0];
-  if (!eligible(id)) { explain(person); return; }   /* blocked: explain, do not select */
+  if (!eligible(id)) { explain(person); return; }      /* nothing to assess at all */
+  if (!selectable(id)) { couldDo(person); return; }    /* thin: not this year, here is why */
   if (picked[id]) { delete picked[id]; $('why3').innerHTML = ''; }
   else { picked[id] = 1; adviseIfWeaker(person); }
   drawTeam();
@@ -1410,6 +1531,7 @@ Promise.all([
   setPayBill(PW.employer.payBill, true);   /* open on Brayford, not on a default */
   drawTeam();
   drawWork3();
+  paintRail();
   lightActs();
 }).catch(function (err) {
   $('stampRules').innerHTML = 'Could not load the funding data — figures below are not trustworthy.';

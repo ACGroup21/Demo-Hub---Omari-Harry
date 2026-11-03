@@ -69,11 +69,11 @@ h1 em{font-style:normal;color:var(--cyan)}
 .act .rail{position:relative;justify-self:center;width:var(--rail)}
 .act .rail::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;
   background:var(--line);transition:background .5s}
-.act.lit .rail::after{background:var(--cyan-dim)}
+.act.lit .rail::after{background:var(--stepc,var(--cyan-dim));opacity:.55}
 .act .rail::before{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;
   margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#05080f;box-shadow:0 0 0 2px var(--line);
   z-index:2;transition:box-shadow .5s,background .5s}
-.act.lit .rail::before{background:var(--cyan);box-shadow:0 0 0 2px var(--cyan)}
+.act.lit .rail::before{background:var(--stepc,var(--cyan));box-shadow:0 0 0 2px var(--stepc,var(--cyan))}
 .act-label{display:flex;align-items:baseline;gap:14px;padding:40px 0 16px;flex-wrap:wrap}
 .act-label b{font-family:var(--mono);font-size:11px;letter-spacing:.19em;text-transform:uppercase;
   color:var(--muted-2);font-weight:500;transition:color .5s}
@@ -85,14 +85,18 @@ h1 em{font-style:normal;color:var(--cyan)}
 .rail{position:relative;justify-self:center;width:var(--rail);align-self:stretch}
 .rail::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;
   background:var(--line);transition:background .5s ease}
-.step.done .rail::after{background:linear-gradient(var(--cyan),var(--cyan-dim))}
+.step.done .rail::after{background:linear-gradient(var(--stepc,var(--cyan)),var(--stepc-next,var(--cyan-dim)))}
 .step:last-of-type .rail::after{bottom:auto;height:46px}
 .node{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;
   width:38px;height:38px;margin:26px auto 0;border-radius:50%;background:#05080f;
   border:2px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--muted-2);
   transition:border-color .4s,color .4s,box-shadow .4s,background .4s}
-.step.active .node{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 0 5px var(--cyan-ghost)}
-.step.done .node{border-color:var(--cyan);background:var(--cyan);color:#001314;font-weight:600}
+.step.active .node{border-color:var(--warm);color:var(--warm);
+  box-shadow:0 0 0 5px rgba(240,163,92,.16);animation:arrive 2.4s ease-in-out infinite}
+@keyframes arrive{0%,100%{box-shadow:0 0 0 5px rgba(240,163,92,.16)}
+  50%{box-shadow:0 0 0 9px rgba(240,163,92,.05)}}
+.step.done .node{border-color:var(--stepc,var(--cyan));background:var(--stepc,var(--cyan));
+  color:#07121a;font-weight:600;animation:none}
 .step.done .node span{display:none}
 .step.done .node::after{content:'\2713';font-size:15px}
 
@@ -222,6 +226,17 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .person.blocked .av{filter:grayscale(1) brightness(.8)}
 .person:hover{border-color:var(--cyan-dim)}
 .person.on{border-color:var(--cyan);background:var(--cyan-ghost)}
+.infopack{margin:12px 0 4px;border:1px solid var(--cyan-dim);border-radius:12px;padding:14px 16px;
+  background:rgba(0,201,204,.055)}
+.ip-h{display:flex;align-items:baseline;gap:12px;margin-bottom:9px}
+.ip-h b{font-size:14px;color:var(--cyan)}
+.ip-h .dismiss{margin-left:auto}
+.infopack .funnel td{padding:6px 14px 6px 0;vertical-align:top;font-family:var(--mono);font-size:11.5px}
+.ip-why{margin:11px 0 0;font-size:13px;color:var(--muted);line-height:1.6;max-width:72ch}
+.ip-src{margin:10px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--muted-2)}
+.ip-src a{color:var(--muted)}
+.person.soon{border-style:dashed;opacity:.72;cursor:help}
+.person.soon:hover{opacity:.95;border-color:var(--warm)}
 .person.blocked{border-style:dashed;opacity:.5;cursor:help}
 .person.blocked:hover{opacity:.78;border-color:var(--warm)}
 .person.blocked .nm{color:var(--muted)}
@@ -506,7 +521,7 @@ footer b{color:var(--muted)}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  #splash,#splash img,#splash .tag,#enter{animation:none}
+  #splash,#splash img,#splash .tag,#enter,.step.active .node{animation:none}
   *{transition-duration:.01ms !important}
 }
 </style>
@@ -691,6 +706,6 @@ footer b{color:var(--muted)}
   <div id="vhost"></div>
 </div>
 
-<script src="journey.js?v=13"></script>
+<script src="journey.js?v=15"></script>
 </body>
 </html>

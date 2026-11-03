@@ -727,5 +727,38 @@
     "verified": "2026-11-03",
     "disclosure": "These go to the government’s own provider directory, not to anyone’s sales page. No provider named there is affiliated with this site, recommended by it, or paying to appear. Listings are live and change — provider counts, achievement rates and availability move constantly, and nothing here is checked for currency after the date above.",
     "whyNotDirect": "Linking one provider’s programme would read as an endorsement on a page that argues their management wrap sits outside the levy, and provider pages rot. The directory shows everyone delivering the standard, with achievement rates, and stays current on its own."
+  },
+  "units": {
+    "name": "Apprenticeship units",
+    "source": "https://www.gov.uk/government/publications/apprenticeship-units-technical-funding/apprenticeship-unit-technical-funding-guide-from-august-2026",
+    "sourceName": "Apprenticeship unit technical funding guide, GOV.UK",
+    "checked": "2026-11-03",
+    "facts": [
+      [
+        "What they are",
+        "Short, flexible training courses available from April 2026, built from employer-led occupational standards — job-specific skills rather than a whole occupation."
+      ],
+      [
+        "How long",
+        "30 to 140 hours, delivered across 1 to 16 weeks."
+      ],
+      [
+        "Who for",
+        "Employees aged 19 and over."
+      ],
+      [
+        "If you pay the levy",
+        "Paid from your employer account, up to the funding rate — the same pot as a full apprenticeship."
+      ],
+      [
+        "If you do not",
+        "Government funds all the training and assessment cost, up to the funding rate."
+      ],
+      [
+        "If your levy runs out",
+        "For a learner aged 25 or over, government funds 75% and you pay 25%, for units starting on or after 1 August 2026. Earlier starts attracted 95%. Learners aged 19 to 24 are fully funded."
+      ]
+    ],
+    "whyHere": "A unit is the obvious move for someone a year away from a full standard. It is weeks rather than eighteen months, it comes from the same levy you are already paying, and it can target the exact duties their job does not yet cover — so they arrive at next year’s cohort with the evidence already built."
   }
 }
