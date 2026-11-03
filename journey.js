@@ -2053,6 +2053,147 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape' && !$('viewer').hidden) closeViewer();
 });
 
+
+/* -- the pointer ---------------------------------------------------------
+   The gate above says WHAT is missing. It says it in a line next to a
+   disabled button, which on these cards is usually below the fold, so a
+   reader who has not scrolled sees a step that will not open and no reason
+   given. The pointer adds the one thing the gate cannot know: WHERE.
+
+   It contributes nothing else. Whether it is showing, and whether it reads
+   as owed or as settled, is taken from the gate's own button -- so there is
+   no second opinion to keep in step, and the pointer cannot tell you to do
+   something the gate has already accepted. The only thing authored here is
+   a target per step, which is the part no amount of state can derive.
+
+   No motion: it is a halo, a tag and, when the thing is off screen, a pill
+   that scrolls it back. Dynamics come after this, deliberately. */
+var AIM = {
+  1: { btn: 'go1', say: 'Line this up with Brayford’s mark',
+       at: function () { return document.querySelector('#s1 .sliderwrap'); } },
+  3: { btn: 'go3', say: 'Pick three from here',
+       at: function () { return $('team'); } },
+  4: { btn: 'go4', say: 'Open one of these',
+       at: function () { return shut('#body4 .learner details'); } },
+  5: { btn: 'go5', say: 'Open one of these',
+       at: function () { return shut('#body5 .learner details'); } },
+  6: { btn: 'go6', say: 'Drag a name onto the programme',
+       at: function () { return $('pool'); } }
+};
+
+/* the first one still closed -- so after you open the second, it stops
+   pointing at the first as though nothing had happened */
+function shut(sel) {
+  var all = document.querySelectorAll(sel);
+  for (var i = 0; i < all.length; i++) if (!all[i].open) return all[i];
+  return all[0] || null;
+}
+
+/* the frontier: the first step that is open for work and not finished.
+   Reopening a done step to review it does not move this, which is right --
+   the thing you still owe is still the thing you owe. */
+function liveStep() {
+  var all = document.querySelectorAll('.step');
+  for (var i = 0; i < all.length; i++) {
+    if (!all[i].classList.contains('locked') && !all[i].classList.contains('done')) {
+      return +all[i].getAttribute('data-n');
+    }
+  }
+  return 0;
+}
+
+function aimBlocked() {
+  var sp = $('splash');
+  if (sp && !sp.classList.contains('gone')) return true;
+  if ($('recap')) return true;
+  var v = $('viewer');
+  if (v && !v.hidden) return true;
+  return false;
+}
+
+function aimTarget() {
+  var n = liveStep(), a = AIM[n];
+  if (!a) return null;
+  var s = step(n);
+  if (!s || s.classList.contains('folded')) return null;
+  var b = $(a.btn);
+  /* gate released: the only thing left to find is the button itself */
+  if (b && !b.disabled) {
+    /* its own label is better copy than anything generic: "See the readiness
+       report" tells you what continuing gets you. */
+    return { el: b, say: b.textContent.replace(/\s*\u2192\s*$/, '').trim(), ready: true };
+  }
+  var el = a.at();
+  return el ? { el: el, say: a.say, ready: false } : null;
+}
+
+var aimLast = '';
+/* Driven by events and a slow interval, NOT by requestAnimationFrame. Worth
+   saying why: measured in this app's own preview pane, rAF fires zero times
+   a second even with document.visibilityState === 'visible', because frames
+   are only produced for a surface that is actually being composited. A
+   pointer hung off rAF is therefore a pointer that is sometimes simply not
+   there, with nothing in the console to say so. Scroll and resize keep it
+   glued during movement; the interval catches the state changes no listener
+   here knows about, like a panel rendered after a fetch. */
+function aim() {
+  var halo = $('halo'), nudge = $('nudge');
+  if (!halo || !nudge) return;
+  var t = aimBlocked() ? null : aimTarget();
+  if (!t) {
+    if (aimLast !== 'off') { halo.className = ''; nudge.className = ''; aimLast = 'off'; }
+    return;
+  }
+
+  var r = t.el.getBoundingClientRect();
+  if (!r.width && !r.height) return;
+  var st = $('stepper');
+  var top = (st && st.classList.contains('show')) ? st.offsetHeight : 0;
+  var vis = r.bottom > top + 10 && r.top < window.innerHeight - 10;
+
+  /* one key per distinct state, so a still page writes nothing at all */
+  var key = [t.say, Math.round(r.top), Math.round(r.left), Math.round(r.width),
+             Math.round(r.height), t.ready, vis, top].join('|');
+  if (key === aimLast) return;
+  aimLast = key;
+
+  var cls = t.ready ? ' ready' : '';
+  halo.className = vis ? 'on' + cls : '';
+  if (vis) {
+    halo.style.left = (r.left - 6) + 'px';
+    halo.style.top = (r.top - 5) + 'px';
+    halo.style.width = (r.width + 12) + 'px';
+    halo.style.height = (r.height + 10) + 'px';
+  }
+
+  /* the pill says it whether or not the target is on screen: on screen it
+     names what is owed, off screen it is also the way back to it */
+  nudge.className = 'on' + cls;
+  nudge.innerHTML =
+    (vis ? '' : '<i>' + (r.top >= window.innerHeight ? '↓' : '↑') + '</i>') +
+    '<span>' + esc(t.say) + '</span>' +
+    (vis ? '' : '<u>take me</u>');
+  nudge.setAttribute('aria-label', t.say + (vis ? '' : ' — scroll to it'));
+}
+
+$('nudge').addEventListener('click', function () {
+  var t = aimTarget();
+  if (!t) return;
+  t.el.scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' });
+  if (t.ready && t.el.focus) t.el.focus();
+});
+
+['scroll', 'resize'].forEach(function (ev) {
+  window.addEventListener(ev, aim, { passive: true });
+});
+['click', 'input', 'change', 'keyup', 'drop', 'dragend'].forEach(function (ev) {
+  document.addEventListener(ev, function () { setTimeout(aim, 0); }, true);
+});
+document.addEventListener('toggle', function () { setTimeout(aim, 0); }, true);
+setInterval(aim, 160);
+aim();
+
+
 /* ── wiring ──────────────────────────────────────────────────────────────── */
 $('enter').addEventListener('click', function () {
   $('splash').classList.add('gone');
