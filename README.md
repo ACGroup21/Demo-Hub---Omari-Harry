@@ -1,7 +1,8 @@
 # Sandbox — Omari Harry
 
 **[Open it](https://acgroup21.github.io/Demo-Hub---Omari-Harry/)** — it runs in the page, nothing to
-install.
+install. **Built for a desktop screen**: below 1024px the walkthrough doesn't run, and you get a
+page explaining why instead of a squeezed version of it.
 
 A retail chain with forty-two stores, 1,340 staff and five years to build its own managers. Seven
 stages, each one locked until the last is finished: here is your levy, here is what it actually
@@ -20,14 +21,14 @@ These tools tell employers what training will cost them, and a figure that is me
 worthless. So the work is built to be **audited rather than trusted**, and that shows up in three
 habits.
 
-**Every narrowing shows its working.** When the page puts four apprenticeships in front of you, it
+**Every narrowing shows its working.** When the page puts five apprenticeships in front of you, it
 shows how it got there from 322 — funded for new starts, right level, right route, properly indexed
 — with live counts that move if the library moves. Nothing in that chain is typed into the page.
 
 **Where a judgement is mine, the page says so, in those words.** The last hop in every filter is
-editorial and is coloured differently and labelled. Two of the four options on screen were removed
-by the tool's own filters and put back deliberately, and it says which filter removed each and why
-they are still there. The classification of which published duties count as "management" is mine,
+editorial and is coloured differently and labelled. Three of the five options on screen were
+removed by the tool's own filters and put back deliberately, and it says which filter removed each
+and why they are still there. The classification of which published duties count as "management" is mine,
 and the page says that too.
 
 **It refuses to guess.** Picking who has potential is a judgement an employer makes; the tool will
@@ -79,19 +80,33 @@ starts a year. **The constraint was never the money.** It was that only five of 
 evidencing anything an assessor could look at — and that the off-the-job hours nobody funds come
 off a shop floor already covered to the hour.
 
-## The full calculator
+## Checking the maths
 
-Sandbox was cut from [`apps/fundable.html`](apps/fundable.html) — a single 5MB file carrying 35
-navigable functions. It opens inside Sandbox rather than in a new tab. It is where the claims above
-are checkable: **open it and press the button to run 58 golden cases** that reproduce gov.uk's own
-worked examples to the penny, and click any figure to see its arithmetic, the funding rule behind it
-and the date that rule was last verified.
+Every figure in the walkthrough comes out of one calculation core, and that core is published on its
+own: [`apps/levy-engine.js`](apps/levy-engine.js), 21KB of pure functions with no interface, no data
+and no client work attached. Beside it is
+[a page that runs it](https://acgroup21.github.io/Demo-Hub---Omari-Harry/apps/golden.html) against
+**49 published gov.uk worked examples** — the levy formula, the August 2026 top-up boundary,
+co-investment and its age waivers, funding-band drawdown, FIFO expiry, the incentive and hiring
+payments, and timezone-safe date handling.
+
+It runs in your browser rather than showing you a screenshot of a result. Each case calls the
+function, prints what came back beside what gov.uk says it should be, and links the rule it rests
+on. All 49 pass.
+
+The full suite has 58. Nine test the application's projection and plan-stage verdict — its *reading*
+of the maths rather than the maths — and need page state this extract doesn't carry. One of those
+nine was passing without testing anything, which is why none of the nine are here rather than
+eight-ninths of them; a false pass on a correctness page is worse than a failure. The page says all
+of that on itself.
 
 Funding constants live in a single JSON file every app fetches at runtime and applies over its own
 defaults. That discipline once found the app overstating employer co-investment **five-fold**, still
 applying a **10% government top-up that had been abolished**, and treating 22–24 year-olds as
 chargeable after they became fully funded — with two test cases pinning the removed rule, which is
-why the suite had stayed green while the number was wrong.
+why the suite had stayed green while the number was wrong. It is the same mechanism that makes
+stage 1 show a **0% top-up** today, and say in the rulebook's own words, with its gov.uk source and
+the date it was read, that the 10% was removed from August 2026.
 
 ## Notes
 
@@ -107,6 +122,11 @@ Those instances, their branding and their data stay private.
 
 **The standards library is partial, and the page says so.** It carries 8 of the 15 occupational
 routes, with no construction or engineering.
+
+**Desktop only, deliberately.** The layout survives down to about 760px and the first real break is
+at 632 — but surviving isn't being the thing it is meant to be. This is a seven-stage rail you move
+down, a five-year timeline read across, a drag step and a pointer that tracks a target across the
+page. A phone build is its own exercise, not a squeeze of this one.
 
 ## Stack
 
