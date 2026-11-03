@@ -945,20 +945,41 @@ function ratioBlock(n, std) {
       '<div class="rr-s">' + sub + '</div></div>';
   }
 
+  var R = PW.ratio;
+  var target = Math.round(head * R.targetPct);
+
   return '<p class="subhead">Learners to non-learners</p>' +
     '<p class="sub">The question this walkthrough is really asking. Not what expires &mdash; ' +
-    '<b>how much of your workforce is being developed at any one time</b>, and how much of that ' +
-    'your levy would already carry.</p>' +
+    '<b>how much of your workforce is being developed at any one time</b>.</p>' +
     '<div class="ratio">' +
-    bar(n, 'now', 'What you are doing', 'the ' + n + ' you chose, on ' + esc(std.name)) +
+    bar(n, 'now', 'This cohort', 'the ' + n + ' you chose, on ' + esc(std.name)) +
     bar(afford, 'could', 'What this levy already pays for',
         fmt(levy.annual) + ' a year ÷ ' + fmt(band) + ' a place — starts you could fund ' +
         'annually without spending a penny more than you already have') +
+    bar(target, 'target', esc(R.targetName) + ' target',
+        Math.round(R.targetPct * 100) + '% of the workforce in earn-and-learn roles. A voluntary ' +
+        'charter, not a statutory ratio.') +
     '</div>' +
-    '<p class="caveat"><b>Neither of these is a target.</b> There is no statutory ratio for a ' +
-    'private employer &mdash; the 2.3% figure people quote is public-sector only, and its reporting ' +
-    'duty has lapsed. Both bars are Brayford measured against itself: what it chose, and what its ' +
-    'own levy would carry.</p>';
+    '<p class="payoff" style="margin-top:20px"><b>Three of ' + head.toLocaleString('en-GB') +
+    ' sounds like nothing. Against the target it is not.</b> ' + n + ' is <b>' +
+    (n / target * 100).toFixed(1) + '%</b> of a ' + Math.round(R.targetPct * 100) + '% position ' +
+    '&mdash; one cohort, and you are a twentieth of the way there. And the levy you already pay ' +
+    'would fund <b>' + afford + ' starts a year</b>, which is <b>' +
+    Math.round(afford / target * 100) + '%</b> of that target in a single year.</p>' +
+    '<p class="caveat"><b>What the 5% actually covers.</b> The club’s 5% is <b>earn-and-learn ' +
+    'broadly</b> &mdash; apprentices, sponsored students and graduates on formalised schemes &mdash; ' +
+    'not apprenticeships alone. So ' + target + ' is a wider target than an apprenticeship cohort, ' +
+    'and this cohort is a share of it rather than the whole of it. It is a voluntary charter: there ' +
+    'is no statutory ratio for a private employer, and the 2.3% figure people reach for is ' +
+    'public-sector only with its reporting duty lapsed.</p>' +
+    '<p class="caveat">The ceiling is not the money either. At the ' +
+    Math.round(R.targetPct * 100) + '% target, off-the-job time alone takes about <b>' +
+    (function () {
+      var o = STD[PW.pathway.instances[1].ref];
+      var wk = o.otjHours / (o.months * 52 / 12);
+      return (wk * target / 37.5).toFixed(0);
+    })() + ' full-time equivalents</b> off the shop floor, permanently. That is the constraint ' +
+    'that binds first.</p>';
 }
 
 function drawStep7() {

@@ -480,5 +480,14 @@
       "Priya N. Communication partly -> yes: a daily team brief is cascading information. Both reads are defensible; the evidence line is shown so a reader can take the other one.",
       "Jordan A.: his JD line “allocate the backroom team” was rewritten to “sequence put-away against replenishment priorities”. The scenario needed five colleagues who cannot be put forward; changing the authored role is honest, re-scoring the same words to a different answer would not be. The Leadership entry went with the line it rested on."
     ]
+  },
+  "ratio": {
+    "targetPct": 0.05,
+    "targetName": "The 5% Club",
+    "targetUrl": "https://www.5percentclub.org.uk/about/",
+    "targetNote": "A voluntary employer charter, not a statutory ratio. Members aspire to 5% of their UK workforce in “earn and learn” positions within five years of joining, with Gold awarded at 5% and Platinum at 10% per the club’s 2025 audit guidance.",
+    "targetCaveat": "IMPORTANT: the 5% covers earn-and-learn BROADLY — apprentices, sponsored students and graduates on formalised schemes — not apprenticeships alone. So the headcount target is wider than an apprenticeship cohort, and a cohort is a share of it rather than the whole of it. Sources also disagree on the tier bands; the club’s own audit document is the one used here.",
+    "ceilingPct": 0.3,
+    "ceilingNote": "An upper bound set for this exercise, not a published figure. The operational limit bites far sooner: at the 5% target, off-the-job time alone takes about 11 full-time equivalents off the floor permanently."
   }
 }
