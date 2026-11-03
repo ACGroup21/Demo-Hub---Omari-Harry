@@ -915,6 +915,52 @@ var EPA_MONTHS = 3;
 var EPA_ASSUMED = true;
 function pct(y) { return (y / YEARS * 100) + '%'; }
 
+/* ── learners to non-learners ────────────────────────────────────────────
+   The ratio is the point, not the expiry. There is no statutory benchmark to
+   measure a private employer against — the 2.3% figure people reach for is
+   public-sector only, from the Public Sector Apprenticeship Targets
+   Regulations 2017, and the publication duty has since lapsed. Borrowing it
+   for a retailer would be borrowing authority that does not exist.
+
+   So the comparison is Brayford against its OWN levy: how many it is
+   developing, against how many that levy would carry. Both numbers are
+   derived here, neither is a standard. */
+function affordable(std) {
+  return (std && std.band) ? Math.floor(levy.annual / std.band) : 0;
+}
+
+function ratioBlock(n, std) {
+  var head = PW.employer.headcount;
+  var band = std.band || 0;
+  var afford = affordable(std);
+  var oneIn = function (k) { return k > 0 ? '1 in ' + Math.round(head / k) : '—'; };
+  var pc = function (k) { return (k / head * 100).toFixed(2).replace(/\.00$/, '') + '%'; };
+
+  function bar(k, cls, label, sub) {
+    var w = Math.max(0.6, k / head * 100);
+    return '<div class="rr"><div class="rr-h"><b>' + label + '</b>' +
+      '<span>' + k.toLocaleString('en-GB') + ' of ' + head.toLocaleString('en-GB') +
+      ' · ' + pc(k) + ' · <b>' + oneIn(k) + '</b></span></div>' +
+      '<div class="rr-t"><i class="' + cls + '" style="width:' + w + '%"></i></div>' +
+      '<div class="rr-s">' + sub + '</div></div>';
+  }
+
+  return '<p class="subhead">Learners to non-learners</p>' +
+    '<p class="sub">The question this walkthrough is really asking. Not what expires &mdash; ' +
+    '<b>how much of your workforce is being developed at any one time</b>, and how much of that ' +
+    'your levy would already carry.</p>' +
+    '<div class="ratio">' +
+    bar(n, 'now', 'What you are doing', 'the ' + n + ' you chose, on ' + esc(std.name)) +
+    bar(afford, 'could', 'What this levy already pays for',
+        fmt(levy.annual) + ' a year ÷ ' + fmt(band) + ' a place — starts you could fund ' +
+        'annually without spending a penny more than you already have') +
+    '</div>' +
+    '<p class="caveat"><b>Neither of these is a target.</b> There is no statutory ratio for a ' +
+    'private employer &mdash; the 2.3% figure people quote is public-sector only, and its reporting ' +
+    'duty has lapsed. Both bars are Brayford measured against itself: what it chose, and what its ' +
+    'own levy would carry.</p>';
+}
+
 function drawStep7() {
   var n = chosen().length;
   var insts = PW.pathway.instances;
@@ -988,28 +1034,28 @@ function drawStep7() {
       '</div><div class="s">at ' + fmt(levy.annual) + ' a year</div></div>' +
     '<div class="t waste"><div class="k">Expires unused</div><div class="v">' + fmt(lost) +
       '</div><div class="s">about ' + fmt(perYear) + ' <b>every year</b></div></div>' +
-    '<div class="t"><div class="k">Still in the account</div><div class="v">' + fmt(acct.live) +
-      '</div><div class="s">landed in the last 12 months, not yet expired</div></div>' +
     '<div class="t"><div class="k">Unfunded time</div><div class="v">' + fmt(otjAll) +
       '</div><div class="s">both programmes, your cost</div></div>' +
     '</div>' +
+    ratioBlock(n, two) +
 
     '<div class="check"><h3>The gap is the product</h3>' +
     '<p>Those <b>' + (gapTo - gapFrom).toFixed(1).replace(/\.0$/, '') + ' years</b> between the two ' +
     'programmes are not idle. That is someone doing the job they have just qualified for, with a funded ' +
     'next rung already visible. It is the part that keeps people, and it costs nothing.</p>' +
-    '<p>The uncomfortable figure is the other one, and it is not a one-off at the end. Levy lands ' +
-    'every month and dies <b>' + RULES.expiryMonths + ' months later</b>, so this plan loses about ' +
-    '<b>' + fmt(perYear) + ' a year, every year</b> &mdash; <b>' + fmt(lost) + '</b> gone across the ' +
-    'five, out of <b>' + fmt(levy5) + '</b> received and <b>' + fmt(spend) + '</b> committed. That is ' +
-    'enough for another <b>' + couldHave + '</b> people on ' + esc(two.name) + ' at no extra cost, ' +
-    'because the money has already left the payroll.</p>' +
-    '<p>The <b>' + fmt(acct.live) + '</b> still in the account has not been saved &mdash; it only ' +
-    'landed in the last twelve months. On this plan it expires too, in the year after this chart ' +
-    'ends.</p>' +
-    '<p>That is the real finding of this walkthrough, and it is not about these three. It is that ' +
-    '<b>' + Math.round(spend / levy5 * 100) + '%</b> of a levy is a normal amount for an employer to ' +
-    'use, and the rest goes back to the Treasury on a rolling twelve-month clock.</p></div>' +
+    '<p>The other finding is about <b>how few people are in it</b>. ' + n + ' of ' +
+    PW.employer.headcount.toLocaleString('en-GB') + ' is one colleague in <b>' +
+    Math.round(PW.employer.headcount / n) + '</b>. The levy already pays for <b>' + affordable(two) +
+    ' starts a year</b> at this band &mdash; so the constraint on developing more of Brayford is not ' +
+    'the money, which has already left the payroll either way.</p>' +
+    '<p>It is the two things steps 3 and 4 found: only <b>' +
+    TEAM.filter(function (p) { return eligible(p.id); }).length + ' of ten</b> had a job that ' +
+    'evidenced anything an assessor could look at, and the <b>' + fmt(otjAll) + '</b> of off-the-job ' +
+    'time comes off a shop floor covered to the hour. Widening the ratio means widening roles and ' +
+    'finding cover &mdash; not finding budget.</p>' +
+    '<p>Unspent levy does expire on a rolling ' + RULES.expiryMonths + '-month clock, about <b>' +
+    fmt(perYear) + ' a year</b> on this plan. Worth knowing; not the point. The point is the ratio ' +
+    'below.</p></div>' +
 
     '<p class="subhead">After year five</p>' +
     '<p class="sub">Where ' + esc(two.name) + ' leads, if they stay. <b>' + above.length + '</b> funded ' +
