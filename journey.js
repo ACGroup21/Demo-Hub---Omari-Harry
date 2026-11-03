@@ -806,6 +806,9 @@ function drawStep6() {
     progCard(insts[0], one, 1, true) +
     progCard(insts[1], two, 2, false) +
 
+    '<p class="caveat"><b>Those provider links are not endorsements.</b> ' +
+    esc(PW.providerLinks.disclosure) + ' ' + esc(PW.providerLinks.whyNotDirect) + '</p>' +
+
     '<p class="assign-note">Drag each name into the first programme &mdash; or just click one, ' +
     'which works the same way.</p>' +
     '<div class="chip-row" id="pool"></div>' +
@@ -858,6 +861,11 @@ function progCard(inst, o, step, isDrop) {
     (inst.soldAs ? '<span class="pv">— ' + esc(inst.soldAs) + '</span>' : '') +
     '<span class="pm">L' + o.level + ' · ' + o.months + ' mo · <b>' + fmt(o.band) +
     '</b> each</span></div>' +
+    '<p class="proglinks">' +
+      '<a href="' + esc(inst.source) + '" target="_blank" rel="noopener">The standard</a>' +
+      ' &middot; ' +
+      '<a href="' + esc(inst.findProviders) + '" target="_blank" rel="noopener">Who delivers it &rarr;</a>' +
+    '</p>' +
     (isDrop
       ? '<div class="drop" id="drop1"></div>'
       : '<p class="assign-note" style="margin-top:10px">The same people move up to this three years ' +
