@@ -172,12 +172,30 @@ function funnelRows(rows) {
 }
 
 /* ── 01 · the levy ───────────────────────────────────────────────────────── */
+/* HMRC works the levy MONTHLY and cumulatively, not as one annual sum: a
+   twelfth of the allowance each month, year to date, with unused allowance
+   carried forward inside the tax year but never into the next. For a steady
+   pay bill the annual answer is identical — but showing annual-minus-£15,000
+   would be the wrong path, and a page whose whole claim is "check the
+   arithmetic" cannot print arithmetic nobody actually does.
+   Source: gov.uk/guidance/pay-apprenticeship-levy */
 function calcLevy(pb) {
-  var gross = pb * RULES.levyRate;
-  var net = Math.max(0, gross - RULES.allowance);
-  var topped = net * (1 + RULES.topUp);
-  return { payBill: pb, gross: gross, net: net, annual: topped, monthly: topped / 12 };
+  var mPay = pb / 12;
+  var mAllow = RULES.allowance / 12;
+  var mGross = mPay * RULES.levyRate;
+  var mNet = Math.max(0, mGross - mAllow);
+  var monthly = mNet * (1 + RULES.topUp);
+  return {
+    payBill: pb, mPay: mPay, mAllow: mAllow, mGross: mGross,
+    monthly: monthly, annual: monthly * 12,
+    gross: pb * RULES.levyRate, net: Math.max(0, pb * RULES.levyRate - RULES.allowance)
+  };
 }
+
+/* The threshold is not a separate rule — it is the pay bill at which the
+   allowance exactly cancels the levy. Derived so it stays right if either
+   constant moves. */
+function levyThreshold() { return RULES.allowance / RULES.levyRate; }
 
 /* Brayford's pay bill is an exact derived figure (headcount x the published
    average salary) and the slider moves in half-millions, so the thumb can
@@ -205,34 +223,55 @@ function drawStep1() {
   var t = calcLevy(target);
   var diff = levy.annual - t.annual;
   var movedOn = !step(3).classList.contains('locked');
+  var thresh = levyThreshold();
+  var isLevyPayer = payBill > thresh;
   $('go1').disabled = !onTarget;
   $('snapBack').hidden = onTarget;
   $('pbHint').className = 'hint' + (onTarget ? '' : ' off');
 
+  /* the levy is the answer this step is named after, so it is the big figure */
+  $('levyOut').className = 'levyout' + (isLevyPayer ? '' : ' nil');
+  $('levyOut').innerHTML = isLevyPayer
+    ? '<div class="lk">Your apprenticeship levy</div><div class="lv">' + fmt(levy.annual) + ' a year' +
+      '</div><div class="ls">' + fmt(levy.monthly) + ' into the account each month. Restricted to ' +
+      'apprenticeship training &mdash; it cannot pay a wage.</div>'
+    : '<div class="lk">Your apprenticeship levy</div><div class="lv">You do not pay it</div>' +
+      '<div class="ls">Under a <b>' + fmt(thresh) + '</b> pay bill there is no levy at all.</div>';
+
   var src = (PW && PW.employer.payBillFrom) || {};
-  $('pbHint').innerHTML = onTarget
-    ? 'Brayford’s pay bill is <b>' + (src.headcount || '') + ' staff × the UK average salary ' +
-      'of ' + fmt(src.avgSalary || 0) + '</b>. Move the slider to see what a bigger or smaller ' +
-      'employer would have &mdash; then come back to carry on.'
-    : 'At ' + fmt(payBill) + ' the levy would be <b>' + fmt(levy.annual) + '</b> a year, ' +
-      '<b>' + fmt(Math.abs(diff)) + '</b> ' + (diff > 0 ? 'more' : 'less') + ' than Brayford’s. ' +
-      (movedOn
-        ? 'Every figure in the steps below has just moved with it &mdash; <b>they are now this ' +
-          'employer’s, not Brayford’s</b>. '
-        : '') +
-      'Use the button to put it back.';
+  $('pbHint').innerHTML = !isLevyPayer
+    ? '<b>This is a different kind of employer, not a smaller version of one.</b> Below ' +
+      fmt(thresh) + ' you pay no levy and have no account &mdash; training is bought through ' +
+      'co-investment instead, with government paying <b>95%</b> and you finding the rest. A ' +
+      'separate funding world, and not the one this walkthrough is about. Use the button to ' +
+      'go back to Brayford.'
+    : onTarget
+      ? 'Brayford’s pay bill is <b>' + (src.headcount || '') + ' staff × the UK average ' +
+        'salary of ' + fmt(src.avgSalary || 0) + '</b>. Move the slider to see what a bigger or ' +
+        'smaller employer would have &mdash; then come back to carry on.'
+      : 'At ' + fmt(payBill) + ' the levy would be <b>' + fmt(levy.annual) + '</b> a year, ' +
+        '<b>' + fmt(Math.abs(diff)) + '</b> ' + (diff > 0 ? 'more' : 'less') + ' than Brayford’s. ' +
+        (movedOn
+          ? 'Every figure in the steps below has just moved with it &mdash; <b>they are now this ' +
+            'employer’s, not Brayford’s</b>. '
+          : '') +
+        'Use the button to put it back.';
 
   $('chain1').textContent = '— ' + fmtM(payBill) + ' → ' + fmt(levy.annual) + '/yr';
   var pbf = (PW && PW.employer.payBillFrom) || {};
   $('work1').innerHTML = funnelRows([
-    { label: 'UK average salary (' + esc(pbf.source || '') + ')', value: fmt(pbf.avgSalary || 0) },
-    { label: '× ' + (pbf.headcount || 0).toLocaleString('en-GB') + ' staff', value: fmt(levy.payBill), indent: true },
-    { label: 'annual pay bill', value: fmt(levy.payBill) },
-    { label: '× levy rate ' + (RULES.levyRate * 100).toFixed(1) + '%', value: fmt(levy.gross), indent: true },
-    { label: '− levy allowance', value: '−' + fmt(RULES.allowance), indent: true },
-    { label: '+ government top-up ' + Math.round(RULES.topUp * 100) + '%', value: RULES.topUp ? '+' + fmt(levy.net * RULES.topUp) : '£0', indent: true },
-    { label: 'into your account each year', value: fmt(levy.annual), sum: true },
-    { label: '÷ 12 months', value: fmt(levy.monthly) + '/mo', indent: true }
+    { label: 'UK average salary &mdash; ' + esc(pbf.source || '') + ', <b>provisional</b>',
+      value: fmt(pbf.avgSalary || 0) },
+    { label: '× ' + (pbf.headcount || 0).toLocaleString('en-GB') + ' staff → annual pay bill',
+      value: fmt(levy.payBill), indent: true },
+    { label: '÷ 12 → pay bill that month', value: fmt(levy.mPay) },
+    { label: '× levy rate ' + (RULES.levyRate * 100).toFixed(1) + '%', value: fmt(levy.mGross), indent: true },
+    { label: '− monthly allowance (' + fmt(RULES.allowance) + ' ÷ 12)',
+      value: '−' + fmt(levy.mAllow), indent: true },
+    { label: '+ government top-up ' + Math.round(RULES.topUp * 100) + '%',
+      value: RULES.topUp ? '+' + fmt(levy.monthly - (levy.mGross - levy.mAllow)) : '£0', indent: true },
+    { label: 'into your account that month', value: fmt(levy.monthly), sum: true },
+    { label: '× 12 months', value: fmt(levy.annual) + '/yr', indent: true }
   ]);
   if (step(2).classList.contains('done') || !step(2).classList.contains('locked')) drawStep2();
   /* a visitor can reopen step 1 and move the slider after the report exists.

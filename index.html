@@ -181,6 +181,21 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .hint.off b{color:var(--warm)}
 .big{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--ink);
   font-variant-numeric:tabular-nums;line-height:1.2;margin-bottom:10px}
+/* The pay bill is the INPUT; the levy is the answer the step is named after.
+   They used to be the other way round — the biggest figure on a step called
+   "Here is your levy" was the pay bill. */
+.paybill{font-family:var(--mono);font-size:19px;font-weight:500;color:var(--muted);
+  font-variant-numeric:tabular-nums;line-height:1.2;margin-bottom:10px}
+.levyout{margin-top:22px}
+.levyout .lk{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted-2)}
+.levyout .lv{font-family:var(--mono);font-size:34px;font-weight:600;color:var(--cyan);
+  font-variant-numeric:tabular-nums;line-height:1.18;margin-top:5px}
+.levyout .ls{font-size:13px;color:var(--muted);margin-top:5px}
+.levyout.nil .lv{color:var(--warm)}
+.caveat-vis{margin:16px 0 0;font-size:12.5px;line-height:1.65;color:var(--warm);max-width:72ch;
+  border-left:2px solid rgba(240,163,92,.4);padding-left:14px}
+.caveat-vis b{color:var(--ink)}
 
 /* ── readout ──────────────────────────────────────────────────────────── */
 .readout{border:1px solid var(--cyan-dim);border-radius:14px;padding:20px 22px;
@@ -439,24 +454,33 @@ footer b{color:var(--muted)}
         on the whole pay bill &mdash; not just salaries above a threshold &mdash; so it is usually a bigger
         number than employers expect. Move it if you like; the story continues either way.</p>
         <label for="paybill">Annual pay bill</label>
-        <div class="big" id="pbOut">&pound;30,000,000</div>
+        <div class="paybill" id="pbOut">&pound;54,820,740</div>
         <div class="sliderwrap">
-          <input type="range" id="paybill" min="3000000" max="90000000" step="500000" value="30000000">
+          <input type="range" id="paybill" min="1000000" max="90000000" step="500000"
+                 aria-describedby="pbHint">
           <div class="mark" id="pbMark"><i>Brayford</i></div>
         </div>
-        <div class="scale"><span>&pound;3m</span><span>&pound;45m</span><span>&pound;90m</span></div>
-        <p class="hint" id="pbHint"></p>
-        <div class="row"><button class="btn" id="go1">This is my budget &rarr;</button>
+        <div class="scale"><span>&pound;1m</span><span>&pound;45m</span><span>&pound;90m</span></div>
+        <div class="levyout" id="levyOut" aria-live="polite"></div>
+        <p class="hint" id="pbHint" aria-live="polite"></p>
+        <p class="caveat-vis"><b>That average is the wrong one for retail, and it matters.</b>
+        The published figure covers <b>full-time</b> staff in post a year or more. A real chain this
+        size runs on part-time hours and high turnover, so its pay bill per head &mdash; and its levy
+        &mdash; would be smaller. Brayford uses the national average because it is published and
+        checkable, not because it flatters the story.</p>
+        <div class="row"><button class="btn" id="go1">This is my levy &rarr;</button>
           <button class="btn ghost" id="snapBack" hidden>Select Brayford&rsquo;s levy</button></div>
         <details class="work"><summary>How that becomes a levy <span class="chain" id="chain1"></span></summary>
           <table class="funnel" id="work1"></table>
           <p class="ours">Every rate and threshold above is read from the governed rulebook when the page
-          loads, not written into this page &mdash; so when one changes, this changes with it.</p>
-          <p class="ours"><b>The average salary is doing a lot of work here, and it is the wrong average
-          for retail.</b> The published figure covers <b>full-time</b> employees who have been in post a
-          year or more. A real chain of this size runs on part-time hours and high turnover, so its pay
-          bill per head would be lower and its levy smaller. Brayford is used at the national average
-          because that number is published and checkable &mdash; not because it flatters the story.</p>
+          loads, not written into this page &mdash; so when one changes, this changes with it. The
+          &pound;3m threshold is not a separate rule either: it is the pay bill at which the allowance
+          exactly cancels the levy, so it is derived rather than typed.</p>
+          <p class="ours"><b>This is the monthly path, because that is the one HMRC actually runs.</b>
+          The allowance is a twelfth each month, worked out cumulatively across the tax year, with
+          unused allowance carried into the next month but never into the next year. Annual pay bill
+          minus &pound;15,000 reaches the same answer for a steady employer &mdash; and is not how it
+          is calculated, which on this page matters.</p>
         </details>
       </div>
     </div>
