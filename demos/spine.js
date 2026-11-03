@@ -33,9 +33,10 @@
     'is-levy-working.html':   ['what-can-you-claim.html','expiry-clock.html']
   };
 
-  /* lead capture endpoint — FormSubmit: no account/key needed. The FIRST submission
-     triggers a one-time confirmation email to this address; click it to activate. */
-  var FORM_ENDPOINT = 'https://formsubmit.co/ajax/hello@arthurcurtis.com';
+  /* The lead-capture endpoint lived here. Removed for the portfolio build along
+     with the modal it posted to — a work sample has nobody to send enquiries to,
+     and an address sitting in public source gets scraped whether or not the code
+     that used it still runs. */
 
   /* read a shared ?s= link into localStorage as early as possible */
   try { S.fromUrl(); } catch(e){}
@@ -172,7 +173,6 @@
     var recs = NEXT[cur] || Object.keys(TOOLMETA).filter(function(f){return f!==cur;}).slice(0,3);
     var recCards = recs.map(function(f){ var m=TOOLMETA[f]; if(!m) return '';
       return '<a class="sn-card" href="'+f+'"><div class="sn-t">'+m.label+' &rarr;</div><div class="sn-b">'+m.blurb+'</div><div class="sn-p">'+m.prev+'</div></a>'; }).join('');
-    recCards += '<a class="sn-card sn-talk" href="https://acgroup21.github.io/arthur-curtis-site/contact.html"><div class="sn-t">Talk to us &rarr;</div><div class="sn-b">Turn this into a funded, provable plan.</div></a>';
 
     host.innerHTML =
       '<div class="dcard">'+
@@ -241,50 +241,11 @@
   }
   function refresh(){ if(HOST) render(HOST); }
 
-  /* ---- lead capture modal ("Email my results") ---- */
-  function submitLead(fields){
-    var body=Object.assign({ _subject:'New Fundable Lite enquiry — '+(fields.tool||''), _captcha:'false', _template:'table', _replyto:fields.email }, fields);
-    return fetch(FORM_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body)})
-      .then(function(r){return r.json();}).then(function(j){ return !!(j && (j.success==='true'||j.success===true)); })
-      .catch(function(){ return false; });
-  }
-  function openCapture(){
-    var lines=summary();
-    var host=document.createElement('div'); host.className='lead-modal';
-    host.innerHTML='<div class="lead-box">'+
-      '<button class="lead-x" aria-label="Close">&times;</button>'+
-      '<h3>Get a plan on your numbers</h3>'+
-      '<p class="lead-sub">Leave your email and we\'ll come back — usually within two working days. Your details below come with it.</p>'+
-      (lines.length?'<div class="lead-sum">'+lines.map(function(t){return '<span>'+dcEsc(t)+'</span>';}).join('')+'</div>':'')+
-      '<input class="lead-in" id="lead-email" type="email" placeholder="Work email *" required>'+
-      '<input class="lead-in" id="lead-name" type="text" placeholder="Your name (optional)">'+
-      '<textarea class="lead-in" id="lead-msg" placeholder="Anything to add? (optional)"></textarea>'+
-      '<input type="text" id="lead-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">'+
-      '<button class="lead-send" id="lead-send">Send &rarr;</button>'+
-      '<div class="lead-status" id="lead-status"></div>'+
-      '<p class="lead-fall">Prefer to write? <a href="mailto:hello@arthurcurtis.com">hello@arthurcurtis.com</a></p>'+
-      '</div>';
-    document.body.appendChild(host);
-    var close=function(){ host.remove(); };
-    host.addEventListener('click',function(e){ if(e.target===host) close(); });
-    host.querySelector('.lead-x').addEventListener('click',close);
-    var send=host.querySelector('#lead-send'), status=host.querySelector('#lead-status');
-    send.addEventListener('click',function(){
-      if(host.querySelector('#lead-hp').value){ close(); return; }
-      var email=(host.querySelector('#lead-email').value||'').trim();
-      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ status.textContent='Please enter a valid email.'; status.className='lead-status err'; return; }
-      send.disabled=true; send.textContent='Sending…'; status.textContent=''; status.className='lead-status';
-      var tool=(document.title||'Fundable Lite').split('—')[0].trim();
-      submitLead({ email:email, name:(host.querySelector('#lead-name').value||'').trim()||'(not given)',
-        message:(host.querySelector('#lead-msg').value||'').trim()||'(none)', tool:tool,
-        your_details:lines.length?lines.join(' · '):'(none entered)', page:location.href
-      }).then(function(ok){
-        if(ok){ host.querySelector('.lead-box').innerHTML='<button class="lead-x" aria-label="Close">&times;</button><h3>Sent &#10003;</h3><p class="lead-sub">Thanks — we\'ll be in touch shortly. Your details went with it.</p>'; host.querySelector('.lead-x').addEventListener('click',close); }
-        else { status.textContent='Something went wrong — please email hello@arthurcurtis.com.'; status.className='lead-status err'; send.disabled=false; send.textContent='Send →'; }
-      });
-    });
-    setTimeout(function(){ var e=host.querySelector('#lead-email'); if(e) e.focus(); },30);
-  }
+  /* The "Email my results" modal posted a name, email and the visitor's whole
+     scenario to a FormSubmit address. It is gone rather than disabled: this is a
+     work sample, so there is nothing to sign up to and nothing to collect. The
+     entry point stays as a no-op so any caller still resolves. */
+  function openCapture(){}
 
   AC.spine = { mount:mount, refresh:refresh, summary:summary, capture:openCapture };
 })();
