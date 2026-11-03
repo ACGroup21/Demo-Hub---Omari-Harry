@@ -568,12 +568,45 @@ function drawTeam() {
 
   var ready = TEAM.filter(function (p) { return eligible(p.id); }).length;
   var n = chosen().length;
+  /* The shortlist is already made, and until now the page never said so
+     plainly — a reader met ten cards, found five of them unclickable, and had
+     to work out why from the flags. This says it up front and points at the
+     other five.
+
+     "Suitable" is doing exact work here and has to keep doing it: it means
+     their job evidences a duty an assessor could look at, nothing more. The
+     page refuses elsewhere to rank who is best, so the pill says what the
+     shortlist is on and what it is not on, or it would quietly contradict
+     the stage it sits in. */
+  /* The shortlist is already made and the page never said so plainly: a
+     reader met ten cards, found seven of them unclickable, and had to infer
+     the rule from the flags. This states it and points at the rest.
+
+     An earlier draft of this line said the three were picked "not on who is
+     best", which was simply untrue. ranked() sorts the eligible by how much
+     their job evidences and selectable() keeps the top three — the tool has
+     judged, and three are highlighted because of it. What it does NOT judge
+     is the person; that distinction is the stage's whole argument and is
+     made in the intro above, so the pill can say plainly that a selection
+     was made and on what. Claiming otherwise here would have been the page
+     telling a comfortable story about itself. */
+  var picks = TEAM.filter(function (q) { return selectable(q.id); }).length;
+  var Cap = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
   $('count3').innerHTML =
-    '<b>' + ready + ' of your ' + TEAM.length + '</b> can be put forward today. ' +
-    (n === 0 ? 'Pick <b>' + PICK + '</b>.'
-      : n < PICK ? 'Picked <b>' + n + '</b> — choose ' + (PICK - n) + ' more.'
-      : n === PICK ? '<b>' + PICK + ' chosen.</b> Everything below now runs on your ' + PICK + '.'
-      : '<b>' + n + ' chosen</b> — more than ' + PICK + ' works, the cost just scales.');
+    (n === 0
+      /* trimmed to fit one line at 1024, the narrowest width this page runs
+         at: the longer version needed ~832px against a card of 831 and wrapped
+         the capsule onto two lines. */
+      ? '<span class="lede">' + Cap(words(picks)) + ' of your ' + words(TEAM.length) +
+        ' are put forward</span> on what their jobs evidence. ' +
+        '<b>Pick them</b>, or click the rest to see why.'
+      : n < PICK
+      ? '<b>' + Cap(words(n)) + ' of ' + words(PICK) + ' picked.</b> ' +
+        'Click any of the others to see why they are not here.'
+      : n === PICK
+      ? '<b>' + Cap(words(PICK)) + ' chosen.</b> Everything below now runs on them.'
+      : '<b>' + Cap(words(n)) + ' chosen</b> — more than ' + words(PICK) +
+        ' works, the cost just scales.');
   gate('go3', n >= PICK, 'Pick ' + (PICK - n) + ' more — then the next stage opens.',
        'Ready — ' + n + ' chosen.');
 }
@@ -1743,7 +1776,12 @@ function drawStep7() {
     '<p class="sub">Where ' + esc(two.name) + ' leads, if they stay. <b>' + above.length + '</b> funded ' +
     'standards sit above it in the same route &mdash; counted from the library, not chosen by us.</p>' +
     '<ul class="rungs">' +
-    above.slice(0, 3).map(function (s) {
+    /* ALL of them, not above.slice(0, 3). The sentence above counts the full
+       list and then boasts that it is "counted from the library, not chosen
+       by us" — and the next line chose three. It read "6 funded standards sit
+       above it" over a list of three, and the three it cut included Retail
+       leadership, the one most obviously next for a retail manager. */
+    above.map(function (s) {
       return '<li><span class="rn">' + esc(s.name) + '</span>' +
         '<span class="rl">L' + s.level + '</span>' +
         '<span class="rd">' + s.months + ' months</span>' +

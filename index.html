@@ -144,6 +144,16 @@ h1 em{font-style:normal;color:var(--cyan)}
 .step.locked .card{opacity:.28;pointer-events:none;filter:grayscale(.55)}
 .step.folded .card{padding:15px 22px}
 .card-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+/* Folded, the header becomes a three-column grid so the cyan summary starts
+   at the same x on every stage. As a flex row it sat immediately after the
+   heading, and the headings are different lengths — measured across the
+   seven, the summary began at 137, 226, 173, 308, 174 and 188px, so scrolling
+   a finished plan moved the one figure per stage you actually want to read
+   through a 171px spread. The heading column is wider than the longest
+   heading at the narrowest width this page runs at (294px at 1024), so
+   nothing wraps to claim it. */
+.step.folded .card-h{display:grid;grid-template-columns:310px 1fr auto;align-items:baseline;
+  gap:0 14px}
 .card-h h2{margin:0;font-size:23px;font-weight:700;letter-spacing:-.022em;line-height:1.2}
 .step.folded .card-h h2{font-size:16px;font-weight:600;color:var(--muted)}
 .fold-sum{margin:0;color:var(--cyan);font-size:13px;font-family:var(--mono)}
@@ -329,8 +339,18 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .person.on .nm{color:var(--cyan)}
 .person .rl{font-size:12.5px;color:var(--muted)}
 .person .nt{font-size:12px;color:var(--muted-2);margin-top:4px;line-height:1.45}
-.count{margin:15px 0 0;font-size:14px;color:var(--muted)}
+/* Its own pill, centred under the grid. It was a left-aligned line of body
+   text sitting among ten cards, which is where a reader stops seeing it — and
+   it is the line that explains why half the grid cannot be clicked. */
+/* max-width is the card, not a ch cap: an 80ch cap was narrower than the
+   card and wrapped the longest state onto two lines, and a two-line capsule
+   stops reading as a pill. */
+.count{margin:20px auto 2px;width:fit-content;max-width:100%;text-align:center;
+  font-size:14px;line-height:1.5;color:var(--muted);
+  border:1px solid var(--line);border-radius:var(--r-pill);padding:11px 22px;
+  background:rgba(159,177,202,.045)}
 .count b{color:var(--ink)}
+.count .lede{color:var(--cyan)}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
 
 /* ── step 4 · duty coverage ───────────────────────────────────────────── */
@@ -1009,6 +1029,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=50"></script>
+<script src="journey.js?v=57"></script>
 </body>
 </html>
