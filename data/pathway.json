@@ -6,8 +6,17 @@
     "sector": "General retail",
     "stores": 42,
     "headcount": 1340,
-    "payBill": 30000000,
-    "payBillNote": "1,340 staff, average total earnings about £22,400. The levy is charged on the whole pay bill, not on salaries above a threshold."
+    "payBill": 54820740,
+    "payBillNote": "1340 staff at the UK average salary of £40,911. The levy is charged on the whole pay bill — not just salaries above a threshold — so it is usually a bigger number than employers expect.",
+    "payBillFrom": {
+      "method": "UK average salary x headcount",
+      "avgSalary": 40911,
+      "headcount": 1340,
+      "source": "ONS Annual Survey of Hours and Earnings, published 22 October 2026",
+      "sourceUrl": "https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/bulletins/annualsurveyofhoursandearnings/2026",
+      "definition": "Median gross annual earnings for FULL-TIME employees who had been in their job for at least a year, April 2026 (provisional).",
+      "caveat": "That definition excludes part-time staff and anyone under a year in post. A real retail chain of this size carries a lot of both, so its pay bill per head would be lower and this makes Brayford a better-paying employer than most of its sector. The figure is used because it is the published national average and can be checked; the page says so rather than quietly picking a number that suits the story."
+    }
   },
   "verified": {
     "fundingRules": "funding-rules.json (canonical), verified 2026-10-13",

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sandbox by Omari Harry — develop a retail team, costed properly</title>
-<meta name="description" content="A retail employer with a £30m pay bill and five years to build managers. Walk the funding, the people, the duty gap and the pathway — on published standards and the rules as they stand today.">
+<meta name="description" content="A retail employer with a £54.8m pay bill and five years to build managers. Walk the funding, the people, the duty gap and the pathway — on published standards and the rules as they stand today.">
 <link rel="icon" href="assets/fundable-favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -402,7 +402,7 @@ footer b{color:var(--muted)}
 
 <div id="splash">
   <img src="assets/sandbox-logo-transparent.svg" alt="Sandbox by Omari Harry, powered by Fundable">
-  <p class="tag">A retail chain. Forty-two stores, a &pound;30m pay bill,<br>
+  <p class="tag">A retail chain. Forty-two stores, a &pound;54.8m pay bill,<br>
     and five years to build its own managers.<br><b>Where does the money actually go?</b></p>
   <button class="btn" id="enter">Start the walkthrough</button>
 </div>
@@ -435,8 +435,8 @@ footer b{color:var(--muted)}
         <p class="fold-sum" id="sum1"></p>
         <button class="reopen" data-open="1" hidden>change</button></div>
       <div class="card-body">
-        <p class="sub">Brayford employs <b>1,340 people across 42 stores</b>. The levy is charged on the
-        whole pay bill &mdash; not just salaries above a threshold &mdash; so it is usually a bigger
+        <p class="sub">Brayford employs <b>1,340 people across 42 stores</b>, paid at the UK average salary. The levy is charged
+        on the whole pay bill &mdash; not just salaries above a threshold &mdash; so it is usually a bigger
         number than employers expect. Move it if you like; the story continues either way.</p>
         <label for="paybill">Annual pay bill</label>
         <div class="big" id="pbOut">&pound;30,000,000</div>
@@ -446,11 +446,17 @@ footer b{color:var(--muted)}
         </div>
         <div class="scale"><span>&pound;3m</span><span>&pound;45m</span><span>&pound;90m</span></div>
         <p class="hint" id="pbHint"></p>
-        <div class="row"><button class="btn" id="go1">This is my budget &rarr;</button></div>
+        <div class="row"><button class="btn" id="go1">This is my budget &rarr;</button>
+          <button class="btn ghost" id="snapBack" hidden>Select Brayford&rsquo;s levy</button></div>
         <details class="work"><summary>How that becomes a levy <span class="chain" id="chain1"></span></summary>
           <table class="funnel" id="work1"></table>
           <p class="ours">Every rate and threshold above is read from the governed rulebook when the page
           loads, not written into this page &mdash; so when one changes, this changes with it.</p>
+          <p class="ours"><b>The average salary is doing a lot of work here, and it is the wrong average
+          for retail.</b> The published figure covers <b>full-time</b> employees who have been in post a
+          year or more. A real chain of this size runs on part-time hours and high turnover, so its pay
+          bill per head would be lower and its levy smaller. Brayford is used at the national average
+          because that number is published and checkable &mdash; not because it flatters the story.</p>
         </details>
       </div>
     </div>

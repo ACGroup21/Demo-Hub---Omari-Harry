@@ -179,8 +179,17 @@ function calcLevy(pb) {
   return { payBill: pb, gross: gross, net: net, annual: topped, monthly: topped / 12 };
 }
 
+/* Brayford's pay bill is an exact derived figure (headcount x the published
+   average salary) and the slider moves in half-millions, so the thumb can
+   never land on it. The slider is a coarse explorer; payBill is the number.
+   Dragging sets payBill from the slider, the snap button sets it exactly. */
+function setPayBill(v, syncSlider) {
+  payBill = v;
+  if (syncSlider) $('paybill').value = v;
+  drawStep1();
+}
+
 function drawStep1() {
-  payBill = +$('paybill').value;
   levy = calcLevy(payBill);
   $('pbOut').innerHTML = fmt(payBill);
 
@@ -195,18 +204,29 @@ function drawStep1() {
   var onTarget = payBill === target;
   var t = calcLevy(target);
   var diff = levy.annual - t.annual;
+  var movedOn = !step(3).classList.contains('locked');
   $('go1').disabled = !onTarget;
+  $('snapBack').hidden = onTarget;
   $('pbHint').className = 'hint' + (onTarget ? '' : ' off');
+
+  var src = (PW && PW.employer.payBillFrom) || {};
   $('pbHint').innerHTML = onTarget
-    ? 'That is Brayford’s actual pay bill. Move the slider to see what a bigger or smaller ' +
-      'employer would have &mdash; then come back here to carry on.'
+    ? 'Brayford’s pay bill is <b>' + (src.headcount || '') + ' staff × the UK average salary ' +
+      'of ' + fmt(src.avgSalary || 0) + '</b>. Move the slider to see what a bigger or smaller ' +
+      'employer would have &mdash; then come back to carry on.'
     : 'At ' + fmt(payBill) + ' the levy would be <b>' + fmt(levy.annual) + '</b> a year, ' +
       '<b>' + fmt(Math.abs(diff)) + '</b> ' + (diff > 0 ? 'more' : 'less') + ' than Brayford’s. ' +
-      'Slide back to the <b>' + fmtM(target) + '</b> marker to continue &mdash; the rest of the ' +
-      'walkthrough runs on Brayford’s real numbers.';
+      (movedOn
+        ? 'Every figure in the steps below has just moved with it &mdash; <b>they are now this ' +
+          'employer’s, not Brayford’s</b>. '
+        : '') +
+      'Use the button to put it back.';
 
   $('chain1').textContent = '— ' + fmtM(payBill) + ' → ' + fmt(levy.annual) + '/yr';
+  var pbf = (PW && PW.employer.payBillFrom) || {};
   $('work1').innerHTML = funnelRows([
+    { label: 'UK average salary (' + esc(pbf.source || '') + ')', value: fmt(pbf.avgSalary || 0) },
+    { label: '× ' + (pbf.headcount || 0).toLocaleString('en-GB') + ' staff', value: fmt(levy.payBill), indent: true },
     { label: 'annual pay bill', value: fmt(levy.payBill) },
     { label: '× levy rate ' + (RULES.levyRate * 100).toFixed(1) + '%', value: fmt(levy.gross), indent: true },
     { label: '− levy allowance', value: '−' + fmt(RULES.allowance), indent: true },
@@ -959,7 +979,11 @@ $('enter').addEventListener('click', function () {
   $('splash').classList.add('gone');
   setTimeout(function () { goTo(1); }, 200);
 });
-$('paybill').addEventListener('input', drawStep1);
+$('paybill').addEventListener('input', function () { setPayBill(+this.value); });
+$('snapBack').onclick = function () {
+  setPayBill(PW.employer.payBill, true);
+  $('go1').focus();
+};
 $('go1').addEventListener('click', function () {
   complete(1, fmt(levy.annual) + '/yr on a ' + fmtM(payBill) + ' pay bill', true);
   unlock(2);
@@ -1030,7 +1054,7 @@ Promise.all([
     '</b> defunded for new starts &middot; ' + esc(f.source || 'Skills England') + ', ' +
     esc(f.accurateAsOf || '') + ', checked <b>' + esc(f.verifiedOn || '') + '</b>';
 
-  drawStep1();
+  setPayBill(PW.employer.payBill, true);   /* open on Brayford, not on a default */
   drawTeam();
   drawWork3();
   lightActs();
