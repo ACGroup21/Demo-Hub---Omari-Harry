@@ -59,27 +59,45 @@
     ]
   },
   "options": {
-    "_note": "The four shown at step 6. `origin` says how each got onto the list: `filtered` means it survived every filter; `added-back` means our own filter removed it and we put it back so the visitor can see it fail.",
+    "_note": "Five standards shown, TWO selectable. The other three are each unsuitable for a different reason, and the page gives the reason rather than hiding the option: one cannot be bought, one is the wrong discipline, one is a sideways move. A list that quietly dropped them would teach nothing - these are the three a real employer actually reaches for.",
     "list": [
       {
         "ref": "ST0325",
+        "pick": true,
         "origin": "filtered",
-        "removedBy": null
+        "removedBy": null,
+        "why": null
       },
       {
         "ref": "ST0070",
+        "pick": true,
         "origin": "filtered",
-        "removedBy": null
+        "removedBy": null,
+        "why": null
       },
       {
         "ref": "ST0384",
+        "pick": false,
         "origin": "added-back",
-        "removedBy": "funding"
+        "removedBy": "funding",
+        "whyShort": "Cannot be bought",
+        "why": "The obvious first step into managing, and it was until 1st September 2026. New starts are no longer government funded, so your levy contributes nothing and the whole cost falls on you while the account sits full."
       },
       {
         "ref": "ST0118",
+        "pick": false,
         "origin": "added-back",
-        "removedBy": "route"
+        "removedBy": "route",
+        "whyShort": "Wrong discipline",
+        "why": "A good standard for a different job. Three times the band, nine months longer, and it qualifies them in Digital while the shop floor still has nobody trained to run it. This is the one a board asks for."
+      },
+      {
+        "ref": "ST0071",
+        "pick": false,
+        "origin": "added-back",
+        "removedBy": "direction",
+        "whyShort": "A sideways move",
+        "why": "Funded, in your sector, and the cheapest on the list, which is exactly why it gets picked. But it develops the job they already do rather than the one they are moving into - it deepens customer service, it does not start anyone managing. Cheapest is not the same as a step up."
       }
     ]
   },
@@ -491,5 +509,208 @@
     "ceilingNote": "Applied at DEPARTMENT level, not across the workforce. 30% of a chain is 402 people and never binds; 30% of a team of three is one person and binds immediately. This is the author’s operating rule, not a published standard, and the page attributes it that way.",
     "ceilingScope": "department",
     "ceilingOwner": "the author's operating rule, not a published standard"
+  },
+  "ksbFull": {
+    "ref": "ST0070",
+    "source": "https://skillsengland.education.gov.uk/apprenticeships/st0070-v1-0",
+    "checked": "2026-11-03",
+    "_codes": "ST0070 publishes NAMED competency areas, not K1/S1/B1 codes. The codes here are positional so the report can label rows, and the report says so. The counts are real: 8 Knowledge, 8 Skills, 5 Behaviours, 21 in total.",
+    "_method": "Each mark is a judgement, read from the colleague’s job description against the published statement, and carries the JD line that justifies it. Absent means \"not evidenced in the job description\" — a claim about the JD, not about the person. The threshold used for the verdict band is the 50% guidance line, which is a convention rather than a funding rule.",
+    "items": [
+      {
+        "code": "K1",
+        "group": "K",
+        "area": "The organisation",
+        "text": "The company's purpose, activities, aims, values, vision, resources, and how political and economic conditions affect it."
+      },
+      {
+        "code": "K2",
+        "group": "K",
+        "area": "Value of their skills",
+        "text": "The company's structure, how their own work benefits it, where they fit in their team, and how their skills support progression."
+      },
+      {
+        "code": "K3",
+        "group": "K",
+        "area": "Stakeholders",
+        "text": "Managing relationships with internal and external customers, clients, suppliers and partners."
+      },
+      {
+        "code": "K4",
+        "group": "K",
+        "area": "Relevant regulation",
+        "text": "Laws and rules that apply to the role, such as data protection, health and safety and compliance."
+      },
+      {
+        "code": "K5",
+        "group": "K",
+        "area": "Policies",
+        "text": "Internal company policies and the key business policies for the sector."
+      },
+      {
+        "code": "K6",
+        "group": "K",
+        "area": "Business fundamentals",
+        "text": "Principles such as managing change, business finance and project management."
+      },
+      {
+        "code": "K7",
+        "group": "K",
+        "area": "Processes",
+        "text": "Workflows such as payments and customer data handling, suggesting improvements, and handling billing and purchase orders."
+      },
+      {
+        "code": "K8",
+        "group": "K",
+        "area": "External environment factors",
+        "text": "External influences such as market forces, policy and regulatory change, and supply chains, and their business impact."
+      },
+      {
+        "code": "S1",
+        "group": "S",
+        "area": "IT",
+        "text": "Using relevant software and systems for correspondence, proposals, financial processes and data."
+      },
+      {
+        "code": "S2",
+        "group": "S",
+        "area": "Record and document production",
+        "text": "Producing accurate records and documents, recommending improvements, and handling confidential information."
+      },
+      {
+        "code": "S3",
+        "group": "S",
+        "area": "Decision making",
+        "text": "Using sound judgement, handling challenges maturely, and seeking advice from experienced colleagues."
+      },
+      {
+        "code": "S4",
+        "group": "S",
+        "area": "Interpersonal skills",
+        "text": "Building positive working relationships, influencing others, and acting as a role model."
+      },
+      {
+        "code": "S5",
+        "group": "S",
+        "area": "Communications",
+        "text": "Communicating effectively in person, by phone, in writing and online, and representing the organisation."
+      },
+      {
+        "code": "S6",
+        "group": "S",
+        "area": "Quality",
+        "text": "Producing high-standard work, reviewing processes for improvement, and resolving complex complaints."
+      },
+      {
+        "code": "S7",
+        "group": "S",
+        "area": "Planning and organisation",
+        "text": "Managing tasks, priorities and deadlines, organising meetings, and managing resources and logistics."
+      },
+      {
+        "code": "S8",
+        "group": "S",
+        "area": "Project management",
+        "text": "Applying project management principles and tools to scope, plan, monitor, report on and lead projects."
+      },
+      {
+        "code": "B1",
+        "group": "B",
+        "area": "Professionalism",
+        "text": "Behaving professionally, respecting diversity, following the code of conduct, representing team culture."
+      },
+      {
+        "code": "B2",
+        "group": "B",
+        "area": "Personal qualities",
+        "text": "Integrity, reliability, self-motivation, proactivity and a positive attitude."
+      },
+      {
+        "code": "B3",
+        "group": "B",
+        "area": "Managing performance",
+        "text": "Taking responsibility for their own work and development, accepting feedback, and self-assessing."
+      },
+      {
+        "code": "B4",
+        "group": "B",
+        "area": "Adaptability",
+        "text": "Adjusting to changing priorities in their own work and in the organisation."
+      },
+      {
+        "code": "B5",
+        "group": "B",
+        "area": "Responsibility",
+        "text": "Taking ownership of team performance and project quality, and developing their own and others' skills."
+      }
+    ],
+    "evidenced": {
+      "1": {
+        "K3": 1,
+        "K7": 0,
+        "K8": 2,
+        "S1": 0,
+        "S2": 1,
+        "S3": 0,
+        "S5": 3,
+        "S6": 0,
+        "S7": 2,
+        "B5": 3
+      },
+      "2": {
+        "K3": 0,
+        "S3": 0,
+        "S4": 3,
+        "S5": 0,
+        "S6": 0,
+        "B1": 3,
+        "B3": 1,
+        "B5": 3
+      },
+      "3": {
+        "K3": 1,
+        "K5": 3,
+        "K7": 1,
+        "S1": 2,
+        "S3": 1,
+        "S4": 0,
+        "S5": 1,
+        "S6": 1,
+        "S7": 0,
+        "B1": 1,
+        "B3": 2,
+        "B5": 3
+      },
+      "5": {
+        "K3": 2,
+        "K5": 2,
+        "K6": 1,
+        "K7": 1,
+        "S2": 3,
+        "S3": 1,
+        "S4": 0,
+        "S5": 2,
+        "S6": 1,
+        "S7": 0,
+        "B1": 1,
+        "B5": 0
+      },
+      "6": {
+        "K3": 3,
+        "K4": 2,
+        "K5": 2,
+        "K6": 1,
+        "K7": 0,
+        "K8": 1,
+        "S2": 2,
+        "S3": 1,
+        "S4": 0,
+        "S5": 3,
+        "S6": 2,
+        "S7": 1,
+        "B1": 2,
+        "B5": 0
+      }
+    }
   }
 }

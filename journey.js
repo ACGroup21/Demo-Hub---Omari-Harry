@@ -383,16 +383,19 @@ function explain(p) {
       'than the job itself.'
     : 'Their job description touches <b>none</b> of the six.';
   $('why3').innerHTML =
-    '<div class="why"><h4>' + esc(p.name) + ' cannot be put forward yet</h4>' +
-    '<p>' + has + ' Nothing is clearly evidenced, so <b>there is nothing for an assessor to look at</b>. ' +
-    'An apprentice is assessed on the job they actually do; enrolling someone whose role contains none ' +
-    'of the duties sets them up to fail an end-point assessment eighteen months from now.</p>' +
-    '<p><b>This is a statement about the job, not about ' + esc(p.name.split(' ')[0]) + '.</b> They may ' +
-    'well be the most capable person on the list &mdash; the tool has no way of knowing that and will ' +
-    'not pretend to. What it can see is the role as written.</p>' +
-    '<p>To put them forward, <b>change the job first</b>: give them at least one of ' +
-    '<b>' + areas.map(esc).join('</b>, <b>') + '</b> as a real, standing responsibility. Then they ' +
-    'qualify &mdash; and the apprenticeship has something to assess.</p>' +
+    '<div class="why"><h4>' + esc(p.name) + '’s job has nothing to assess yet</h4>' +
+    '<p><b>Nobody has to be good at managing to start learning it</b> &mdash; that is what the ' +
+    'apprenticeship is for. The bar here is not competence. It is <b>opportunity</b>: an apprentice ' +
+    'is assessed on work they actually do, so the role has to let them practise it somewhere.</p>' +
+    '<p>' + has + ' With nothing to point an assessor at, ' + esc(p.name.split(' ')[0]) + ' would ' +
+    'spend eighteen months learning the theory of a job they are never given, and fail an end-point ' +
+    'assessment on evidence they had no chance to produce.</p>' +
+    '<p><b>So this is a statement about the job, not about ' + esc(p.name.split(' ')[0]) + '.</b> ' +
+    'They may be the most capable person on the list &mdash; the tool has no way of knowing that and ' +
+    'will not pretend to.</p>' +
+    '<p><b>Change the job first</b>, and they qualify immediately: one of ' +
+    '<b>' + andList(areas.map(esc)) + '</b> as a real, standing responsibility. Not mastery of it ' +
+    '&mdash; just the chance to do it badly at first, which is the whole point.</p>' +
     '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
   $('why3').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
 }
@@ -409,7 +412,8 @@ function adviseIfWeaker(p) {
     '<div class="why"><h4>' + esc(p.name) + ' is a thinner bet &mdash; your call</h4>' +
     '<p>Their job description clearly evidences <b>' + t.yes.length + '</b> of the six' +
     (t.part.length ? ' and touches <b>' + t.part.length + '</b> more in part' : '') +
-    '. That is enough to be assessed on, so they are not blocked.</p>' +
+    '. That is enough of a foothold to be assessed on, so they are not blocked — and being '+
+      'thin on management is not a reason to exclude anyone from learning it.</p>' +
     (better.length
       ? '<p>But <b>' + andList(better.map(function (x) { return esc(x.p.name); })) +
         '</b> evidence more for <b>the same ' + fmt((STD[PW.pathway.instances[0].ref] || {}).band || 0) +
@@ -703,11 +707,9 @@ function drawStep6() {
     var mc = manageCover(row.ref);
     var lad = ladder(o);
 
-    var badge = dead
-      ? '<span class="badge gone">Defunded ' + esc(o.defundedFrom || '') + '</span>'
-      : row.origin === 'filtered'
-        ? '<span class="badge kept">Survived all four filters</span>'
-        : '<span class="badge back">Removed by the ' + esc(row.removedBy) + ' filter — shown anyway</span>';
+    var badge = row.pick
+      ? '<span class="badge kept">Suitable · selectable</span>'
+      : '<span class="badge gone">Not suitable · ' + esc(row.whyShort || '') + '</span>';
 
     var meta = [
       'Level <b>' + o.level + '</b>',
@@ -717,22 +719,14 @@ function drawStep6() {
       'Leads to <b>' + lad + '</b> funded standard' + (lad === 1 ? '' : 's') + ' above it'
     ].filter(Boolean).join('</span><span>');
 
-    var line = dead
-      ? '<b>Your levy cannot pay for this.</b> New starts stopped being government funded on ' +
-        esc(o.defundedFrom) + '. Anyone already on it finishes on funding; nobody new joins. ' +
-        'The ' + fmt(cost) + ' would come out of your own cash.'
-      : row.removedBy === 'route'
-        ? 'Funded, and a perfectly good standard — for a different job. At <b>' + fmt(o.band) +
-          '</b> a head it is <b>' + (o.band / STD[opts[0].ref].band).toFixed(0) + '×</b> the cost of ' +
-          'the cheapest option here, runs <b>' + (o.months - STD[opts[0].ref].months) + ' months longer</b>, ' +
-          'and sits in the ' + esc(o.route) + ' route rather than yours.'
-        : mc
-          ? 'Of its <b>' + mc.of + '</b> published areas, <b>' + mc.n + '</b> ' +
-            (mc.n === 1 ? 'is' : 'are') + ' about managing people or money.'
-          : '';
+    var line = row.pick
+      ? (mc ? 'Of its <b>' + mc.of + '</b> published areas, <b>' + mc.n + '</b> ' +
+          (mc.n === 1 ? 'is' : 'are') + ' about managing people or money.' : '')
+      : esc(row.why || '').replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
 
-    return '<button class="opt' + (chosenStd === row.ref ? ' on' : '') + (dead ? ' dead' : '') +
-      '" data-std="' + esc(row.ref) + '">' +
+    return '<button class="opt' + (chosenStd === row.ref ? ' on' : '') +
+      (row.pick ? '' : ' dead') + '" data-std="' + esc(row.ref) + '"' +
+      (row.pick ? '' : ' aria-disabled="true"') + '>' +
       '<div class="oh"><span class="on-name">' + esc(o.name) + '</span>' +
       '<span class="ref">' + esc(o.ref) + '</span>' + badge +
       '<span class="price">' + fmt(o.band) + ' &times; ' + n + ' = <b>' + fmt(cost) + '</b></span></div>' +
@@ -842,8 +836,28 @@ function pickStd(ref) {
 
 document.addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('[data-std]');
-  if (b) pickStd(b.getAttribute('data-std'));
+  if (!b) return;
+  var ref = b.getAttribute('data-std');
+  var row = PW.options.list.filter(function (r) { return r.ref === ref; })[0];
+  /* three of the five are not selectable. Clicking one explains why rather
+     than silently doing nothing - the reason IS the content of this step. */
+  if (row && !row.pick) { explainStd(row); return; }
+  pickStd(ref);
 });
+
+function explainStd(row) {
+  var o = STD[row.ref];
+  var n = chosen().length;
+  $('verdict').innerHTML = '<div class="verdict bad"><h3>' + esc(o.name) + ' — ' +
+    esc(row.whyShort) + '</h3><p>' + esc(row.why) + '</p>' +
+    '<p><b>' + fmt(o.band) + '</b> a head, <b>' + o.months + ' months</b>, <b>' + o.otjHours +
+    '</b> off-the-job hours each. ' + (o.funded === false
+      ? 'And none of it fundable.'
+      : 'Fundable — which is exactly what makes it tempting.') + '</p>' +
+    '<p>Pick one of the two marked selectable to carry on.</p></div>';
+  $('go6').disabled = !chosenStd;
+  $('verdict').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+}
 
 /* ── 07 · the five-year pathway ──────────────────────────────────────────
    Two instances of training inside five years, and the gap between them is
