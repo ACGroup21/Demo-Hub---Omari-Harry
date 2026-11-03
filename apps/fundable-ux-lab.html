@@ -161,6 +161,8 @@ footer{padding:30px 0 70px;font-family:var(--mono);font-size:10px;letter-spacing
 @media(max-width:700px){.starts{grid-template-columns:1fr}}
 .st{background:rgba(150,190,225,.04);border:1px solid var(--line);border-radius:12px;padding:15px;cursor:pointer;text-align:left;font:inherit;color:inherit}
 .st:hover{border-color:var(--cyan)}
+.st.on{border-color:var(--cyan);background:rgba(0,195,221,.10)}
+.st.on b{color:var(--cyan)}
 .st b{display:block;color:var(--text);font-size:14.5px;margin-bottom:3px}
 .st span.d{font-size:12.5px;color:var(--text3)}
 
@@ -641,6 +643,26 @@ function showProv(k){
 [].forEach.call(document.querySelectorAll('.pv'),function(b){
   b.addEventListener('click',function(){showProv(b.dataset.k);});});
 showProv('levy');
+
+/* The four "ways to start" cards were styled clickable (cursor:pointer, a hover
+   border) and never wired, so the lab's opening claim that every sketch is
+   playable was not quite true. Fixed with the stylesheet's own idiom.
+   The primer steps next door were NEVER broken — primDraw() delegates from
+   #primSteps and tracks read progress. An earlier sweep reported them dead
+   because that function replaces its own innerHTML, so a cached NodeList goes
+   stale and the clicks land on detached nodes. The app was right; the test was
+   wrong. */
+
+/* four ways to start: an exclusive choice */
+[].forEach.call(document.querySelectorAll('.starts .st'),function(b){
+  b.setAttribute('aria-pressed','false');
+  b.addEventListener('click',function(){
+    [].forEach.call(document.querySelectorAll('.starts .st'),function(o){
+      o.classList.remove('on'); o.setAttribute('aria-pressed','false');});
+    b.classList.add('on'); b.setAttribute('aria-pressed','true');
+  });
+});
+
 
 /* ── 2. command palette ──────────────────────────────────────────────────── */
 var CMDS=[
