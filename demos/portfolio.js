@@ -26,14 +26,29 @@
       var el = document.getElementById(id);
       if (el) el.remove();
     });
-    /* any surviving outbound link to the AC site or a mail capture */
+    /* Any surviving outbound link to the AC site or a mail capture.
+     *
+     * The host matters as much as the domain: the AC site is published to
+     * acgroup21.github.io/arthur-curtis-site/, so a pattern that only looked
+     * for arthurcurtis.com left every "Get a plan" and "talk to us" link live
+     * — the exact funnel this file exists to remove.
+     *
+     * A call-to-action button is deleted rather than deadened. Stripping the
+     * href off a primary button leaves something that looks clickable and
+     * isn't, which reads as a broken page; inline prose links degrade to
+     * plain text without that problem. */
+    var FUNNEL = /arthurcurtis\.com|arthur-curtis-site|mailto:|formsubmit/i;
     [].forEach.call(document.querySelectorAll('a[href]'), function (a) {
-      var h = a.getAttribute('href') || '';
-      if (/arthurcurtis\.com|mailto:|formsubmit/i.test(h)) {
-        a.removeAttribute('href');
-        a.style.cursor = 'default';
-      }
+      if (!FUNNEL.test(a.getAttribute('href') || '')) return;
+      if ((a.className || '').split(' ').indexOf('btn') > -1) { a.remove(); return; }
+      a.replaceWith(document.createTextNode(a.textContent || ''));
     });
+    /* og:url and canonical point search engines at AC's copy of the page */
+    [].forEach.call(document.querySelectorAll('link[rel="canonical"],meta[property="og:url"]'),
+      function (t) {
+        var v = t.getAttribute('href') || t.getAttribute('content') || '';
+        if (FUNNEL.test(v)) t.remove();
+      });
   }
 
   if (document.readyState === 'loading') {
