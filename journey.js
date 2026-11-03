@@ -149,6 +149,38 @@ function reduced() {
   return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/* Opening a details panel inside step 4 or 5 is the action those steps ask
+   for, so it releases their gate. Listening on the capture phase because
+   toggle does not bubble. */
+document.addEventListener('toggle', function (e) {
+  var d = e.target;
+  if (!d.open || d.tagName !== 'DETAILS') return;
+  if (d.closest('#body4')) {
+    gate('go4', true, '', 'Evidence reviewed.');
+  } else if (d.closest('#body5') && d.closest('.learner')) {
+    gate('go5', true, '', 'Breakdown reviewed.');
+  }
+}, true);
+
+/* ── gates ───────────────────────────────────────────────────────────────
+   A step does not unlock the next until its own work is done, and the button
+   says what is missing rather than just greying out. A disabled control with
+   no reason given is the most annoying thing a page can do. */
+function gate(btnId, ok, why, doneLabel) {
+  var b = $(btnId);
+  if (!b) return;
+  b.disabled = !ok;
+  b.title = ok ? '' : why;
+  var hint = b.parentNode.querySelector('.gate-why');
+  if (!hint) {
+    hint = document.createElement('span');
+    hint.className = 'gate-why';
+    b.parentNode.appendChild(hint);
+  }
+  hint.textContent = ok ? (doneLabel || '') : why;
+  hint.className = 'gate-why' + (ok ? ' ok' : '');
+}
+
 /* ── the marker's journey ────────────────────────────────────────────────
    The rail runs red at the top to cyan-green at the bottom, so the spine
    itself reads as heat cooling off: you arrive not knowing what any of it
@@ -409,7 +441,8 @@ function drawTeam() {
       : n < PICK ? 'Picked <b>' + n + '</b> — choose ' + (PICK - n) + ' more.'
       : n === PICK ? '<b>' + PICK + ' chosen.</b> Everything below now runs on your ' + PICK + '.'
       : '<b>' + n + ' chosen</b> — more than ' + PICK + ' works, the cost just scales.');
-  $('go3').disabled = n < PICK;
+  gate('go3', n >= PICK, 'Choose ' + (PICK - n) + ' more before you carry on.',
+       'Ready — ' + n + ' chosen.');
 }
 function chosen() {
   return TEAM.filter(function (p) { return picked[p.id]; });
@@ -649,6 +682,8 @@ function drawStep4() {
     'any of it. Which of the six areas count as management is our call too, not the standard&rsquo;s.</p>' +
     '</details>';
 
+  gate('go4', false, 'Open one colleague’s job description below to see what each line — ' +
+       'and what it does not — evidences.');
   $('go4').onclick = function () {
     complete(4, totalYes + ' of ' + max + ' areas evidenced', true);
     unlock(5);
@@ -695,15 +730,22 @@ function otjFor(ref, n) {
 var KSB_THRESHOLD = 0.5;
 var KSB_GROUPS = [['K', 'Knowledge'], ['S', 'Skills'], ['B', 'Behaviours']];
 
-function ksbFor(id) {
-  var F = PW.ksbFull;
+/* two KSB sets now: the standard they start on and the one they move up to */
+function ksbSet(ref) {
+  return [PW.ksbFull, PW.ksbFull2].filter(Boolean)
+    .filter(function (f) { return f.ref === ref; })[0] || null;
+}
+function ksbFor(id, ref) {
+  var F = ref ? ksbSet(ref) : PW.ksbFull;
   if (!F) return null;
   var ev = F.evidenced[String(id)];
   if (!ev) return null;
   var by = {};
-  KSB_GROUPS.forEach(function (g) { by[g[0]] = { have: 0, of: 0 }; });
+  F.items.forEach(function (it) { by[it.group] = { have: 0, of: 0 }; });
   var items = F.items.map(function (it) {
-    var line = ev[it.code];
+    /* one set is keyed by code, the other by area name — both are legitimate
+       shapes for the data, so read either rather than forcing one */
+    var line = (it.code in ev) ? ev[it.code] : ev[it.area];
     by[it.group].of++;
     if (line != null) by[it.group].have++;
     return { it: it, jd: line };
@@ -727,9 +769,10 @@ function ring(pct, low) {
     '<div class="rv">' + Math.round(pct * 100) + '%</div></div>';
 }
 
-function ksbCard(p, std) {
-  var k = ksbFor(p.id);
+function ksbCard(p, ref) {
+  var k = ksbFor(p.id, ref);
   if (!k) return '';
+  var groups = Object.keys(k.by);
   return '<div class="learner">' +
     '<div class="ksb-h">' + ring(k.pct, !k.pass) +
     '<div class="ksb-who"><div class="n">' + esc(p.name) + '</div>' +
@@ -738,14 +781,16 @@ function ksbCard(p, std) {
       (k.pass ? 'Compatible — gaps to develop' : 'Below the 50% guidance line') + '</span>' +
     '<div class="ksb-tot"><b>' + k.have + '</b> of ' + k.of + ' evidenced<br>' +
       (k.of - k.have) + ' to develop</div></div>' +
-    '<div class="ksb-areas">' + KSB_GROUPS.map(function (g) {
-      var b = k.by[g[0]];
-      return '<div class="ka ' + g[0] + '"><span class="kl">' + g[1] + '</span>' +
-        '<span class="kb"><i style="width:' + (b.have / b.of * 100) + '%"></i></span>' +
-        '<span class="kn">' + b.have + ' / ' + b.of + '</span></div>';
-    }).join('') + '</div>' +
-    '<details><summary>All ' + k.of + ' knowledge, skills and behaviours</summary>' +
-    '<ul class="ksb-list">' + k.items.map(function (x) {
+    (groups.length > 1
+      ? '<div class="ksb-areas">' + groups.map(function (g) {
+          var b = k.by[g];
+          return '<div class="ka ' + esc(g.charAt(0)) + '"><span class="kl">' + esc(g) + '</span>' +
+            '<span class="kb"><i style="width:' + (b.have / b.of * 100) + '%"></i></span>' +
+            '<span class="kn">' + b.have + ' / ' + b.of + '</span></div>';
+        }).join('') + '</div>'
+      : '') +
+    '<details><summary>All ' + k.of + ' published areas, and which line of their JD evidences each' +
+    '</summary><ul class="ksb-list">' + k.items.map(function (x) {
       return '<li class="' + (x.jd != null ? 'ev' : '') + '">' +
         '<span class="c">' + esc(x.it.code) + '</span><span>' +
         (x.jd != null ? '<b>' + esc(x.it.area) + '</b>' : esc(x.it.area)) +
@@ -754,36 +799,48 @@ function ksbCard(p, std) {
     }).join('') + '</ul></details></div>';
 }
 
-function ksbSection() {
-  var std = STD[chosenStd] || STD[PW.pathway.instances[0].ref];
-  var F = PW.ksbFull;
-  if (!F || F.ref !== std.ref) {
-    return '<p class="subhead">Coverage against the standard</p>' +
-      '<p class="sub">Per-KSB coverage has been read for <b>' + esc(STD[F.ref].name) + '</b> only. ' +
-      'Pick that standard at step 6 to see it &mdash; measuring against ' + esc(std.name) +
-      ' would need its own pass, and estimating it would be the thing this page refuses to do.</p>';
-  }
+/* Coverage against BOTH steps of the pathway, because the contrast is the
+   whole argument for it: they are close to ready for the first standard and
+   nowhere near the second, which is why there are three years in between. */
+function ksbBlock(inst) {
+  var F = ksbSet(inst.ref);
+  var std = STD[inst.ref];
+  if (!F) return '';
   var ppl = chosen().filter(function (p) { return F.evidenced[String(p.id)]; });
-  var tot = ppl.reduce(function (t, p) { var k = ksbFor(p.id); return t + k.have; }, 0);
-  var max = ppl.length * F.items.length;
-  var below = ppl.filter(function (p) { return !ksbFor(p.id).pass; });
+  if (!ppl.length) return '';
+  var pass = ppl.filter(function (p) { return ksbFor(p.id, inst.ref).pass; });
+  return '<p class="subhead">Year ' + inst.startYear + ' · ' + esc(std.name) + '</p>' +
+    '<p class="sub">Each job description read against <b>all ' + F.items.length +
+    ' published areas</b> of this standard. <b>' + pass.length + ' of ' + ppl.length +
+    '</b> clear the 50% guidance line.</p>' +
+    ppl.map(function (p) { return ksbCard(p, inst.ref); }).join('');
+}
 
-  return '<p class="subhead">Coverage against the standard</p>' +
-    '<p class="sub">Each job description read against <b>all ' + F.items.length + ' published ' +
-    'knowledge, skills and behaviours</b> of ' + esc(std.name) + ' &mdash; ' + F.items.filter(
-      function (i) { return i.group === 'K'; }).length + ' knowledge, ' + F.items.filter(
-      function (i) { return i.group === 'S'; }).length + ' skills, ' + F.items.filter(
-      function (i) { return i.group === 'B'; }).length + ' behaviours. <b>' + tot + ' of ' + max +
-    '</b> evidenced across your ' + ppl.length + '.</p>' +
-    ppl.map(function (p) { return ksbCard(p, std); }).join('') +
-    (below.length
-      ? '<p class="caveat"><b>' + andList(below.map(function (p) { return esc(p.name); })) +
-        '</b> ' + (below.length === 1 ? 'sits' : 'sit') + ' below the 50% line. That is not a bar to ' +
-        'starting &mdash; it is a measure of how much of the role has to widen first, and where.</p>'
-      : '') +
-    '<p class="caveat"><b>How this was measured.</b> ' + esc(F._method) + ' ' +
-    esc(F._codes) + ' <a href="' + esc(F.source) + '" target="_blank" rel="noopener">The standard ' +
-    'on Skills England</a>, checked ' + esc(F.checked) + '.</p>';
+function ksbSection() {
+  var insts = PW.pathway.instances;
+  var one = insts[0], two = insts[1];
+  var set1 = ksbSet(one.ref) || { evidenced: {} };
+  var ppl = chosen().filter(function (p) { return set1.evidenced[String(p.id)]; });
+  if (!ppl.length) return '';
+  var passOne = ppl.filter(function (p) { var k = ksbFor(p.id, one.ref); return k && k.pass; }).length;
+  var passTwo = ppl.filter(function (p) { var k = ksbFor(p.id, two.ref); return k && k.pass; }).length;
+
+  return '<p class="subhead">Coverage against the standards</p>' +
+    '<p class="sub">Not a score of the people — a measure of how much of each standard their ' +
+    '<b>current job</b> already puts in front of an assessor.</p>' +
+    ksbBlock(one) +
+    ksbBlock(two) +
+    '<p class="payoff"><b>That gap is the pathway.</b> Against ' + esc(STD[one.ref].name) +
+    ', <b>' + passOne + ' of ' + ppl.length + '</b> clear the line today. Against ' +
+    esc(STD[two.ref].name) + ', <b>' + passTwo + ' of ' + ppl.length + '</b> do' +
+    (passTwo === 0 ? ' — not one of them' : '') + '. Which is precisely why the second ' +
+    'programme sits <b>three years out</b> rather than beside the first: the job they do after ' +
+    'eighteen months on the first standard is what makes them ready for the second.</p>' +
+    '<p class="caveat"><b>How this was measured.</b> ' + esc(PW.ksbFull._method) + ' ' +
+    esc(PW.ksbFull._codes) + ' Sources: <a href="' + esc(PW.ksbFull.source) +
+    '" target="_blank" rel="noopener">' + esc(STD[one.ref].name) + '</a> and <a href="' +
+    esc(PW.ksbFull2.source) + '" target="_blank" rel="noopener">' + esc(STD[two.ref].name) +
+    '</a> on Skills England, both checked ' + esc(PW.ksbFull.checked) + '.</p>';
 }
 
 function buildReport() {
@@ -882,6 +939,8 @@ function drawStep5() {
     '<div class="row"><button class="btn" id="go5">Pick the apprenticeship &rarr;</button>' +
     '<button class="btn ghost" id="printRep">Open full screen to print</button></div>';
 
+  gate('go5', false, 'Open one colleague’s full list of knowledge, skills and behaviours ' +
+       'before you carry on — the counts above are the summary, not the evidence.');
   $('go5').onclick = function () {
     complete(5, r.sections.length + '-section report built', true);
     unlock(6);
@@ -1018,7 +1077,9 @@ function drawPool() {
         return o ? ' · plus ' + fmt(o.cost) + ' of unfunded time' : '';
       })()
     : 'Cohort <b>0</b> of ' + chosen().length;
-  $('go6').disabled = inZone.length === 0;
+  gate('go6', inZone.length === chosen().length,
+       inZone.length + ' of ' + chosen().length + ' assigned — put the rest on the programme.',
+       'All ' + chosen().length + ' on the programme.');
   $('assignAll').hidden = pool.length === 0;
 }
 

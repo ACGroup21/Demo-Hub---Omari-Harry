@@ -760,5 +760,146 @@
       ]
     ],
     "whyHere": "A unit is the obvious move for someone a year away from a full standard. It is weeks rather than eighteen months, it comes from the same levy you are already paying, and it can target the exact duties their job does not yet cover — so they arrive at next year’s cohort with the evidence already built."
+  },
+  "ksbFull2": {
+    "ref": "ST0325",
+    "source": "https://skillsengland.education.gov.uk/apprenticeships/st0325-v1-2",
+    "checked": "2026-11-03",
+    "_codes": "ST0325 publishes NAMED areas too, in one list rather than split into knowledge, skills and behaviours. The codes are positional so rows can be labelled. The 16 is real.",
+    "_method": "Read, not scored, against the published statement rather than the area name. Dan runs replenishment but does not get \"Stock\", because that statement is about monitoring the stock system to minimise damage and loss — which is Priya’s job. Matching on the heading would have given him it.",
+    "items": [
+      {
+        "code": "A1",
+        "group": "Standard",
+        "area": "Customer",
+        "text": "Understand key drivers of customer journeys and how managing positive customer experiences increases sales"
+      },
+      {
+        "code": "A2",
+        "group": "Standard",
+        "area": "Business",
+        "text": "Understand the vision of the business, its competitive position and own role and responsibility"
+      },
+      {
+        "code": "A3",
+        "group": "Standard",
+        "area": "Financial",
+        "text": "Understand the key drivers of profitable retail performance and the relationship of forecasting"
+      },
+      {
+        "code": "A4",
+        "group": "Standard",
+        "area": "Leadership",
+        "text": "Understand different leadership styles used in retail businesses and when to use them effectively"
+      },
+      {
+        "code": "A5",
+        "group": "Standard",
+        "area": "Marketing",
+        "text": "Know the key factors influencing a marketing plan such as product launch and life cycle"
+      },
+      {
+        "code": "A6",
+        "group": "Standard",
+        "area": "Communication",
+        "text": "Understand how to communicate and cascade information effectively at all levels and to a diverse audience"
+      },
+      {
+        "code": "A7",
+        "group": "Standard",
+        "area": "Sales and promotions",
+        "text": "Understand how to set sales targets that are challenging but realistic and how to lead team members"
+      },
+      {
+        "code": "A8",
+        "group": "Standard",
+        "area": "Product and service",
+        "text": "Keep up to date knowledge of product ranges, brand development, promotions, current and future trends."
+      },
+      {
+        "code": "A9",
+        "group": "Standard",
+        "area": "Brand reputation",
+        "text": "Understand the importance of upholding brand reputation, how brand reputation can become compromised"
+      },
+      {
+        "code": "A10",
+        "group": "Standard",
+        "area": "Merchandising",
+        "text": "Understand key features of merchandising and how these link with the business' merchandising plan"
+      },
+      {
+        "code": "A11",
+        "group": "Standard",
+        "area": "Stock",
+        "text": "Monitor the stock management system to minimise the cost of damage to stock and the loss of stock"
+      },
+      {
+        "code": "A12",
+        "group": "Standard",
+        "area": "Technology",
+        "text": "Understand the technology requirements of the business and how to manage them to achieve effective"
+      },
+      {
+        "code": "A13",
+        "group": "Standard",
+        "area": "Developing self",
+        "text": "Identify a variety of ways to inspire and motivate team members, how to positively influence"
+      },
+      {
+        "code": "A14",
+        "group": "Standard",
+        "area": "Team performance",
+        "text": "Know how to recruit, retain and develop the right people for the right roles."
+      },
+      {
+        "code": "A15",
+        "group": "Standard",
+        "area": "Legal and governance",
+        "text": "Understand environmental, legislative, corporate, data protection and social responsibilities relating to retail businesses"
+      },
+      {
+        "code": "A16",
+        "group": "Standard",
+        "area": "Diversity",
+        "text": "Understand how local demographics impact on business, customers, staff and products"
+      }
+    ],
+    "evidenced": {
+      "1": {
+        "Financial": 2,
+        "Communication": 3,
+        "Stock": 0,
+        "Technology": 0
+      },
+      "2": {
+        "Customer": 0,
+        "Product and service": 2,
+        "Developing self": 3,
+        "Team performance": 3
+      },
+      "3": {
+        "Customer": 1,
+        "Financial": 2,
+        "Leadership": 0,
+        "Communication": 1,
+        "Sales and promotions": 2,
+        "Technology": 2,
+        "Team performance": 3
+      },
+      "5": {
+        "Customer": 0,
+        "Financial": 1,
+        "Leadership": 0,
+        "Communication": 2,
+        "Brand reputation": 1
+      },
+      "6": {
+        "Financial": 1,
+        "Leadership": 0,
+        "Communication": 3,
+        "Legal and governance": 2
+      }
+    }
   }
 }
