@@ -1180,7 +1180,10 @@ function drawStep7() {
     '<div class="tl-gap" style="left:' + pct(gapFrom) + ';width:' + pct(gapTo - gapFrom) + '">' +
       '<span>' + (gapTo - gapFrom).toFixed(1).replace(/\.0$/, '') + ' years doing the job</span></div>' +
     PW.pathway.markers.map(function (m) {
-      return '<div class="tl-mark" style="left:' + pct(m.year) + '" data-label="' + esc(m.label) + '"></div>';
+      /* a marker sitting on the right edge would push its label off the chart */
+      var edge = m.year / YEARS >= 0.95;
+      return '<div class="tl-mark' + (edge ? ' edge' : '') + '" style="left:' + pct(m.year) +
+        '" data-label="' + esc(m.label) + '"></div>';
     }).join('');
 
   var axis = '';

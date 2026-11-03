@@ -271,7 +271,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   font-size:10px;color:var(--muted-2);bottom:3px}
 .tl-axis span::after{content:'';position:absolute;left:50%;bottom:-5px;width:1px;height:5px;
   background:var(--line)}
-.tl-track{position:relative;height:118px;margin-top:4px}
+.tl-track{position:relative;height:118px;margin:4px 0 30px}
 .tl-bar{position:absolute;height:46px;border-radius:9px;padding:7px 11px;overflow:hidden;
   background:linear-gradient(135deg,rgba(0,201,204,.3),rgba(0,201,204,.13));
   border:1px solid var(--cyan-dim)}
@@ -289,9 +289,13 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   font-size:9px;color:var(--cyan);letter-spacing:.06em}
 .tl-bar.off .bn{color:var(--bad)}
 .tl-mark{position:absolute;top:0;bottom:0;width:1px;background:var(--warm)}
-.tl-mark::before{content:attr(data-label);position:absolute;top:-21px;left:50%;
+.tl-mark::before{content:attr(data-label);position:absolute;top:auto;bottom:-24px;left:50%;
   transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;
   text-transform:uppercase;color:var(--warm);white-space:nowrap}
+.tl-mark.edge::before{transform:translateX(-100%)}
+/* the first and last year ticks half-overhang their own chart without this */
+.tl-axis span:first-child{transform:translateX(-12%)}
+.tl-axis span:last-child{transform:translateX(-88%)}
 .tl-gap{position:absolute;top:50px;height:14px;border-top:1px dashed var(--muted-2);
   border-left:1px dashed var(--muted-2);border-right:1px dashed var(--muted-2)}
 .tl-gap span{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:11px;
@@ -684,6 +688,6 @@ footer b{color:var(--muted)}
   <div id="vhost"></div>
 </div>
 
-<script src="journey.js?v=10"></script>
+<script src="journey.js?v=12"></script>
 </body>
 </html>
