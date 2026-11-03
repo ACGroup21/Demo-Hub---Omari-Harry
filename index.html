@@ -773,12 +773,14 @@ footer b{color:var(--muted)}
     <div class="rail"><div class="node"><span>02</span></div></div>
     <div class="card">
       <div class="card-h"><h2>Your levy, as it actually lands</h2>
-        <p class="fold-sum" id="sum2"></p></div>
+        <p class="fold-sum" id="sum2"></p>
+        <button class="reopen" data-open="2" hidden>review</button></div>
       <div class="card-body">
         <p class="sub">Not a pot you draw on whenever you like. It arrives monthly, and it
         <b>expires twelve months after it lands</b>, oldest first.</p>
         <div class="readout"><div class="ro-grid" id="readout"></div>
           <p class="ro-sum" id="roSum"></p></div>
+        <div class="row"><button class="btn" id="go2">I see how it lands &rarr;</button></div>
       </div>
     </div>
   </section>
@@ -879,6 +881,6 @@ footer b{color:var(--muted)}
 <div id="halo" aria-hidden="true"></div>
 <button id="nudge" type="button"></button>
 
-<script src="journey.js?v=30"></script>
+<script src="journey.js?v=32"></script>
 </body>
 </html>

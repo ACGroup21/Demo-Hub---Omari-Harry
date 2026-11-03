@@ -1689,7 +1689,36 @@ function drawStep7() {
   };
 
   mountWalker(insts[0], insts[1], n);
-  complete(7, fmt(spend) + ' over 5 years · ' + fmt(lost) + ' expired', false);
+
+  /* Stage 7 was ticked here, by being drawn. Same objection as stage 2, and
+     the same principle — but the opposite answer, because the stages differ
+     in kind. Stages 1 to 6 complete by doing the thing that opens the next
+     one; stage 7 has no next one, so there is nothing to press and a button
+     saying "I have finished reading" would be invented furniture. What
+     finishing the last stage actually means is reaching the end of it, so
+     that is what is watched: the closing row, once it has been in view. */
+  var end = $('endActions');
+  if (end) onceInView(end, function () {
+    complete(7, fmt(spend) + ' over 5 years · ' + fmt(lost) + ' expired', false);
+  });
+}
+
+/* Second time in this file a rendering-lifecycle API turns out not to run.
+   IntersectionObserver was the obvious way to ask "has the closing row been
+   seen", and measured, it never delivers at all in a surface that is not
+   being composited — exactly like requestAnimationFrame, and silent in
+   exactly the same way: the element is squarely in the viewport, the
+   callback simply never comes. So the question is answered off the same
+   event-and-interval driver as the pointer, which is known to run. */
+var INVIEW = [];
+function onceInView(el, fn) { INVIEW.push({ el: el, fn: fn }); checkInView(); }
+function checkInView() {
+  for (var i = INVIEW.length - 1; i >= 0; i--) {
+    var w = INVIEW[i], r = w.el.getBoundingClientRect();
+    if (!r.height) continue;
+    var shown = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+    if (shown / r.height >= 0.4) { INVIEW.splice(i, 1); w.fn(); }
+  }
 }
 
 /* ── the recap ───────────────────────────────────────────────────────────
@@ -1950,6 +1979,8 @@ function devRunTo(target) {
 
       say('1 → levy');
       $('go1').click();
+      await devWait(function () { return !step(2).classList.contains('locked'); });
+      $('go2').click();
       await devWait(function () { return !step(3).classList.contains('locked'); });
       if (target <= 3) return say('at 3');
 
@@ -2071,6 +2102,8 @@ document.addEventListener('keydown', function (e) {
 var AIM = {
   1: { btn: 'go1', say: 'Line this up with Brayford’s mark',
        at: function () { return document.querySelector('#s1 .sliderwrap'); } },
+  2: { btn: 'go2', say: 'Read how it lands',
+       at: function () { return document.querySelector('#s2 .readout'); } },
   3: { btn: 'go3', say: 'Pick three from here',
        at: function () { return $('team'); } },
   4: { btn: 'go4', say: 'Open one of these',
@@ -2137,6 +2170,7 @@ var aimLast = '';
    glued during movement; the interval catches the state changes no listener
    here knows about, like a panel rendered after a fetch. */
 function aim() {
+  checkInView();
   var halo = $('halo'), nudge = $('nudge');
   if (!halo || !nudge) return;
   var t = aimBlocked() ? null : aimTarget();
@@ -2208,9 +2242,17 @@ $('go1').addEventListener('click', function () {
   complete(1, fmt(levy.annual) + '/yr on a ' + fmtM(payBill) + ' pay bill', true);
   unlock(2);
   drawStep2();
-  complete(2, null, false);
-  unlock(3);
   goTo(2);
+});
+/* Stage 2 used to be ticked by the line above, the moment you left stage 1 —
+   so you arrived at the readout to find it already marked done, and stage 3
+   already open beneath it. A tick is a claim that you did the thing; on a
+   stage whose thing is READ THIS, the only honest signal is you saying so.
+   Hence a control, like every other stage, which the pointer then aims at. */
+$('go2').addEventListener('click', function () {
+  complete(2, fmt(levy.monthly) + '/mo \u00b7 ' + RULES.expiryMonths + '-month clock', true);
+  unlock(3);
+  goTo(3);
 });
 document.addEventListener('click', function (e) {
   if (e.target.id === 'whyX') { $('why3').innerHTML = ''; return; }
