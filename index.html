@@ -192,6 +192,52 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .check p:last-child{margin-bottom:0}
 .check b{color:var(--ink)}
 
+/* ── step 7 · the pathway ─────────────────────────────────────────────── */
+.tl-wrap{overflow-x:auto;padding-bottom:4px}
+.tl{min-width:540px;position:relative;margin:26px 0 10px}
+.tl-axis{position:relative;height:17px;border-bottom:1px solid var(--line)}
+.tl-axis span{position:absolute;transform:translateX(-50%);font-family:var(--mono);
+  font-size:10px;color:var(--muted-2);bottom:3px}
+.tl-axis span::after{content:'';position:absolute;left:50%;bottom:-5px;width:1px;height:5px;
+  background:var(--line)}
+.tl-track{position:relative;height:118px;margin-top:4px}
+.tl-bar{position:absolute;height:46px;border-radius:9px;padding:7px 11px;overflow:hidden;
+  background:linear-gradient(135deg,rgba(0,201,204,.3),rgba(0,201,204,.13));
+  border:1px solid var(--cyan-dim)}
+.tl-bar.two{top:60px}
+.tl-bar .bn{display:block;font-size:12.5px;font-weight:700;color:var(--cyan);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.tl-bar .bm{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;
+  white-space:nowrap}
+.tl-bar.off{background:linear-gradient(135deg,rgba(232,112,95,.26),rgba(232,112,95,.1));
+  border-color:var(--bad)}
+.tl-epa{position:absolute;height:46px;border-radius:0 9px 9px 0;border:1px dashed var(--cyan-dim);
+  border-left:0;background:repeating-linear-gradient(135deg,rgba(0,201,204,.14) 0 4px,transparent 4px 9px)}
+.tl-epa.two{top:60px}
+.tl-epa span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--mono);
+  font-size:9px;color:var(--cyan);letter-spacing:.06em}
+.tl-bar.off .bn{color:var(--bad)}
+.tl-mark{position:absolute;top:0;bottom:0;width:1px;background:var(--warm)}
+.tl-mark::before{content:attr(data-label);position:absolute;top:-21px;left:50%;
+  transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--warm);white-space:nowrap}
+.tl-gap{position:absolute;top:50px;height:14px;border-top:1px dashed var(--muted-2);
+  border-left:1px dashed var(--muted-2);border-right:1px dashed var(--muted-2)}
+.tl-gap span{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:11px;
+  color:var(--muted-2);white-space:nowrap}
+.caveat{margin:14px 0 0;font-size:12.5px;color:var(--muted-2);max-width:76ch;line-height:1.65}
+.caveat b{color:var(--muted)}
+.tally{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));margin-top:20px}
+.tally .t{border:1px solid var(--line);border-radius:12px;padding:14px 15px;
+  background:rgba(159,177,202,.03)}
+.tally .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted-2)}
+.tally .v{font-family:var(--mono);font-size:22px;font-weight:600;margin-top:5px;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.tally .s{font-size:12px;color:var(--muted);margin-top:4px}
+.tally .t.spend .v{color:var(--cyan)}
+.tally .t.waste .v{color:var(--warm)}
+
 /* ── step 6 · the options ─────────────────────────────────────────────── */
 .opt{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;
   border:1px solid var(--line);border-radius:13px;background:rgba(159,177,202,.03);

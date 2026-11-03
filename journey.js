@@ -431,12 +431,12 @@ function drawStep4() {
     'any of it. Which of the six areas count as management is our call too, not the standard&rsquo;s.</p>' +
     '</details>';
 
-  $('go4').addEventListener('click', function () {
+  $('go4').onclick = function () {
     complete(4, totalYes + ' of ' + max + ' areas evidenced', true);
     unlock(5);
     drawStep5();
     goTo(5);
-  });
+  };
   $('sum4').innerHTML = '';
 }
 
@@ -560,19 +560,19 @@ function drawStep5() {
     '<div class="row"><button class="btn" id="go5">Pick the apprenticeship &rarr;</button>' +
     '<button class="btn ghost" id="printRep">Open full screen to print</button></div>';
 
-  $('go5').addEventListener('click', function () {
+  $('go5').onclick = function () {
     complete(5, r.sections.length + '-section report built', true);
     unlock(6);
     drawStep6();
     goTo(6);
-  });
-  $('printRep').addEventListener('click', function () {
+  };
+  $('printRep').onclick = function () {
     var w = $('vhost');
     $('vtitle').textContent = 'Readiness report';
     w.innerHTML = '<div style="overflow:auto;height:100%;padding:26px">' + r.html + '</div>';
     $('viewer').hidden = false;
     document.body.style.overflow = 'hidden';
-  });
+  };
 }
 
 /* ── 06 · pick the apprenticeship ────────────────────────────────────────
@@ -663,12 +663,13 @@ function drawStep6() {
     'quietly dropped both would teach you nothing.</p></details>';
 
   drawWork6();
-  $('go6').addEventListener('click', function () {
+  $('go6').onclick = function () {
     var o = STD[chosenStd];
     complete(6, esc(o.name) + ' · ' + fmt(o.band * n) + (o.funded === false ? ' (unfunded)' : ''), true);
     unlock(7);
+    drawStep7();
     goTo(7);
-  });
+  };
 }
 
 function drawWork6() {
@@ -749,6 +750,144 @@ document.addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('[data-std]');
   if (b) pickStd(b.getAttribute('data-std'));
 });
+
+/* ── 07 · the five-year pathway ──────────────────────────────────────────
+   Two instances of training inside five years, and the gap between them is
+   the point rather than dead space: that is where someone is doing the job
+   with a funded next rung already visible.
+
+   The bars are the PRACTICAL PERIOD only. End-point assessment adds to each
+   and the published standards do not say how much — ST0325's own page gives
+   two unreconciled durations — so nothing is drawn for it. A tail of invented
+   length would make the timeline look more precise than the source is. */
+var YEARS = 5;
+/* End-point assessment is NOT in a standard's typical duration — ST0325's own
+   page says so, and then gives a second duration elsewhere that does not
+   reconcile with the first. No standard publishes the EPA window, so three
+   months is an assumption, drawn hatched and labelled as one on the page.
+   It is the figure EPA organisations commonly quote; it is not from source. */
+var EPA_MONTHS = 3;
+var EPA_ASSUMED = true;
+function pct(y) { return (y / YEARS * 100) + '%'; }
+
+function drawStep7() {
+  var n = chosen().length;
+  var insts = PW.pathway.instances;
+  var one = STD[chosenStd] || STD[insts[0].ref];
+  var two = STD[insts[1].ref];
+  var diverged = chosenStd && chosenStd !== insts[0].ref;
+
+  var y1 = { start: 0, len: one.months / 12 };
+  var y2 = { start: insts[1].startYear, len: two.months / 12 };
+  var gapFrom = y1.start + y1.len, gapTo = y2.start;
+
+  var bars =
+    '<div class="tl-bar' + (one.funded === false ? ' off' : '') + '" style="left:' + pct(y1.start) +
+      ';width:' + pct(y1.len) + '"><span class="bn">' + esc(one.name) + ' L' + one.level + '</span>' +
+      '<span class="bm">' + one.months + ' mo · ' + fmt(one.band * n) + '</span></div>' +
+    '<div class="tl-bar two" style="left:' + pct(y2.start) + ';width:' + pct(y2.len) + '">' +
+      '<span class="bn">' + esc(two.name) + ' L' + two.level + '</span>' +
+      '<span class="bm">' + two.months + ' mo · ' + fmt(two.band * n) + '</span></div>' +
+    '<div class="tl-epa" style="left:' + pct(y1.start + y1.len) + ';width:' + pct(EPA_MONTHS / 12) +
+      '"><span>EPA</span></div>' +
+    '<div class="tl-epa two" style="left:' + pct(y2.start + y2.len) + ';width:' + pct(EPA_MONTHS / 12) +
+      '"><span>EPA</span></div>' +
+    '<div class="tl-gap" style="left:' + pct(gapFrom) + ';width:' + pct(gapTo - gapFrom) + '">' +
+      '<span>' + (gapTo - gapFrom).toFixed(1).replace(/\.0$/, '') + ' years doing the job</span></div>' +
+    PW.pathway.markers.map(function (m) {
+      return '<div class="tl-mark" style="left:' + pct(m.year) + '" data-label="' + esc(m.label) + '"></div>';
+    }).join('');
+
+  var axis = '';
+  for (var y = 0; y <= YEARS; y++) axis += '<span style="left:' + pct(y) + '">Y' + y + '</span>';
+
+  /* the money, across the whole five years rather than one invoice */
+  var spend = (one.band + two.band) * n;
+  var levy5 = levy.annual * YEARS;
+  var otj1 = otjFor(one.ref, n), otj2 = otjFor(two.ref, n);
+  var otjAll = (otj1 ? otj1.cost : 0) + (otj2 ? otj2.cost : 0);
+  var lost = Math.max(0, levy5 - spend);
+  var couldHave = two.band ? Math.floor(lost / two.band) : 0;
+
+  /* where it goes after year five — computed, not listed by hand */
+  var above = Object.keys(STD).map(function (k) { return STD[k]; }).filter(function (s) {
+    return s.funded !== false && s.route === two.route && (s.level || 0) > (two.level || 0);
+  }).sort(function (a, b) { return (a.level - b.level) || (a.band - b.band); });
+
+  $('body7').innerHTML =
+    (diverged
+      ? '<p class="sub">You chose <b>' + esc(one.name) + '</b>, which is not where this pathway ' +
+        'normally starts. It is drawn with your choice in it so you can see what that does to the ' +
+        'shape.</p>'
+      : '') +
+    '<p class="sub">Two instances of training inside five years. Competent at two, senior at five &mdash; ' +
+    'and <b>training occupies about two of those five years</b>. The rest is doing the job.</p>' +
+    '<div class="tl-wrap"><div class="tl"><div class="tl-axis">' + axis + '</div>' +
+    '<div class="tl-track">' + bars + '</div></div></div>' +
+    '<p class="caveat">Solid bars are the <b>practical period</b>, taken from the published standards. ' +
+    'The hatched tails are <b>end-point assessment at ' + EPA_MONTHS + ' months &mdash; an assumption, ' +
+    'not a published figure</b>. A standard&rsquo;s typical duration excludes EPA and none of them states ' +
+    'the window; ' + esc(two.name) + '&rsquo;s own page gives two durations that do not reconcile. ' +
+    'Three months is what assessment organisations commonly quote, so it is drawn hatched and said out ' +
+    'loud rather than folded silently into a solid bar.</p>' +
+
+    '<div class="tally">' +
+    '<div class="t spend"><div class="k">Training, 5 years</div><div class="v">' + fmt(spend) +
+      '</div><div class="s">' + n + ' people × 2 programmes</div></div>' +
+    '<div class="t"><div class="k">Levy over 5 years</div><div class="v">' + fmt(levy5) +
+      '</div><div class="s">at ' + fmt(levy.annual) + ' a year</div></div>' +
+    '<div class="t waste"><div class="k">Expires unused</div><div class="v">' + fmt(lost) +
+      '</div><div class="s">on a ' + RULES.expiryMonths + '-month clock</div></div>' +
+    '<div class="t"><div class="k">Unfunded time</div><div class="v">' + fmt(otjAll) +
+      '</div><div class="s">both programmes, your cost</div></div>' +
+    '</div>' +
+
+    '<div class="check"><h3>The gap is the product</h3>' +
+    '<p>Those <b>' + (gapTo - gapFrom).toFixed(1).replace(/\.0$/, '') + ' years</b> between the two ' +
+    'programmes are not idle. That is someone doing the job they have just qualified for, with a funded ' +
+    'next rung already visible. It is the part that keeps people, and it costs nothing.</p>' +
+    '<p>The uncomfortable figure is the other one. Across five years this plan commits <b>' + fmt(spend) +
+    '</b> of a <b>' + fmt(levy5) + '</b> levy. <b>' + fmt(lost) + '</b> expires unused &mdash; enough for ' +
+    'another <b>' + couldHave + '</b> people on ' + esc(two.name) + ', at no extra cost to Brayford, ' +
+    'because the money has already left the payroll.</p>' +
+    '<p>That is the real finding of this walkthrough, and it is not about these three. It is that ' +
+    '<b>' + Math.round(spend / levy5 * 100) + '%</b> of a levy is a normal amount for an employer to ' +
+    'use, and the rest goes back to the Treasury twelve months after it lands.</p></div>' +
+
+    '<h4 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;' +
+    'color:var(--cyan);font-weight:500;margin:24px 0 9px">After year five</h4>' +
+    '<p class="sub">Where ' + esc(two.name) + ' leads, if they stay. <b>' + above.length + '</b> funded ' +
+    'standards sit above it in the same route &mdash; counted from the library, not chosen by us.</p>' +
+    '<ul class="hits" style="list-style:none;margin:0;padding:0">' +
+    above.slice(0, 3).map(function (s) {
+      return '<li class="learner" style="margin-top:8px"><div class="lh">' +
+        '<span class="ln">' + esc(s.name) + '</span><span class="lr">Level ' + s.level + '</span>' +
+        '<span class="lscore">' + s.months + ' months · <b>' + fmt(s.band) + '</b></span></div></li>';
+    }).join('') + '</ul>' +
+
+    '<div class="row"><button class="btn ghost" id="restart">Start again &rarr;</button></div>';
+
+  $('restart').onclick = function () {
+    picked = {}; chosenStd = null;
+    [7, 6, 5, 4, 3, 2].forEach(function (i) {
+      var s = step(i);
+      s.className = 'step locked';
+      var b = s.querySelector('.reopen'); if (b) b.hidden = true;
+      $('sum' + i).innerHTML = '';
+    });
+    ['body4', 'body5', 'body6', 'body7'].forEach(function (id) {
+      $(id).innerHTML = '<p class="sub">Built next.</p>';
+    });
+    step(1).className = 'step active';
+    $('sum1').innerHTML = '';
+    step(1).querySelector('.reopen').hidden = true;
+    $('why3').innerHTML = '';
+    drawTeam();
+    goTo(1);
+  };
+
+  complete(7, fmt(spend) + ' over 5 years · ' + fmt(lost) + ' expired', false);
+}
 
 /* ── the in-page viewer ──────────────────────────────────────────────────
    Everything stays on this page. The iframe is built on open rather than
