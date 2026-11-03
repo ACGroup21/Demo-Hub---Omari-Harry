@@ -174,6 +174,10 @@ function drawStep1() {
     { label: '÷ 12 months', value: fmt(levy.monthly) + '/mo', indent: true }
   ]);
   if (step(2).classList.contains('done') || !step(2).classList.contains('locked')) drawStep2();
+  /* a visitor can reopen step 1 and move the slider after the report exists.
+     Rebuild anything downstream that carries a money figure, or the report
+     quietly keeps quoting a pay bill nobody is looking at any more. */
+  if (!step(5).classList.contains('locked')) drawStep5();
 }
 
 function drawStep2() {
@@ -373,9 +377,144 @@ function drawStep4() {
   $('go4').addEventListener('click', function () {
     complete(4, totalYes + ' of ' + max + ' areas evidenced', true);
     unlock(5);
+    drawStep5();
     goTo(5);
   });
   $('sum4').innerHTML = '';
+}
+
+/* ── 05 · the readiness report ───────────────────────────────────────────
+   The document is BUILT, then its contents list is read back off what was
+   built. Describing a report you have not assembled is how a page ends up
+   promising sections that are not in it. */
+function hourlyRate() {
+  /* derived from the pay bill the visitor set, not a number typed in here:
+     average earnings over contracted hours. Moves when the slider moves. */
+  var head = PW.employer.headcount;
+  var hoursPerYear = 37.5 * 52;
+  return payBill / head / hoursPerYear;
+}
+
+function otjFor(ref, n) {
+  var o = STD[ref];
+  if (!o || !o.otjHours) return null;
+  var rate = hourlyRate();
+  return {
+    std: o, hours: o.otjHours, people: n,
+    perWeek: o.otjHours / (o.months * 52 / 12),
+    totalHours: o.otjHours * n,
+    cost: o.otjHours * n * rate,
+    rate: rate
+  };
+}
+
+function buildReport() {
+  var people = chosen();
+  var areas = PW.coverage.areas;
+  var inst1 = STD[PW.pathway.instances[0].ref];
+  var otj = otjFor(PW.pathway.instances[0].ref, people.length);
+  var sections = [];
+
+  function sec(title, html) { sections.push(title); return '<h4>' + esc(title) + '</h4>' + html; }
+
+  /* who, and what their jobs evidence */
+  var rows = people.map(function (p) {
+    var t = tally(p.id);
+    return '<tr><td><b>' + esc(p.name) + '</b><br>' + esc(p.role) + '</td>' +
+      '<td>' + (t.yes.length ? t.yes.map(esc).join(', ') : '—') + '</td>' +
+      '<td>' + (t.part.length ? t.part.map(esc).join(', ') : '—') + '</td>' +
+      '<td class="num">' + t.yes.length + ' / ' + areas.length + '</td></tr>';
+  }).join('');
+
+  /* what has to change: areas no one clearly evidences */
+  var gaps = areas.filter(function (a) {
+    return !people.some(function (p) { return tally(p.id).yes.indexOf(a) > -1; });
+  });
+
+  var body =
+    sec('The money', '<table><tr><td>Annual pay bill</td><td class="num">' + fmt(payBill) + '</td></tr>' +
+      '<tr><td>Apprenticeship levy into the account</td><td class="num">' + fmt(levy.annual) + ' / yr</td></tr>' +
+      '<tr><td>Arriving each month, on a ' + RULES.expiryMonths + '-month expiry clock</td><td class="num">' +
+        fmt(levy.monthly) + '</td></tr>' +
+      '<tr><td>Committed by this plan (' + people.length + ' × ' + esc(inst1.name) + ')</td>' +
+        '<td class="num">' + fmt(inst1.band * people.length) + '</td></tr>' +
+      '<tr><td><b>Left unspent against this year’s levy</b></td><td class="num"><b>' +
+        fmt(Math.max(0, levy.annual - inst1.band * people.length)) + '</b></td></tr></table>') +
+
+    sec('Who is being put forward',
+      '<p>Chosen from <b>' + TEAM.filter(function (p) { return eligible(p.id); }).length + '</b> of ' +
+      TEAM.length + ' colleagues whose current role evidences a duty the standard assesses.</p>' +
+      '<table><tr><th>Colleague</th><th>Clearly evidenced</th><th>In part</th><th>&nbsp;</th></tr>' +
+      rows + '</table>') +
+
+    sec('What has to change before anyone enrols', gaps.length
+      ? '<p class="act">Not one of these three currently evidences <b>' + gaps.map(esc).join('</b>, <b>') +
+        '</b>. An apprentice is assessed on the job they do, so each needs to become a real, standing ' +
+        'responsibility <b>before</b> the programme starts &mdash; not something the training is expected ' +
+        'to supply.</p>'
+      : '<p>All six areas are evidenced somewhere across the three. No role changes needed before enrolment.</p>') +
+
+    sec('The cost nobody funds', otj
+      ? '<table><tr><td>Minimum off-the-job training, per apprentice</td><td class="num">' +
+        otj.hours + ' hrs</td></tr>' +
+        '<tr><td>Across ' + otj.people + ' apprentices over ' + otj.std.months + ' months</td>' +
+        '<td class="num">' + otj.totalHours.toLocaleString('en-GB') + ' hrs</td></tr>' +
+        '<tr><td>About, per person, per week</td><td class="num">' + otj.perWeek.toFixed(1) + ' hrs</td></tr>' +
+        '<tr><td>Hourly cost — your pay bill over your headcount, over contracted hours</td>' +
+        '<td class="num">£' + otj.rate.toFixed(2) + '</td></tr>' +
+        '<tr><td><b>Cost of that time to Brayford</b></td><td class="num"><b>' + fmt(otj.cost) +
+        '</b></td></tr></table>' +
+        '<p class="act">The levy pays for training. It does not pay for the hours. On this plan the ' +
+        'unfunded time costs <b>' + fmt(otj.cost) + '</b> against <b>' + fmt(inst1.band * otj.people) +
+        '</b> of funded training — and it comes off a shop floor already covered to the hour.</p>'
+      : '<p>No published minimum-hours figure for this standard.</p>');
+
+  var f = STDMETA.funding || {}, t = STDMETA.otj || {};
+  var doc =
+    '<div class="doc"><div class="doc-head">' +
+    '<div><h3>Readiness report &mdash; ' + esc(PW.employer.name) + '</h3>' +
+    '<p style="margin:5px 0 0;font-size:12.5px">First step into management &middot; ' +
+    people.length + ' colleagues</p></div>' +
+    '<div class="meta">INDICATIVE · NOT A FUNDING DECISION<br>Generated ' +
+    new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + '</div>' +
+    '</div>' + body +
+    '<div class="doc-foot">' +
+    'Funding rules: ' + esc(RULES.src) + ', verified ' + esc(RULES.asOf) + '.<br>' +
+    'Standards, bands and funding status: ' + esc(f.source || '') + ', ' + esc(f.accurateAsOf || '') +
+    ', checked ' + esc(f.verifiedOn || '') + '.<br>' +
+    'Off-the-job hours: ' + esc(t.source || '') + '.<br>' +
+    'Which duties count as management, and which job-description line evidences each, are judgements ' +
+    'made for this report and shown in full at step 4.' +
+    '</div></div>';
+
+  return { html: doc, sections: sections };
+}
+
+function drawStep5() {
+  var r = buildReport();
+  $('body5').innerHTML =
+    '<p class="sub">Everything above, as something you could hand to a finance director. ' +
+    'The <b>' + r.sections.length + ' sections</b> below are read back off the document after it is ' +
+    'built, not from a list written by hand &mdash; a page that describes a report it has not assembled ' +
+    'is how you end up promising a section that is not there.</p>' +
+    '<ul class="contents">' + r.sections.map(function (s, i) {
+      return '<li>' + (i + 1) + ' · ' + esc(s) + '</li>'; }).join('') + '</ul>' +
+    r.html +
+    '<div class="row"><button class="btn" id="go5">Pick the apprenticeship &rarr;</button>' +
+    '<button class="btn ghost" id="printRep">Open full screen to print</button></div>';
+
+  $('go5').addEventListener('click', function () {
+    complete(5, r.sections.length + '-section report built', true);
+    unlock(6);
+    goTo(6);
+  });
+  $('printRep').addEventListener('click', function () {
+    var w = $('vhost');
+    $('vtitle').textContent = 'Readiness report';
+    w.innerHTML = '<div style="overflow:auto;height:100%;padding:26px">' + r.html + '</div>';
+    $('viewer').hidden = false;
+    document.body.style.overflow = 'hidden';
+  });
 }
 
 /* ── the in-page viewer ──────────────────────────────────────────────────

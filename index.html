@@ -183,6 +183,33 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .check p:last-child{margin-bottom:0}
 .check b{color:var(--ink)}
 
+/* ── step 5 · the report ──────────────────────────────────────────────── */
+.doc{border:1px solid var(--line);border-radius:13px;background:#060a14;padding:24px 26px;margin-top:4px}
+.doc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;
+  padding-bottom:14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.doc-head h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.015em}
+.doc-head .meta{font-family:var(--mono);font-size:10px;color:var(--muted-2);text-align:right;line-height:1.8}
+.doc h4{margin:22px 0 9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--cyan);font-weight:500}
+.doc p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:78ch}
+.doc p b{color:var(--ink)}
+.doc table{width:100%;border-collapse:collapse;font-size:13px;margin:4px 0 2px}
+.doc th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--muted-2);font-weight:500;padding:6px 10px 6px 0;
+  border-bottom:1px solid var(--line)}
+.doc td{padding:7px 10px 7px 0;border-bottom:1px solid rgba(159,177,202,.07);color:var(--muted);
+  vertical-align:top}
+.doc td b{color:var(--ink)}
+.doc td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  white-space:nowrap;color:var(--ink);padding-right:0}
+.doc .act{color:var(--warm)}
+.doc-foot{margin-top:22px;padding-top:13px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:10px;color:var(--muted-2);line-height:1.9}
+.doc-foot a{color:var(--muted)}
+.contents{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.contents li{font-family:var(--mono);font-size:10.5px;color:var(--muted-2);
+  border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+
 /* ── in-page viewer ───────────────────────────────────────────────────── */
 #viewer{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.93);display:flex;flex-direction:column}
 #viewer[hidden]{display:none}
