@@ -37,16 +37,29 @@ had stayed green while the number was wrong.
 
 ---
 
-## The apps
+## The demos
 
-| | |
+**[Open the hub](https://acgroup21.github.io/Demo-Hub---Omari-Harry/)** — each one runs in the
+page, no download.
+
+| | what it shows |
 |---|---|
-| **[Apprentice Tracker](apps/apprentice-tracker-demo.html)** | Progress reviews, off-the-job tracking and a cohort dashboard, reconciled against e-portfolio exports (OneFile / Bud). One engine, per-client config. |
+| **Levy Expiry Clock** | Time-series forecasting with a consequence attached: unused levy now
+expires after 12 months instead of 24, so this puts a date and a number on what goes back to the
+Treasury. |
+| **JD Matcher** | A ranking problem, not a lookup — a job description scored against 255
+standards, showing which terms matched and by how much. Two earlier scoring approaches were
+thrown away before this one worked. |
+| **What can you claim?** | A governed rules engine: every grant and incentive for one hire,
+each with its condition and its gov.uk source. It reads the rulebook live rather than hardcoding
+figures, so when a rule changed it corrected itself. |
 
-*More to follow: the funding calculator, its UX research lab, the KSB document
-builder, and the job-description → standard matcher.*
+All three run on one shared `engine.js`, left as a separate file on purpose — one engine behind
+three apps is the architecture, and inlining it would hide it.
 
----
+The full calculator they were cut from is in [`apps/fundable.html`](apps/fundable.html), along
+with the apprentice tracker, the KSB document builder and a UX study. Fundable is where the
+58-case suite and the per-figure provenance actually live.
 
 ## Notes on the demos
 

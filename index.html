@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo Hub — Omari Harry</title>
+<meta name="description" content="Working apprenticeship funding and delivery tools. Open any demo and use it — nothing is a screenshot.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Tokens lifted from the Arthur Curtis site so the hub reads as the same hand.
+   Dark only — the site dropped its light theme, and a portfolio that disagrees
+   with the work it is showing is its own kind of tell. */
+:root{
+  --bg:#04070f; --navy:#0b1426; --cyan:#00B8C0; --cyan-soft:#5fe0e6;
+  --blue:#2f7d9c; --ink:#eef4fc; --muted:#9fb1ca; --warm:#f0a35c;
+  --line:rgba(159,177,202,.16); --card:rgba(11,20,38,.72);
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;
+  line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(900px 520px at 14% -8%, rgba(0,184,192,.13), transparent 62%),
+    radial-gradient(760px 460px at 88% 6%, rgba(47,125,156,.11), transparent 60%)}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* ── head ─────────────────────────────────────────────────────────── */
+header{padding:76px 0 34px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.17em;
+  text-transform:uppercase;color:var(--cyan);margin:0 0 16px}
+h1{margin:0 0 14px;font-size:clamp(34px,5.6vw,58px);line-height:1.04;
+  font-weight:800;letter-spacing:-.022em;text-wrap:balance}
+h1 .q{color:var(--cyan)}
+.lede{margin:0;max-width:66ch;font-size:clamp(16px,2vw,18.5px);color:var(--muted)}
+.lede b{color:var(--ink);font-weight:600}
+
+/* ── the claim strip ──────────────────────────────────────────────── */
+.claim{margin:34px 0 0;border:1px solid var(--line);border-radius:16px;
+  background:linear-gradient(180deg,rgba(0,184,192,.07),rgba(11,20,38,.5));
+  padding:22px 24px}
+.claim h2{margin:0 0 6px;font-size:15px;font-weight:700;color:var(--cyan-soft);
+  letter-spacing:-.01em}
+.claim p{margin:0;color:var(--muted);font-size:14.5px;max-width:78ch}
+.claim p b{color:var(--ink)}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding:0;list-style:none}
+.facts li{font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;
+  border:1px solid var(--line);border-radius:999px;padding:6px 13px;color:var(--muted)}
+.facts li b{color:var(--cyan);font-weight:500}
+
+/* ── cards ────────────────────────────────────────────────────────── */
+.secthead{display:flex;align-items:baseline;gap:14px;margin:56px 0 18px}
+.secthead h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.015em}
+.secthead span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.app{border:1px solid var(--line);border-radius:16px;background:var(--card);
+  padding:22px 22px 18px;display:flex;flex-direction:column;gap:11px;
+  transition:border-color .18s,transform .18s}
+.app:hover{border-color:rgba(0,184,192,.46);transform:translateY(-2px)}
+.app.wide{grid-column:1/-1}
+.app h3{margin:0;font-size:17.5px;font-weight:700;letter-spacing:-.012em}
+.app .what{margin:0;font-size:14.5px;color:var(--muted);flex:1}
+.app .what b{color:var(--ink);font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:7px;padding:0;margin:2px 0 0;list-style:none}
+.tags li{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--blue);border:1px solid var(--line);
+  border-radius:5px;padding:3px 8px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.btn{font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;
+  border-radius:9px;padding:9px 15px;border:1px solid transparent;
+  background:var(--cyan);color:#04070f;transition:filter .15s}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:none;color:var(--muted);border-color:var(--line)}
+.btn.ghost:hover{color:var(--cyan);border-color:var(--cyan)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px}
+
+/* ── the inline runner ────────────────────────────────────────────── */
+.stage{margin-top:14px;border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;background:#000;display:none}
+.stage.on{display:block}
+.stage .bar{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:rgba(11,20,38,.9);border-bottom:1px solid var(--line)}
+.stage .bar .dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);flex:0 0 auto}
+.stage .bar .url{font-family:var(--mono);font-size:11px;color:var(--muted);
+  flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stage iframe{display:block;width:100%;height:620px;border:0;background:#04070f}
+.loading{padding:20px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* ── notes ────────────────────────────────────────────────────────── */
+.note{margin:48px 0 0;border-left:2px solid var(--warm);padding:4px 0 4px 18px;
+  color:var(--muted);font-size:14px;max-width:76ch}
+.note b{color:var(--ink)}
+footer{margin:64px 0 72px;padding-top:24px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:13px;display:flex;gap:18px;flex-wrap:wrap;
+  justify-content:space-between}
+footer a{color:var(--cyan);text-decoration:none}
+footer a:hover{text-decoration:underline}
+@media (max-width:640px){
+  header{padding:48px 0 24px}
+  .stage iframe{height:460px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Demo hub</p>
+  <h1>Three working tools for <span class="q">apprenticeship funding</span>, built to be checked.</h1>
+  <p class="lede">Open any of them below and <b>use it in the page</b> — none of this is a
+  screenshot. Each does one job, and all three run on one shared engine: no build step,
+  no framework, no server.</p>
+
+  <div class="claim">
+    <h2>Why these are built to be checked rather than trusted</h2>
+    <p>These tools tell employers what training will cost them, and a figure that is merely
+    plausible is worthless. So the funding rules live in <b>one governed file</b> that every
+    app reads at runtime, each constant carrying its gov.uk source and the date it was last
+    verified — and a routine re-checks them quarterly, <b>stamping the result even when
+    nothing has changed</b>, because an unstamped “no change” is indistinguishable from
+    nobody looking.</p>
+    <ul class="facts">
+      <li><b>58</b> golden cases vs gov.uk</li>
+      <li><b>322</b> standards, one shared library</li>
+      <li>per-figure <b>provenance</b></li>
+      <li>rules verified <b>Oct 2026</b></li>
+    </ul>
+    <!-- Every number above has to be checkable from this page, or it is just a
+         boast. The three demos do not contain the test suite, so the full tool
+         they were cut from is linked rather than claimed. -->
+    <p style="margin:14px 0 0;font-size:13.5px;color:var(--muted)">The golden-case
+      suite and the per-figure provenance live in the full calculator these three were cut
+      from — <a href="apps/fundable.html" target="_blank" rel="noopener"
+      style="color:var(--cyan);text-decoration:none;border-bottom:1px solid rgba(0,184,192,.4)">open
+      Fundable and run the 58 cases yourself &#8599;</a></p>
+  </div>
+</header>
+
+<div class="secthead"><h2>The tools</h2><span>three jobs, one engine &middot; click Run to use one here</span></div>
+
+<div class="grid">
+
+  <article class="app">
+    <h3>Levy Expiry Clock</h3>
+    <p class="what">Unused apprenticeship levy now expires <b>12 months</b> after it lands,
+    down from 24. This puts a date and a number on it: how much of your pot goes back to the
+    Treasury, and when. Move the pay bill and watch the loss move with it.</p>
+    <ul class="tags"><li>forecasting</li><li>FIFO expiry</li><li>consequence-first</li></ul>
+    <div class="row">
+      <button class="btn" data-run="demos/expiry-clock.html">&#9656; Run it here</button>
+      <a class="btn ghost" href="demos/expiry-clock.html" target="_blank" rel="noopener">Full screen &#8599;</a>
+    </div>
+    <div class="stage"><div class="bar"><i class="dot"></i><span class="url"></span></div></div>
+  </article>
+
+  <article class="app">
+    <h3>JD Matcher</h3>
+    <p class="what">Paste a job description and it ranks the apprenticeship standards that fit,
+    showing <b>which of your terms matched and by how much</b>. Not a lookup — a ranking problem,
+    and two earlier approaches to scoring it were thrown away before this one worked.</p>
+    <ul class="tags"><li>ranking algorithm</li><li>255 standards</li><li>PDF / text parsing</li></ul>
+    <div class="row">
+      <button class="btn" data-run="demos/jd-matcher.html">&#9656; Run it here</button>
+      <a class="btn ghost" href="demos/jd-matcher.html" target="_blank" rel="noopener">Full screen &#8599;</a>
+    </div>
+    <div class="stage"><div class="bar"><i class="dot"></i><span class="url"></span></div></div>
+  </article>
+
+  <article class="app">
+    <h3>What can you claim?</h3>
+    <p class="what">Every grant, incentive and saving for one hire, with the condition attached to
+    each and a gov.uk source behind it. <b>It reads the governed rulebook live</b> rather than
+    hardcoding figures — so when a rule changed in August, this corrected itself.</p>
+    <ul class="tags"><li>rules engine</li><li>live governed data</li><li>eligibility logic</li></ul>
+    <div class="row">
+      <button class="btn" data-run="demos/what-can-you-claim.html">&#9656; Run it here</button>
+      <a class="btn ghost" href="demos/what-can-you-claim.html" target="_blank" rel="noopener">Full screen &#8599;</a>
+    </div>
+    <div class="stage"><div class="bar"><i class="dot"></i><span class="url"></span></div></div>
+  </article>
+
+</div>
+
+<p class="note"><b>Everything here runs on invented data.</b> Northwind Group and Contoso
+Training are fictional companies, and no real employer, learner or provider appears anywhere.
+Several of these tools run live for named organisations; those instances, their branding and
+their data stay private — what you see is the engine with a demo configuration.</p>
+
+<footer>
+  <span>Built with vanilla JavaScript, HTML and CSS. No dependencies beyond what is in the file.</span>
+  <span>Omari Harry · <a href="https://arthurcurtis.com">Arthur Curtis Education</a></span>
+</footer>
+
+</div>
+
+<script>
+/* Run-in-place. The iframe is created on demand, not on load: Fundable alone is
+   5MB, and five hidden iframes would make the hub slower than the tools it is
+   showing. One stage open at a time, so a visitor is never comparing two things
+   they cannot both see. */
+(function(){
+  var open = null;
+  document.querySelectorAll('[data-run]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var card  = btn.closest('.app');
+      var stage = card.querySelector('.stage');
+      var src   = btn.getAttribute('data-run');
+
+      if (stage.classList.contains('on')) {          /* toggle closed */
+        stage.classList.remove('on');
+        btn.textContent = '▸ Run it here';
+        open = null;
+        return;
+      }
+      if (open && open !== stage) {                  /* only one at a time */
+        open.classList.remove('on');
+        var ob = open.closest('.app').querySelector('[data-run]');
+        if (ob) ob.textContent = '▸ Run it here';
+      }
+
+      stage.classList.add('on');          /* visible BEFORE the src is set */
+      if (!stage.querySelector('iframe')) {
+        stage.querySelector('.url').textContent = src;
+        var note = document.createElement('div');
+        note.className = 'loading';
+        note.textContent = 'Loading…';
+        stage.appendChild(note);
+        var f = document.createElement('iframe');
+        /* deliberately NOT loading="lazy": the iframe is already created on
+           demand, and a lazy iframe appended inside a display:none stage is
+           deferred by the browser indefinitely — it renders a frame that never
+           loads anything, which is the exact failure this hub is meant to avoid */
+        f.setAttribute('title', card.querySelector('h3').textContent);
+        f.addEventListener('load', function(){ note.remove(); });
+        stage.appendChild(f);
+        f.src = src;
+      }
+      btn.textContent = '▾ Close';
+      open = stage;
+      stage.scrollIntoView({block:'nearest'});
+    });
+  });
+})();
+</script>
+</body>
+</html>

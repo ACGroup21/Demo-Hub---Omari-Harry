@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build your first cohort (lite) — Arthur Curtis</title>
+<meta name="description" content="Set your pay bill and watch your unused apprenticeship levy become a pool of funded talent — then build your first cohort by role.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Arthur Curtis Education">
+<meta property="og:title" content="Build your first cohort (lite) — Arthur Curtis">
+<meta property="og:description" content="Set your pay bill and watch your unused apprenticeship levy become a pool of funded talent — then build your first cohort by role.">
+<meta property="og:url" content="https://acgroup21.github.io/arthur-curtis-site/tools/first-cohort.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Build your first cohort (lite) — Arthur Curtis">
+<meta name="twitter:description" content="Set your pay bill and watch your unused apprenticeship levy become a pool of funded talent — then build your first cohort by role.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lite.css?v=5">
+<link rel="icon" type="image/svg+xml" href="../assets/fundable-favicon.svg">
+<style>
+  .fc-control{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  .fc-control .lbl{font-size:13px;color:var(--muted)}
+  .fc-pb{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.01em}
+  .fc-pb .cur{color:var(--muted);font-size:20px}
+  #fcPbOut{outline:none;cursor:text;border-bottom:1.5px dashed rgba(34,211,238,.3);padding-bottom:1px;transition:border-color .2s}
+  #fcPbOut:hover{border-bottom-color:rgba(34,211,238,.6)} #fcPbOut:focus{border-bottom-color:var(--cyan)}
+  .fc-readout{display:flex;gap:24px;flex-wrap:wrap;text-align:right}
+  .fc-readout .r .n{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--cyan);font-variant-numeric:tabular-nums}
+  .fc-readout .r .l{font-size:11px;color:var(--muted-2)}
+  #fcRange{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;margin:18px 0 3px;background:linear-gradient(90deg,var(--cyan),var(--blue));outline:none;cursor:pointer}
+  #fcRange::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(34,211,238,.22),0 4px 12px rgba(0,0,0,.5);cursor:pointer}
+  #fcRange::-moz-range-thumb{width:24px;height:24px;border:none;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 0 0 5px rgba(34,211,238,.22)}
+  .fc-ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted-2)}
+  .fc-stage{position:relative;width:100%;height:210px;border-radius:14px;overflow:hidden;margin-top:18px;background:radial-gradient(120% 130% at 50% 120%,rgba(34,211,238,.05),transparent),#050e1c;border:1px solid var(--line)}
+  .fc-stage canvas{display:block;width:100%;height:100%}
+  .fc-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:18px;padding:18px 20px;border-radius:14px;border:1px solid rgba(34,211,238,.28);background:linear-gradient(150deg,rgba(34,211,238,.09),rgba(37,99,235,.05))}
+  .fc-cta .t .h{font-size:16px;font-weight:700} .fc-cta .t .h b{color:#f0c65a}
+  .fc-cta .t .s{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .fc-stage .cp-hint{position:absolute;right:12px;top:9px;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted-2);opacity:.75;pointer-events:none}
+  .fc-stage .cp-pop{position:absolute;z-index:6;width:220px;max-width:74%;background:rgba(9,18,34,.97);border:1px solid rgba(34,211,238,.4);border-radius:11px;padding:12px 14px;box-shadow:0 14px 40px -12px rgba(0,0,0,.85);opacity:0;transform:translateY(6px) scale(.98);transform-origin:top left;pointer-events:none;transition:opacity .18s,transform .18s}
+  .fc-stage .cp-pop.on{opacity:1;transform:none;pointer-events:auto}
+  .fc-stage .cp-pop .ph{font-family:var(--mono);font-size:11px;letter-spacing:.03em;font-weight:600;margin-bottom:6px}
+  .fc-stage .cp-pop .pb{font-size:12px;line-height:1.5;color:var(--muted)}
+  .fc-stepper{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px}
+  .fc-stepbtn{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(34,211,238,.3);background:rgba(34,211,238,.06);color:var(--ink);border-radius:9px;padding:9px 14px;white-space:nowrap;transition:border-color .15s,color .15s,opacity .15s}
+  .fc-stepbtn:hover:not(:disabled){border-color:var(--cyan);color:var(--cyan)}
+  .fc-stepbtn:disabled{opacity:.3;cursor:not-allowed}
+  .fc-stepbtn.pri{background:linear-gradient(150deg,rgba(240,198,90,.16),rgba(240,198,90,.05));border-color:rgba(240,198,90,.5)}
+  .fc-stepbtn.pri:hover:not(:disabled){border-color:#f0c65a;color:#f0c65a}
+  .fc-stepmid{flex:1;text-align:center;min-width:0}
+  .fc-stepmid .sn{font-size:14px;font-weight:700}
+  .fc-stepmid .sy{font-family:var(--mono);font-size:10.5px;color:var(--muted-2);margin-top:1px}
+  .fc-progress{display:flex;gap:6px;justify-content:center;margin-top:8px}
+  .fc-progress i{width:7px;height:7px;border-radius:50%;background:rgba(120,160,220,.25);transition:background .2s}
+  .fc-progress i.on{background:var(--cyan)} .fc-progress i.done{background:var(--gold)}
+  @media(max-width:480px){.fc-stepbtn{padding:8px 10px;font-size:12px}}
+  /* by-role counter rows */
+  .fc-roles{margin-top:20px}
+  .fc-roles-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:11px}
+  .fc-roles-head .t{font-size:14px;font-weight:700}
+  .fc-roles-head .fn{font-family:var(--mono);font-size:11.5px;color:var(--muted-2)}
+  .fc-roles-head .fn b{color:var(--cyan)}
+  .fc-rows{display:flex;flex-direction:column;gap:6px}
+  .fc-row{display:flex;align-items:center;gap:11px;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.015);transition:border-color .15s,background .15s}
+  .fc-row.has{border-color:rgba(240,198,90,.45);background:rgba(240,198,90,.05)}
+  .fc-row .nm{flex:1;font-size:13px;font-weight:600;line-height:1.25}
+  .fc-row .nm .sub{display:block;font-family:var(--mono);font-size:9.5px;color:var(--muted-2);font-weight:400;margin-top:1px}
+  .fc-row .ct2{display:flex;align-items:center;gap:8px}
+  .fc-rbtn{width:26px;height:26px;border-radius:7px;border:1px solid rgba(120,160,220,.26);background:rgba(255,255,255,.03);color:var(--ink);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .fc-rbtn:hover:not(:disabled){border-color:var(--cyan);color:var(--cyan)}
+  .fc-rbtn:disabled{opacity:.25;cursor:not-allowed}
+  .fc-rnum{font-family:var(--mono);font-size:15px;font-weight:700;min-width:16px;text-align:center;font-variant-numeric:tabular-nums}
+  .fc-row.has .fc-rnum{color:var(--gold)}
+  .fc-usage{margin-top:16px}
+  .fc-usage-t{font-size:12.5px;color:var(--muted);margin-bottom:7px}
+  .fc-usage-t b{color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+  .fc-usage-t .left{color:var(--muted-2);font-size:11.5px}
+  .fc-usebar{height:9px;border-radius:6px;background:rgba(120,160,220,.12);overflow:hidden}
+  .fc-usebar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ffd97a);transition:width .3s}
+  .fc-roles-note{font-size:11px;color:var(--muted-2);line-height:1.45;margin:12px 0 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="lite-head"></div>
+
+  <span class="eyebrow"><span class="dot"></span>First cohort · lite</span>
+  <h1 class="title">Turn your levy into people.</h1>
+  <p class="subtitle">Set your pay bill and watch your unspent levy become a pool of funded talent — then start your first cohort.</p>
+
+  <div class="card">
+    <div class="fc-control">
+      <div>
+        <div class="lbl">Your annual pay bill</div>
+        <div class="fc-pb"><span class="cur">£</span><span id="fcPbOut" contenteditable="true" inputmode="numeric" spellcheck="false">25,000,000</span></div>
+      </div>
+      <div class="fc-readout">
+        <div class="r"><div class="n">£<span id="fcPot">0</span></div><div class="l">levy to spend</div></div>
+        <div class="r"><div class="n" id="fcApp">0</div><div class="l">apprenticeships</div></div>
+      </div>
+    </div>
+    <input type="range" id="fcRange" min="0" max="1000" step="1" value="326">
+    <div class="fc-ticks"><span>£3m</span><span>£75m</span><span>£2bn</span></div>
+
+    <div class="fc-stepper">
+      <button class="fc-stepbtn" id="fcBack" aria-label="Previous stage">&larr; Back</button>
+      <div class="fc-stepmid"><div class="sn" id="fcStageName">Start &middot; Junior</div><div class="sy" id="fcStageYr">Stage 1 of 4</div></div>
+      <button class="fc-stepbtn pri" id="fcNext" aria-label="Advance cohort to the next stage">Next stage &rarr;</button>
+    </div>
+    <div class="fc-progress" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+    <div class="fc-stage"><canvas id="fcCanvas"></canvas><div class="cp-hint">▸ tap a stage to learn more</div><div class="cp-pop" id="fcPop"></div></div>
+
+    <div class="fc-roles">
+      <div class="fc-roles-head"><span class="t">Choose your cohort by role</span><span class="fn">&pound;<b id="fcFundN">0</b> levy to spend</span></div>
+      <div class="fc-rows" id="fcRows" role="group" aria-label="Choose your cohort by role"></div>
+      <div class="fc-usage">
+        <div class="fc-usage-t" aria-live="polite">Cohort uses <b>&pound;<span id="fcUseCost">0</span></b> of your <b>&pound;<span id="fcUsePot">0</span></b> levy <span class="left" id="fcUseLeft"></span></div>
+        <div class="fc-usebar"><i id="fcUseBar"></i></div>
+      </div>
+      <p class="fc-roles-note">Each standard carries its own funding band (here &pound;3.5k&ndash;&pound;15k), so the cost reflects your actual mix &mdash; not a flat average. Standards verified against Skills England; the mix shown is an example.</p>
+    </div>
+
+    <div class="fc-cta">
+      <div class="t">
+        <div class="h">Your first cohort: <b id="fcCohN">0</b> people &middot; &pound;<span id="fcCohSpend">0</span></div>
+        <div class="s">Levy-funded, costed at each standard&rsquo;s real band. Choose the roles above; we help you shape and start them right.</div>
+      </div>
+      <a class="btn btn-primary" href="https://acgroup21.github.io/arthur-curtis-site/contact.html" target="_blank" rel="noopener">Make it real — talk to us →</a>
+    </div>
+  </div>
+
+  <p class="note">Indicative. <span data-trace="levy.rate" data-label="The 0.5% levy rate">0.5%</span> of pay bill − <span data-trace="levy.allowance" data-label="£15,000 levy allowance">£15k</span> allowance, apprenticeships at <span data-trace="headline.avgApprenticeCost" data-label="~£9,000 average band" data-indicative>~£9k avg</span>. Always confirm current rules at <a href="https://www.gov.uk/guidance/pay-apprenticeship-levy" target="_blank" rel="noopener">gov.uk</a>.</p>
+</div>
+
+<script src="engine.js?v=5"></script>
+<script src="spine.js?v=5"></script>
+<script src="nav.js?v=20"></script>
+<script src="comfort.js?v=3"></script>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  if(window.AC&&AC.spine) AC.spine.mount();
+  var fmt=(window.AC&&AC.fmt)?AC.fmt:function(n){return Math.round(n).toLocaleString('en-GB');};
+  var PB_MIN=3e6, PB_MAX=2e9, LMIN=Math.log(PB_MIN), LSPAN=Math.log(PB_MAX)-Math.log(PB_MIN), currentPB=25e6;
+  function posToPB(p){ return Math.round(Math.exp(LMIN+LSPAN*(p/1000))/1e5)*1e5; }
+  function pbToPos(v){ return Math.max(0,Math.min(1000,Math.round(1000*(Math.log(v)-LMIN)/LSPAN))); }
+  function levy(v){ if(window.AC&&AC.levy){ var r=AC.levy(v); return {pot:r.pot, app:r.apprentices}; } var pot=Math.max(0,v*0.005-15000); return {pot:pot, app:Math.floor(pot/9000)}; }
+  function anim(el,t){ if(!el)return; var s=parseFloat((el.textContent||'0').replace(/,/g,''))||0,t0=performance.now(); (function st(n){var p=Math.min(1,(n-t0)/500),e=1-Math.pow(1-p,3);el.textContent=fmt(s+(t-s)*e);if(p<1)requestAnimationFrame(st);})(performance.now()); }
+
+  function refresh(){
+    var r=levy(currentPB); $('fcPbOut').textContent=fmt(currentPB); anim($('fcPot'),r.pot); anim($('fcApp'),r.app);
+    updateFunded(); renderRows(); syncCohort(); repaint();
+    try{ AC.scenario.set({payBill:currentPB}); }catch(e){}
+  }
+  $('fcRange').addEventListener('input',function(){ currentPB=posToPB(+this.value); refresh(); });
+  var el=$('fcPbOut'), rng=$('fcRange');
+  el.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); el.blur(); } });
+  el.addEventListener('blur',function(){ var v=parseInt((el.textContent||'').replace(/[^0-9]/g,''),10)||PB_MIN; v=Math.max(PB_MIN,Math.min(PB_MAX,v)); currentPB=v; rng.value=pbToPos(v); refresh(); });
+  el.addEventListener('focus',function(){ var g=document.createRange();g.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(g); });
+
+  /* ---- 2-5 pathway (labels in a lane) + by-role cohort selection ---- */
+  var cv=$('fcCanvas'), cx=cv.getContext('2d'), DPR=Math.min(2,devicePixelRatio||1), MONO="'JetBrains Mono',monospace", SANS="'Inter',sans-serif";
+  var CYAN='#22d3ee', GOLD='#f0c65a';
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var cap=16, pot=0, cohN=0;
+  var ROLES=[
+    {n:'Operations manager',ref:'ST0385',level:5,s:'L5 · ST0385 · £9k band',band:9000,c:0},
+    {n:'Professional accounting technician',ref:'ST0003',level:4,s:'L4 · ST0003 · £12k band',band:12000,c:1},
+    {n:'Data analyst',ref:'ST0118',level:4,s:'L4 · ST0118 · £15k band',band:15000,c:1},
+    {n:'Team leader',ref:'ST0384',level:3,s:'L3 · ST0384 · £5k band',band:5000,c:2},
+    {n:'Customer service practitioner',ref:'ST0072',level:2,s:'L2 · ST0072 · £3.5k band',band:3500,c:1}
+  ];
+  var MILES=[{t:0,tt:'Start',s:'Junior'},{t:1/3,tt:'Yr 2',s:'Competent'},{t:2/3,tt:'Yr 3',s:'Applying'},{t:1,tt:'Yr 5',s:'Senior'}];
+  var stageIdx=0, markerT=MILES[0].t, targetT=MILES[0].t;
+  function fit(){var r=cv.getBoundingClientRect();if(!r.width)return;cv.width=Math.floor(r.width*DPR);cv.height=Math.floor(r.height*DPR);}
+  function roleTotal(){ var t=0; for(var i=0;i<ROLES.length;i++) t+=ROLES[i].c; return t; }
+  function cohortCost(){ var c=0; for(var i=0;i<ROLES.length;i++) c+=ROLES[i].c*ROLES[i].band; return c; }
+  function persistCohort(){ try{ if(!(window.AC&&AC.scenario)) return; var roles=[]; for(var i=0;i<ROLES.length;i++){ var r=ROLES[i]; if(r.c>0) roles.push({name:r.n,ref:r.ref,level:r.level,band:r.band,count:r.c}); } AC.scenario.set({cohort:{people:roleTotal(),cost:cohortCost(),roles:roles}}); }catch(e){} }
+  function restoreCohort(){ try{ if(!(window.AC&&AC.scenario)) return; var s=AC.scenario.get(); if(!s.cohort||!s.cohort.roles||!s.cohort.roles.length) return; for(var i=0;i<ROLES.length;i++) ROLES[i].c=0; s.cohort.roles.forEach(function(sr){ for(var j=0;j<ROLES.length;j++){ if(ROLES[j].ref===sr.ref) ROLES[j].c=Math.max(0,sr.count|0); } }); }catch(e){} }
+  function updateFunded(){ pot=levy(currentPB).pot;
+    while(cohortCost()>pot){ var rm=false; for(var i=ROLES.length-1;i>=0;i--){ if(ROLES[i].c>0){ ROLES[i].c--; rm=true; break; } } if(!rm) break; }
+    var fn=$('fcFundN'); if(fn) fn.textContent=fmt(pot); }
+  function syncCohort(){ cohN=roleTotal(); var cost=cohortCost(); $('fcCohN').textContent=cohN; anim($('fcCohSpend'),cost);
+    var uc=$('fcUseCost'), up=$('fcUsePot'), ub=$('fcUseBar'), ul=$('fcUseLeft');
+    if(uc) uc.textContent=fmt(cost); if(up) up.textContent=fmt(pot);
+    if(ub) ub.style.width=(pot>0?Math.min(100,cost/pot*100):0)+'%';
+    if(ul){ var left=Math.max(0,pot-cost); ul.textContent=pot>0?('· £'+fmt(left)+' left'):'· set your pay bill above'; } persistCohort(); }
+  function renderRows(){ var w=$('fcRows'); if(!w) return; w.innerHTML=''; var cost=cohortCost();
+    ROLES.forEach(function(r,i){ var el=document.createElement('div'); el.className='fc-row'+(r.c>0?' has':''); var canAdd=cost+r.band<=pot;
+      el.innerHTML='<div class="nm">'+r.n+'<span class="sub">'+r.s+'</span></div><div class="ct2"><button class="fc-rbtn" data-m="'+i+'" aria-label="Remove one '+r.n+'"'+(r.c<=0?' disabled':'')+'>&minus;</button><span class="fc-rnum" aria-label="'+r.c+' '+r.n+'">'+r.c+'</span><button class="fc-rbtn" data-p="'+i+'" aria-label="Add one '+r.n+'"'+(canAdd?'':' disabled')+'>+</button></div>';
+      w.appendChild(el); });
+    w.querySelectorAll('[data-p]').forEach(function(b){ b.onclick=function(){ var r=ROLES[+b.dataset.p]; if(cohortCost()+r.band<=pot){ r.c++; renderRows(); syncCohort(); repaint(); } }; });
+    w.querySelectorAll('[data-m]').forEach(function(b){ b.onclick=function(){ var rr=ROLES[+b.dataset.m]; if(rr.c>0){ rr.c--; renderRows(); syncCohort(); repaint(); } }; }); }
+  function repaint(){ if(reduce) draw(0); }
+  function pathPt(t,W,H){ var mx=W*0.09, myT=H*0.14, myB=H*0.07, pH=H*0.58;
+    var x=mx + t*(W-2*mx); var y=(pH-myB) - t*(pH-myT-myB);
+    y += Math.sin(t*Math.PI*2.6+0.5)*pH*0.15*(1-t*0.35); return {x:x,y:y}; }
+  function draw(dt){
+    var W=cv.width,H=cv.height; if(!W)return; cx.clearRect(0,0,W,H);
+    if(reduce) markerT=targetT; else { markerT += (targetT-markerT)*Math.min(1,dt*0.009); if(Math.abs(targetT-markerT)<0.0008) markerT=targetT; }
+    /* subtle terrain */
+    var N=10; for(var b=0;b<N;b++){ var by=H*0.06+b*(H*0.56/N); cx.beginPath();
+      for(var xx=-10;xx<=W+10;xx+=8){ var yy=by+Math.sin(xx*0.012+b*0.7)*6*DPR+Math.sin(xx*0.03+b*1.2)*3*DPR; xx<=-10?cx.moveTo(xx,yy):cx.lineTo(xx,yy);}
+      cx.strokeStyle='rgba(70,110,150,'+(0.05+0.015*Math.sin(b))+')'; cx.lineWidth=1*DPR; cx.stroke(); }
+    /* trail (faint full route) */
+    function trace(a,b){cx.beginPath();for(var f=a;f<=b+0.0001;f+=0.012){var p=pathPt(Math.min(f,b),W,H);f===a?cx.moveTo(p.x,p.y):cx.lineTo(p.x,p.y);}}
+    trace(0,1); cx.strokeStyle='rgba(34,211,238,.12)'; cx.lineWidth=10*DPR; cx.lineCap='round'; cx.stroke();
+    trace(0,1); var lg=cx.createLinearGradient(0,H*0.58,W,0); lg.addColorStop(0,'rgba(70,120,160,.55)'); lg.addColorStop(.7,'rgba(34,211,238,.6)'); lg.addColorStop(1,'rgba(240,198,90,.6)'); cx.strokeStyle=lg; cx.lineWidth=2.4*DPR; cx.stroke();
+    /* progress — how far the cohort has walked */
+    trace(0,markerT); cx.strokeStyle='rgba(240,198,90,.92)'; cx.lineWidth=3.2*DPR; cx.lineCap='round'; cx.stroke();
+    /* milestones + evenly-gapped lane labels */
+    var laneY=H*0.88, mx=W*0.09, span=W-2*mx, n=MILES.length;
+    cx.textAlign='center';
+    MILES.forEach(function(m,i){ var p=pathPt(m.t,W,H), last=i===MILES.length-1, reached=markerT>=m.t-0.001, lx=mx+(i/(n-1))*span;
+      cx.strokeStyle='rgba(120,160,220,.22)';cx.lineWidth=1*DPR;cx.setLineDash([2*DPR,3*DPR]);cx.beginPath();cx.moveTo(p.x,p.y+6*DPR);cx.lineTo(lx,laneY-13*DPR);cx.stroke();cx.setLineDash([]);
+      if(i===stageIdx){ cx.beginPath(); cx.arc(p.x,p.y,9*DPR,0,7); cx.strokeStyle='rgba(240,198,90,.85)'; cx.lineWidth=1.5*DPR; cx.stroke(); }
+      cx.beginPath(); cx.arc(p.x,p.y,4.5*DPR,0,7); cx.fillStyle=(last||reached)?GOLD:CYAN; cx.fill();
+      cx.beginPath(); cx.arc(p.x,p.y,4.5*DPR,0,7); cx.strokeStyle='rgba(5,14,28,.9)'; cx.lineWidth=1.5*DPR; cx.stroke();
+      cx.fillStyle='rgba(238,244,252,.96)'; cx.font='700 '+(10*DPR)+'px '+SANS; cx.fillText(m.tt,lx,laneY);
+      cx.fillStyle=last?'rgba(240,198,90,.9)':'rgba(159,177,202,.8)'; cx.font=(8*DPR)+'px '+MONO; cx.fillText(m.s,lx,laneY+12*DPR); });
+    /* cohort marker = gold dot with the count, on the trail */
+    var pc=pathPt(markerT,W,H);
+    var g=cx.createRadialGradient(pc.x,pc.y,1,pc.x,pc.y,20*DPR); g.addColorStop(0,'rgba(240,198,90,.5)'); g.addColorStop(1,'rgba(240,198,90,0)');
+    cx.fillStyle=g; cx.beginPath(); cx.arc(pc.x,pc.y,20*DPR,0,7); cx.fill();
+    var rad=(cohN>0?13:5)*DPR; cx.beginPath(); cx.arc(pc.x,pc.y,rad,0,7); cx.fillStyle=GOLD; cx.shadowColor='rgba(240,198,90,.6)'; cx.shadowBlur=8*DPR; cx.fill(); cx.shadowBlur=0;
+    cx.textAlign='center';
+    if(cohN>0){ cx.fillStyle='#1a1405'; cx.font='700 '+(12.5*DPR)+'px '+MONO; cx.textBaseline='middle'; cx.fillText(String(cohN),pc.x,pc.y+0.5*DPR); cx.textBaseline='alphabetic'; }
+    else { cx.fillStyle='rgba(159,177,202,.9)'; cx.font='600 '+(8.5*DPR)+'px '+MONO; cx.fillText('add roles below ↓', pc.x, pc.y-15*DPR); }
+  }
+  /* stepper — the cohort only moves when you advance a stage */
+  function updateStepUI(){ var m=MILES[stageIdx];
+    $('fcStageName').textContent=m.tt+' · '+m.s;
+    $('fcStageYr').textContent='Stage '+(stageIdx+1)+' of '+MILES.length;
+    $('fcBack').disabled=stageIdx===0; $('fcNext').disabled=stageIdx===MILES.length-1;
+    var dots=document.querySelectorAll('.fc-progress i'); for(var k=0;k<dots.length;k++) dots[k].className=k<stageIdx?'done':(k===stageIdx?'on':''); }
+  function gotoStage(i){ stageIdx=Math.max(0,Math.min(MILES.length-1,i)); targetT=MILES[stageIdx].t; updateStepUI(); showPop(stageIdx); repaint(); }
+  $('fcNext').addEventListener('click',function(e){ e.stopPropagation(); if(stageIdx<MILES.length-1) gotoStage(stageIdx+1); });
+  $('fcBack').addEventListener('click',function(e){ e.stopPropagation(); if(stageIdx>0) gotoStage(stageIdx-1); });
+  /* clickable checkpoints + selectable roster */
+  var pop=$('fcPop');
+  var INFO=[
+    {c:'#7fdbe8',h:'Start · Junior (Year 0)',b:'They join and begin training — levy-funded from day one, no upfront cost to you. Off-the-job learning runs alongside real work.'},
+    {c:'#7fdbe8',h:'Year 2 · Competent',b:'Two years in: trained to the standard and working independently. This is where the productivity starts to show.'},
+    {c:'#7fdbe8',h:'Year 3 · Applying',b:'A year of applying the new skills — embedding them, taking on more, and mentoring the next intake.'},
+    {c:'#f0c65a',h:'Year 5 · Senior',b:'A further training block takes them junior → senior on ~5 years of contextual experience. You grew the senior instead of hiring one — retention, automated.'}
+  ];
+  function hitMile(cxp,cyp){ var W=cv.width,H=cv.height,hit=-1,best=1e9; MILES.forEach(function(m,i){ var p=pathPt(m.t,W,H),px=p.x/DPR,py=p.y/DPR,dd=Math.hypot(cxp-px,cyp-py); if(dd<18&&dd<best){best=dd;hit=i;} }); return hit; }
+  function showPop(i){ var p=pathPt(MILES[i].t,cv.width,cv.height),px=p.x/DPR,py=p.y/DPR,sw=cv.getBoundingClientRect().width;
+    var body=INFO[i].b;
+    if(i===MILES.length-1 && cohN>0) body='A further training block takes your '+cohN+' junior &rarr; senior on ~5 years of contextual experience. You grew '+cohN+' senior'+(cohN>1?'s':'')+' instead of hiring '+(cohN>1?'them':'one')+' &mdash; retention, automated.';
+    pop.innerHTML='<div class="ph" style="color:'+INFO[i].c+'">'+INFO[i].h+'</div><div class="pb">'+body+'</div>';
+    pop.classList.add('on'); pop.dataset.i=i; var pw=pop.offsetWidth||220;
+    pop.style.left=Math.max(6,Math.min(px-pw*0.12,sw-pw-6))+'px'; pop.style.top=(py+14)+'px'; }
+  cv.addEventListener('click',function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    var mi=hitMile(mx,my);
+    if(mi>=0){ if(pop.classList.contains('on')&&+pop.dataset.i===mi){ pop.classList.remove('on'); } else { showPop(mi); } e.stopPropagation(); return; }
+    pop.classList.remove('on'); });
+  cv.addEventListener('mousemove',function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top; cv.style.cursor=hitMile(mx,my)>=0?'pointer':'default'; });
+  document.addEventListener('click',function(e){ if(!pop.contains(e.target)) pop.classList.remove('on'); });
+
+  fit(); addEventListener('resize',function(){fit();repaint();}); restoreCohort(); refresh(); updateStepUI();
+  if(reduce){ draw(16); }
+  else { var last=performance.now();
+    (function loop(n){ if(!document.body.contains(cv)) return; var dt=Math.min(48,n-last); last=n; draw(dt); requestAnimationFrame(loop); })(performance.now()); }
+})();
+</script>
+</body>
+</html>
