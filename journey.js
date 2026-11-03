@@ -117,6 +117,7 @@ function unlock(n) {
   s.classList.remove('locked');
   s.classList.add('active');
   lightActs();
+  syncStepper();
 }
 function complete(n, summary, foldable) {
   var s = step(n);
@@ -137,6 +138,7 @@ function complete(n, summary, foldable) {
   }
   b.hidden = false;
   lightActs();
+  syncStepper();
 }
 function goTo(n) {
   unlock(n);
@@ -197,16 +199,19 @@ function gate(btnId, ok, why, doneLabel) {
    funded and warm means your own cost. These nodes are chrome, not data —
    they are a gradient down a rail, which is why they read as position rather
    than as a verdict. */
-/* Seven explicit stops, not an interpolation. Interpolating RGB from orange to
-   cyan passes through a muddy green, which landed step 4 at rgb(120,182,148)
-   — 23.9 dE from step 7's green, close enough to read as the same thing. And
-   steps 6 and 7 came out 15 apart, effectively identical.
+/* Interpolating RGB from orange to cyan passes through a muddy green, which
+   landed step 4 at rgb(120,182,148) — 23.9 dE from step 7's green, close
+   enough to read as the same thing. Hand-picking fixed that but gave uneven
+   jumps, which is not a gradient.
 
-   These were picked and then MEASURED in CIELAB: step 4 against step 7 is now
-   59 dE, no non-adjacent pair is under 31, and the closest pair of all is 15.3
-   between neighbours — which is what a ramp should look like. */
-var RAIL_STOPS = ['#c7443a', '#e8705f', '#f0a35c', '#efc86b',
-                  '#49a9a4', '#00c9cc', '#6fe0ae'];
+   A steady gradient means even PERCEPTUAL steps, which RGB cannot give you.
+   This one is interpolated in LCH — polar CIELAB, so hue sweeps round the
+   wheel instead of cutting across it — from red to mint, then measured:
+   consecutive steps are 24/22/21/21/19/19 dE, so the largest and smallest
+   differ by under 5. Nothing non-adjacent is confusable, and step 4 sits 56
+   from step 7. */
+var RAIL_STOPS = ['#c9443a', '#c6662a', '#bc8426', '#ad9f36',
+                  '#9ab757', '#85cd80', '#6fe0ae'];
 function stepColour(n, total) {
   var t = (n - 1) / Math.max(1, (total || 7) - 1);
   return RAIL_STOPS[Math.round(t * (RAIL_STOPS.length - 1))];
@@ -219,6 +224,67 @@ function paintRail() {
     s.style.setProperty('--stepc-next', stepColour(Math.min(i + 2, steps.length), steps.length));
   });
 }
+
+/* ── the stepper ─────────────────────────────────────────────────────────
+   A 2,800px page with seven gated stages needs a way to move that is not
+   scrolling. This sticks to the top once you are past the header: seven
+   dots, each in its own rail colour, each saying what it is and what state
+   it is in. Click any unlocked one to jump to it.
+
+   Locked ones are not clickable and say why, because a dead control with no
+   explanation is the thing that makes people give up on a page. */
+var STEP_NAMES = ['Your levy', 'The readout', 'Choose learners', 'Match JDs',
+                  'The report', 'Assign the cohort', 'The pathway'];
+
+function mountStepper() {
+  if ($('stepper')) return;
+  var n = document.querySelectorAll('.step').length;
+  var el = document.createElement('nav');
+  el.id = 'stepper';
+  el.setAttribute('aria-label', 'Walkthrough stages');
+  el.innerHTML = '<div class="stepper-in">' +
+    Array.apply(null, Array(n)).map(function (_, i) {
+      var s = i + 1;
+      return '<button class="sdot" data-goto="' + s + '" style="--stepc:' + stepColour(s, n) + '">' +
+        '<span class="sd"></span><span class="sl">' + esc(STEP_NAMES[i] || ('Step ' + s)) + '</span>' +
+        '</button>';
+    }).join('') +
+    '<span class="sprog" id="sprog"></span></div>';
+  document.body.appendChild(el);
+  syncStepper();
+}
+
+function syncStepper() {
+  if (!$('stepper')) return;
+  var done = 0, total = document.querySelectorAll('.step').length;
+  [].forEach.call(document.querySelectorAll('.sdot'), function (b) {
+    var s = step(b.getAttribute('data-goto'));
+    var locked = s.classList.contains('locked');
+    var isDone = s.classList.contains('done');
+    if (isDone) done++;
+    b.className = 'sdot' + (isDone ? ' done' : '') + (s.classList.contains('active') ? ' active' : '') +
+      (locked ? ' locked' : '');
+    b.disabled = locked;
+    b.title = locked ? 'Finish the stage before this one first' : 'Jump to ' + b.textContent;
+  });
+  $('sprog').textContent = done + ' of ' + total;
+  $('stepper').classList.toggle('show', window.pageYOffset > 320);
+}
+
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('[data-goto]');
+  if (!b || b.disabled) return;
+  var n = +b.getAttribute('data-goto');
+  var s = step(n);
+  if (s.classList.contains('folded')) {
+    s.classList.remove('folded');
+    var r = s.querySelector('.reopen'); if (r) r.hidden = true;
+  }
+  goTo(n);
+});
+window.addEventListener('scroll', function () {
+  if ($('stepper')) $('stepper').classList.toggle('show', window.pageYOffset > 320);
+}, { passive: true });
 
 /* An act lights once anything inside it is reachable, so the three labels on
    the rail fill in as you descend rather than all being lit from the start. */
@@ -1703,6 +1769,8 @@ Promise.all([
   drawWork3();
   paintRail();
   lightActs();
+  mountStepper();
+  syncStepper();
 }).catch(function (err) {
   $('stampRules').innerHTML = 'Could not load the funding data — figures below are not trustworthy.';
   if (window.console) console.error(err);
