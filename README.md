@@ -61,17 +61,18 @@ The full calculator they were cut from is in [`apps/fundable.html`](apps/fundabl
 with the apprentice tracker, the KSB document builder and a UX study. Fundable is where the
 58-case suite and the per-figure provenance actually live.
 
-## Notes on the demos
+## Notes
 
-**All data is invented.** Northwind Group and Contoso Training are fictional
-companies. No real employer, learner or provider appears anywhere in this
+**A standalone work sample.** These were built in-house for Arthur Curtis Education, a
+levy-funded apprenticeship consultancy, and are shown here as examples of my work. The demos
+have had their cross-tool navigation and email capture removed, so there is nothing to sign up
+to and nothing is collected.
+
+**All data is invented.** No real employer, learner or provider appears anywhere in this
 repository.
 
-**Client work is not published here.** Several of these tools run live for named
-organisations. Those instances, their branding and their data stay private; what
-is shown is the engine with a demo configuration.
-
----
+**Client work is not published here.** Several of these tools run live for named organisations.
+Those instances, their branding and their data stay private.
 
 ## Stack
 

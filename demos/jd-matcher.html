@@ -82,7 +82,7 @@
 
 <script src="engine.js?v=5"></script>
 <script src="spine.js?v=5"></script>
-<script src="nav.js?v=20"></script>
+<script src="portfolio.js?v=1"></script>
 <script src="comfort.js?v=3"></script>
 <script>
   var $=function(id){return document.getElementById(id);};
@@ -133,7 +133,7 @@
     box.innerHTML=top.map(function(x,i){
       var s=x.s, bar=Math.round(x.sc/best*100), cov=Math.round(100*x.m/total);
       return '<div class="mrow"><div class="mtop"><span class="mn"><span class="rank">#'+(i+1)+'</span>'+
-        '<a href="status-checker.html?ref='+s.ref+'">'+s.name+'</a></span>'+
+        ''+s.name+'</span>'+
         '<span class="meta">Level '+(s.level||'?')+(s.band?' · £'+AC.fmt(s.band):'')+'</span></div>'+
         '<div class="mbar"><div class="f" style="width:'+bar+'%"></div></div>'+
         '<div class="terms">Matched <b>'+x.m+'</b> of your '+total+' key terms · '+cov+'% overlap · '+s.route+'</div></div>';
