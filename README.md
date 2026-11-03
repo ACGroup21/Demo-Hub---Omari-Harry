@@ -3,10 +3,11 @@
 **[Open it](https://acgroup21.github.io/Demo-Hub---Omari-Harry/)** — it runs in the page, nothing to
 install.
 
-A retail chain with forty-two stores, a £30m pay bill and five years to build its own managers.
-Seven steps, each unlocking the next: here is your levy, here is what it actually buys, choose who
-to develop, find out what their jobs don't yet evidence, read the report, pick the apprenticeship,
-see the five-year pathway.
+A retail chain with forty-two stores, 1,340 staff and five years to build its own managers. Seven
+stages, each one locked until the last is finished: here is your levy, here is what it actually
+buys, choose who to develop, find out what their jobs don't yet evidence, read the report, assign
+the cohort, see the five-year pathway. It ends on a recap built from your own run, and a report
+you can print.
 
 The employer is invented. **Everything else is real and dated** — the levy arithmetic, the funding
 bands, the published duties, and which apprenticeships you can still buy.
@@ -30,10 +31,18 @@ they are still there. The classification of which published duties count as "man
 and the page says that too.
 
 **It refuses to guess.** Picking who has potential is a judgement an employer makes; the tool will
-not fake it. What it will do is say whose *current job* evidences a duty an assessor could look at,
-because that is written in a job description rather than carried around in someone's head. Five of
-the ten are blocked on that basis, and clicking one explains that the finding is about the job, not
-the person — and what would have to change.
+not fake it. And nobody has to be *good* at managing to start learning it — the bar is **opportunity,
+not competence**: an apprentice is assessed on work they actually do, so the role has to let them
+practise it somewhere. Five of the ten have jobs that give an assessor nothing to look at. Two more
+are held back a year rather than refused, with four things to do about it in the meantime — a dotted
+line, a project with a budget, an apprenticeship unit, and a named place in next year's cohort.
+Every one of those is a statement about the job, not the person, and the page says so.
+
+**It measures against the published standards, not a summary of them.** Each job description was
+read against all 21 knowledge, skills and behaviours of Business administrator and all 16 published
+areas of Retail manager — 185 person-by-area judgements, each carrying the line of the JD that
+justifies it. That is what makes a percentage mean anything, and the page shows its working rather
+than the number alone.
 
 ## What it caught
 
@@ -59,10 +68,15 @@ Its index was rebuilt from source and it now survives on merit.
 
 ## The numbers it lands on
 
-A £30m pay bill is £135,000 of levy a year. Three colleagues on two programmes across five years
-commits £30,000 of £675,000 — so **£645,000 expires unused**, enough for another 129 people, because
-the money has already left the payroll. And the training the levy pays for is matched almost pound
-for pound by **off-the-job hours nobody funds**: 348 published hours per apprentice, about 4.5 a week,
+1,340 staff at the published UK average salary is a £54.8m pay bill, which is **£259,104 of levy a
+year**. Three colleagues on two standards across five years commits £30,000 of the £1.3m that
+arrives in that time — so **£1,006,415 expires unused**, about a quarter of a million a year on a
+rolling twelve-month clock, because the money left the payroll either way.
+
+Expiry is not the point, though, and the page says so. The point is the ratio: three of 1,340 is
+**one colleague in 447**, against a 5% Club target of 67 and a levy that would already fund 51
+starts a year. **The constraint was never the money.** It was that only five of the ten had a job
+evidencing anything an assessor could look at — and that the off-the-job hours nobody funds come
 off a shop floor already covered to the hour.
 
 ## The full calculator
