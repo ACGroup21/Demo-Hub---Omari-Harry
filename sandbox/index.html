@@ -233,9 +233,15 @@ fetch('data/standards.json').then(function (r) { return r.json(); }).then(functi
   STD.forEach(function (o) { BY[o.ref] = o; });
   buildIdf();
   var k = (d.meta && d.meta.index) || {};
-  if (k.from_ksb) $('idxline').innerHTML = 'Matching index: built from the published knowledge, ' +
-    'skills and behaviours of <b>' + k.from_ksb + '</b> standards &middot; the other <b>' +
-    k.from_summary + '</b> have none published and are indexed from a summary, so they match less well';
+  if (k.from_ksb) {
+    var routes = {};
+    STD.forEach(function (o) { routes[(o.route || '').split(',')[0].trim()] = 1; });
+    $('idxline').innerHTML = 'Covers <b>' + STD.length + '</b> standards across <b>' +
+      Object.keys(routes).length + ' of the 15 routes</b> — no construction, engineering, ' +
+      'education or agriculture &middot; matching index built from the published knowledge, skills ' +
+      'and behaviours of <b>' + k.from_ksb + '</b> of them, the other <b>' + k.from_summary +
+      '</b> from a thinner summary';
+  }
   var lv = {}; STD.forEach(function (o) { if (o.level) lv[o.level] = 1; });
   Object.keys(lv).sort().forEach(function (l) {
     var op = document.createElement('option'); op.value = l; op.textContent = 'Level ' + l;
@@ -339,7 +345,11 @@ function match() {
        without this the verbose ones would win on volume rather than fit. sqrt
        rather than a flat divide, so a longer description is still allowed to
        be somewhat more findable — it genuinely is. */
-    var norm = Math.sqrt(Object.keys(o._kw).length || 1);
+    /* Floored. Without the floor, the 63 standards indexed from a thin summary
+       — some only three terms long — were dividing by sqrt(3) and beating
+       properly documented ones on two incidental hits. An index being short is
+       not evidence of a better fit. */
+    var norm = Math.sqrt(Math.max(Object.keys(o._kw).length || 1, 80));
     scored.push({ o: o, score: (weight / norm) * (1 + 3 * nameFrac), hits: hits,
                   nameFrac: nameFrac, terms: matched });
   });
@@ -347,6 +357,11 @@ function match() {
   /* and only show what is genuinely close to the best answer — a confident JD
      yields one or two, an ambiguous one yields more, which is the honest shape */
   var best = scored.length ? scored[0].score : 0;
+  /* An absolute floor as well as a relative one. This library holds 8 of the 15
+     routes — no construction, engineering, education or agriculture — so for a
+     bricklayer or a groundworker the right answer is not in here at all. Ranking
+     the least-bad of a bad set would look like an answer. */
+  var WEAK = 1.1;
   /* 0.72 and three, chosen by running six real JDs rather than tuning on one.
      At 0.65 a supervisor JD surfaced EMBALMER fourth — it scored the same 70%
      as the genuine operations-manager variants off rota, stock and coaching, so
@@ -365,6 +380,16 @@ function match() {
     return (o.months ? o.months + ' months' : 'duration n/a') + ' · ' + (o.band ? fmt(o.band) : 'no band');
   });
   $('jdnote').style.display = '';
+  if (best && best < WEAK) {
+    $('matches').innerHTML = '';
+    $('jdnote').style.display = '';
+    $('jdnote').innerHTML = '<b>No good match for this one.</b> Nothing scored well enough to ' +
+      'put forward honestly. That is usually one of two things: the role sits in a route this ' +
+      'library does not carry — it holds <b>8 of the 15</b>, with no construction, engineering, ' +
+      'education or agriculture — or the description leans on tools and acronyms rather than the ' +
+      'work itself, which is what standards are written in.';
+    return;
+  }
   $('jdnote').innerHTML = !scored.length
     ? 'Nothing shared enough with this description to rank honestly. That is a real answer — ' +
       'a brief or unusual JD often has no good match.'
