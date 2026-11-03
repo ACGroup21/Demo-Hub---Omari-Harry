@@ -197,6 +197,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .btn:disabled{opacity:.28;cursor:not-allowed;filter:none}
 .gate-why{font-size:12.5px;color:var(--warm);max-width:48ch;line-height:1.5}
 .gate-why.ok{color:var(--good)}
+.why .scope{color:var(--muted-2);font-size:12.5px;font-style:italic}
 
 /* ── the pointer ────────────────────────────────────────
    The gate already says WHAT is missing, in a line beside a disabled button
@@ -342,9 +343,27 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .jd li em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--cyan);
   display:block;margin-top:2px}
 .learner details{margin-top:11px}
-.learner details>summary{cursor:pointer;font-size:12px;color:var(--muted-2);list-style:none}
+/* This was 12px muted-2 text with the marker removed, which is the styling of
+   a caption, not of a control — and on stages 4 and 5 opening it is the whole
+   of the work, the thing the gate is waiting on. Shut, it is now plainly a
+   button and says whose JD it opens. Open, it reverts to the quiet caption it
+   used to be, because by then it has nothing left to ask for. */
+.learner details>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;
+  gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;color:var(--warm);
+  border:1px solid rgba(240,163,92,.5);border-radius:7px;padding:7px 12px;
+  background:rgba(240,163,92,.07);transition:color .2s,border-color .2s,background .2s}
 .learner details>summary::-webkit-details-marker{display:none}
-.learner details>summary:hover{color:var(--cyan)}
+.learner details>summary::before{content:'\25B8';font-size:10px;opacity:.8;
+  transition:transform .2s}
+.learner details>summary:hover{color:var(--cyan);border-color:var(--cyan);
+  background:var(--cyan-ghost)}
+.learner details[open]>summary{font-family:inherit;font-size:12px;letter-spacing:0;
+  color:var(--muted-2);border-color:transparent;background:none;padding:2px 0}
+.learner details[open]>summary::before{transform:rotate(90deg)}
+.learner details[open]>summary:hover{color:var(--cyan);border-color:transparent;background:none}
+.learner details>summary .s-open{display:none}
+.learner details[open]>summary .s-shut{display:none}
+.learner details[open]>summary .s-open{display:inline}
 
 /* ── step 7 · the pathway ─────────────────────────────────────────────── */
 .tl-wrap{overflow-x:auto;padding-bottom:4px}
@@ -887,6 +906,6 @@ footer b{color:var(--muted)}
 <div id="halo" aria-hidden="true"></div>
 <button id="nudge" type="button"></button>
 
-<script src="journey.js?v=37"></script>
+<script src="journey.js?v=41"></script>
 </body>
 </html>

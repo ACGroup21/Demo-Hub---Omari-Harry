@@ -552,28 +552,74 @@ function chosen() {
 
 /* why a particular person cannot be put forward — derived from the mapping,
    not written per person, so it cannot drift from the evidence in step 4 */
+/* These two panels used to open by restating the principle from the stage
+   intro a few inches above them -- "nobody has to be good at managing to
+   start learning it", "the bar is opportunity, not competence", "a statement
+   about the job, not about the person" -- in places word for word. A reader
+   who has got as far as clicking a name has read it. So the principle is
+   stated once, up there, and what opens here is the diagnosis: this role,
+   this evidence, this consequence, this recommendation. */
 function explain(p) {
   var t = tally(p.id);
-  var areas = PW.coverage.areas;
-  var has = t.part.length
-    ? 'Their job description touches <b>' + t.part.map(esc).join('</b> and <b>') + '</b>, but only in ' +
-      'part &mdash; ' + (t.part.length === 1 ? 'it is' : 'they are') + ' a by-product of the job rather ' +
-      'than the job itself.'
-    : 'Their job description touches <b>none</b> of the six.';
+  var by = coverFor(p.id);
+  var first = esc(p.name.split(' ')[0]);
+
+  /* cite the line the claim rests on, as everything else on this page does */
+  /* every claim beside the line it rests on, which is this page's method.
+     The first draft quoted ONE line as the evidence for every area reached,
+     which for a role touching two areas from two different lines was simply
+     untrue. */
+  var reach = t.part.length
+    ? '<p>It reaches ' + andList(t.part.map(function (a) {
+        return '<b>' + esc(a) + '</b> through &ldquo;' + esc(p.jd[by[a].jd]) + '&rdquo;';
+      })) + ' &mdash; but as a by-product of the work rather than as the work. An assessor needs a ' +
+      'duty held deliberately and repeatedly, not one that happens to arise.</p>'
+    : '<p>None of the four lines in it touches any of the six. The role is scoped to something ' +
+      'other than managing people or money, which is a statement about its design and not about ' +
+      'its difficulty.</p>';
+
+  /* Name the ones actually within reach rather than listing all six: an area
+     the role already brushes is a smaller change to make standing than one it
+     has never touched.
+
+     It named ONE at first -- t.part[0] -- which produced "the nearest is
+     Financial" for four of the five people here, not because Financial was
+     nearest for any of them but because it is first in the areas array. A
+     ranking that is really an array order, presented as a judgement. There is
+     nothing in the data that ranks one brushed area above another, so it names
+     them all and leaves the choice where it belongs. */
+  var nearest = t.part.length
+    ? 'The nearest ' + (t.part.length === 1 ? 'is' : 'are') + ' <b>' +
+      andList(t.part.map(esc)) + '</b>, which the role already brushes above: making ' +
+      (t.part.length === 1 ? 'that' : 'either of those') + ' standing rather than occasional is a ' +
+      'smaller change than adding a duty from nothing.'
+    : 'Nothing in the role points to one of the six over another, so which to add is a scoping ' +
+      'decision for whoever owns the job rather than something this tool should pick.';
+
   $('why3').innerHTML =
-    '<div class="why"><h4>' + esc(p.name) + '’s job has nothing to assess yet</h4>' +
-    '<p><b>Nobody has to be good at managing to start learning it</b> &mdash; that is what the ' +
-    'apprenticeship is for. The bar here is not competence. It is <b>opportunity</b>: an apprentice ' +
-    'is assessed on work they actually do, so the role has to let them practise it somewhere.</p>' +
-    '<p>' + has + ' With nothing to point an assessor at, ' + esc(p.name.split(' ')[0]) + ' would ' +
-    'spend eighteen months learning the theory of a job they are never given, and fail an end-point ' +
-    'assessment on evidence they had no chance to produce.</p>' +
-    '<p><b>So this is a statement about the job, not about ' + esc(p.name.split(' ')[0]) + '.</b> ' +
-    'They may be the most capable person on the list &mdash; the tool has no way of knowing that and ' +
-    'will not pretend to.</p>' +
-    '<p><b>Change the job first</b>, and they qualify immediately: one of ' +
-    '<b>' + andList(areas.map(esc)) + '</b> as a real, standing responsibility. Not mastery of it ' +
-    '&mdash; just the chance to do it badly at first, which is the whole point.</p>' +
+    '<div class="why"><h4>' + esc(p.name) + ': no evidence base for the management duties</h4>' +
+
+    '<p>' + first + ' is a <b>' + esc(p.role.toLowerCase()) + '</b>. ' + esc(p.note) + '.</p>' +
+    reach +
+
+    '<p><b>An apprentice evidences the standard from the job they are given.</b> The portfolio is ' +
+    'built at work, taken through gateway, and defended at end-point assessment. There is no route ' +
+    'to evidence a duty the role never asks for, and the six hours a week off the job do not ' +
+    'substitute for it &mdash; that time is for learning the duty, not for inventing the ' +
+    'opportunity to perform it.</p>' +
+
+    '<p><b>The cost of getting this wrong is not the full band.</b> A programme that cannot ' +
+    'produce evidence tends to end in withdrawal rather than failure, and on withdrawal the ' +
+    'provider&rsquo;s instalments stop that month and the completion payment is never released. ' +
+    'You pay for the months drawn down and hold no achievement against them &mdash; a smaller ' +
+    'invoice and a worse outcome than finishing.</p>' +
+
+    '<p><b>The intervention is a change to the role, not a training decision.</b> ' + nearest +
+    ' Whatever is chosen has to be written in and in place <b>before the start date</b> rather ' +
+    'than promised during it, so the portfolio has something in it from month one. Competence at ' +
+    'the duty is not the requirement; being given it is.</p>' +
+
+    '<p class="scope">Read from the job description alone.</p>' +
     '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
   $('why3').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
 }
@@ -611,46 +657,50 @@ document.addEventListener('click', function (e) {
 function couldDo(p) {
   var t = tally(p.id);
   var areas = PW.coverage.areas;
-  /* the areas NOBODY in the eligible pool clearly evidences — the real hole */
+  /* the areas NOBODY in the eligible pool clearly evidences -- the real hole */
   var holes = areas.filter(function (a) {
     return !TEAM.filter(function (q) { return eligible(q.id); })
       .some(function (q) { return tally(q.id).yes.indexOf(a) > -1; });
   });
   var first = esc(p.name.split(' ')[0]);
+  var pool = TEAM.filter(function (q) { return eligible(q.id); }).length;
 
   $('why3').innerHTML =
-    '<div class="why"><h4>' + esc(p.name) + ' &mdash; not this year. What you could do instead</h4>' +
-    '<p>Their job evidences <b>' + t.yes.length + '</b> of the six clearly' +
-    (t.part.length ? ' and touches <b>' + t.part.length + '</b> in part' : '') +
-    ' &mdash; enough to learn from, but the thinnest of those who could go. Put them in now and ' +
-    'most of the eighteen months goes on building a job for the apprenticeship to assess. ' +
-    '<b>Spend the year building it first</b>, and ' + first + ' starts next cohort already ahead.</p>' +
+    '<div class="why"><h4>' + esc(p.name) + ': the thinnest evidence base of those who could go</h4>' +
 
-    '<p><b>1. Give them a dotted line.</b> One or two colleagues reporting to ' + first +
-    ' informally &mdash; not a promotion, not a pay change, just somebody whose work they are ' +
-    'accountable for. That one change turns <b>Team performance</b> and <b>Developing self</b> from ' +
-    'theory into something an assessor can look at.</p>' +
+    '<p>Their role evidences <b>' + t.yes.length + '</b> of the six clearly' +
+    (t.part.length ? ' and touches <b>' + t.part.length + '</b> more in part' : '') +
+    ' &mdash; past the bar, and the weakest of the ' + pool + ' who clear it. The practical effect ' +
+    'is that much of the first year goes on building the job the programme is meant to assess, ' +
+    'instead of on the programme. <b>The recommendation is to defer ' + first + ' by one cohort ' +
+    'and spend the year on the four changes below</b>, which cost nothing like a programme does ' +
+    'and are worth making whether or not they lead to one.</p>' +
 
-    '<p><b>2. Hand them a project with a budget.</b>' +
+    '<p><b>1. Give them a reporting line.</b> One or two colleagues accountable to ' + first +
+    ', informally and in writing &mdash; not a promotion and not a pay change. That single change ' +
+    'turns <b>Team performance</b> and <b>Developing self</b> from theory into something an ' +
+    'assessor can examine.</p>' +
+
+    '<p><b>2. Assign a project with a budget and a deadline.</b>' +
     (holes.length
-      ? ' Across everyone you could put forward, <b>' + andList(holes.map(esc)) + '</b> ' +
-        (holes.length === 1 ? 'appears' : 'appear') + ' in nobody’s role at all. A defined ' +
-        'piece of work with a number attached and a date to finish is the cheapest way to create it.'
-      : ' A defined piece of work with a number attached and a date to finish evidences financial ' +
-        'and planning duties that a day job rarely does.') + '</p>' +
+      ? ' Across everyone who could be put forward, <b>' + andList(holes.map(esc)) + '</b> ' +
+        (holes.length === 1 ? 'appears' : 'appear') + ' in nobody&rsquo;s role at all &mdash; a ' +
+        'gap in the cohort, not just in one person. A defined piece of work with a number attached ' +
+        'is the cheapest way to create it.'
+      : ' A defined piece of work with a number attached and a date to finish evidences the ' +
+        'financial and planning duties a day job rarely reaches.') + '</p>' +
 
-    '<p><b>3. Buy them an apprenticeship unit in the meantime.</b> Weeks rather than eighteen ' +
-    'months, out of the same levy you already pay, aimed at the exact duties their job does not ' +
-    'cover yet. <button class="linklike" id="unitsOpen">What is an apprenticeship unit?</button></p>' +
+    '<p><b>3. Fund a unit in the meantime.</b> Weeks rather than eighteen months, from the same ' +
+    'levy, aimed at the duties the role does not yet cover. ' +
+    '<button class="linklike" id="unitsOpen">What is an apprenticeship unit?</button></p>' +
     '<div id="unitsPack"></div>' +
 
-    '<p><b>4. Book them into next year’s cohort now.</b> Not a vague promise &mdash; a named ' +
-    'place, twelve months out, with the three changes above as the conditions. People leave because ' +
-    'the next step is invisible, and this is the cheapest thing on the page.</p>' +
+    '<p><b>4. Name them in next year&rsquo;s cohort now.</b> A named place twelve months out, with ' +
+    'the three changes above as its conditions &mdash; not a vague undertaking. Deferral without a ' +
+    'date reads as a refusal, and people leave over it.</p>' +
 
-    '<p style="color:var(--muted-2);font-size:12.5px">This is advice, not a rule. Nothing stops you ' +
-    'enrolling ' + first + ' anyway &mdash; the tool simply will not pretend it is the same bet as ' +
-    'the other three.</p>' +
+    '<p class="scope">Advisory. Nothing prevents enrolling ' + first + ' this year; the tool will ' +
+    'not represent it as carrying the same risk as the other three.</p>' +
     '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
   $('why3').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
 }
@@ -659,25 +709,6 @@ function couldDo(p) {
    than the other three, and picking one is a worse use of the same £5,000 —
    but it is a legitimate choice an employer might make for reasons the tool
    cannot see, so it says so and gets out of the way. */
-function adviseIfWeaker(p) {
-  if (!isWeaker(p.id)) { $('why3').innerHTML = ''; return; }
-  var t = tally(p.id);
-  var better = ranked().slice(0, PICK).filter(function (x) { return !picked[x.p.id]; });
-  $('why3').innerHTML =
-    '<div class="why"><h4>' + esc(p.name) + ' is a thinner bet &mdash; your call</h4>' +
-    '<p>Their job description clearly evidences <b>' + t.yes.length + '</b> of the six' +
-    (t.part.length ? ' and touches <b>' + t.part.length + '</b> more in part' : '') +
-    '. That is enough of a foothold to be assessed on, so they are not blocked — and being '+
-      'thin on management is not a reason to exclude anyone from learning it.</p>' +
-    (better.length
-      ? '<p>But <b>' + andList(better.map(function (x) { return esc(x.p.name); })) +
-        '</b> evidence more for <b>the same ' + fmt((STD[PW.pathway.instances[0].ref] || {}).band || 0) +
-        '</b>, and would start with less of their role to change first.</p>'
-      : '') +
-    '<p>You may still have good reasons &mdash; retention, succession, someone who has been waiting. ' +
-    'The tool cannot see any of that, so it is <b>not stopping you</b>.</p>' +
-    '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
-}
 
 function drawWork3() {
   var head = (PW && PW.employer.headcount) || 1340;
@@ -736,7 +767,10 @@ function drawStep4() {
       '<span class="lscore"><b>' + yes + '</b> of ' + areas.length + ' clearly' +
       (part ? ' · ' + part + ' in part' : '') + '</span></div>' +
       '<div class="chips">' + chips + '</div>' +
-      '<details><summary>Their job description, and what each line evidences</summary>' +
+      '<details><summary>' +
+      '<span class="s-shut">Open ' + esc(p.name.split(' ')[0]) + '\u2019s job description</span>' +
+      '<span class="s-open">Their job description, and what each line evidences</span>' +
+      '</summary>' +
       '<ul class="jd">' + lines + '</ul></details></div>';
   }).join('');
 
@@ -891,8 +925,10 @@ function ksbCard(p, ref) {
             '<span class="kn">' + b.have + ' / ' + b.of + '</span></div>';
         }).join('') + '</div>'
       : '') +
-    '<details><summary>All ' + k.of + ' published areas, and which line of their JD evidences each' +
-    '</summary><ul class="ksb-list">' + k.items.map(function (x) {
+    '<details><summary>' +
+    '<span class="s-shut">Open ' + esc(p.name.split(' ')[0]) + '\u2019s full breakdown</span>' +
+    '<span class="s-open">All ' + k.of + ' published areas, and which line of their JD evidences ' +
+    'each</span></summary><ul class="ksb-list">' + k.items.map(function (x) {
       return '<li class="' + (x.jd != null ? 'ev' : '') + '">' +
         '<span class="c">' + esc(x.it.code) + '</span><span>' +
         (x.jd != null ? '<b>' + esc(x.it.area) + '</b>' : esc(x.it.area)) +
@@ -2349,7 +2385,9 @@ document.addEventListener('click', function (e) {
   if (!eligible(id)) { explain(person); return; }      /* nothing to assess at all */
   if (!selectable(id)) { couldDo(person); return; }    /* thin: not this year, here is why */
   if (picked[id]) { delete picked[id]; $('why3').innerHTML = ''; }
-  else { picked[id] = 1; adviseIfWeaker(person); }
+  else { picked[id] = 1; $('why3').innerHTML = ''; }   /* was adviseIfWeaker(), which
+    could never render: selectable() already excludes anyone isWeaker() flags, so its own
+    first line returned every time. Clearing the panel was the whole of its live effect. */
   drawTeam();
 });
 $('go3').addEventListener('click', function () {
