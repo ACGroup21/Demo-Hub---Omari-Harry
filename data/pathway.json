@@ -1,0 +1,316 @@
+{
+  "_note": "Scenario content for the Brayford Stores journey. Every figure here is either computed from data/standards.json or quoted from the source named in `source`. Nothing in this file is invented except the fictional employer and its ten people.",
+  "employer": {
+    "name": "Brayford Stores",
+    "fictional": true,
+    "sector": "General retail",
+    "stores": 42,
+    "headcount": 1340,
+    "payBill": 30000000,
+    "payBillNote": "1,340 staff, average total earnings about £22,400. The levy is charged on the whole pay bill, not on salaries above a threshold."
+  },
+  "verified": {
+    "fundingRules": "funding-rules.json (canonical), verified 2026-10-13",
+    "standards": "Skills England apprenticeships export, accurate as of 28 June 2026, checked against the live standard pages 2026-11-03"
+  },
+  "pathway": {
+    "model": "2-5",
+    "modelNote": "Competent at two years, senior at five. Training occupies two of those five years; the rest is time in role.",
+    "instances": [
+      {
+        "n": 1,
+        "ref": "ST0070",
+        "startYear": 0,
+        "label": "Business administrator L3",
+        "soldAs": "Management and business foundations",
+        "soldAsNote": "Providers package this standard as a management foundation programme, which is how the gap left by Team leader L3 is being filled. The levy buys the standard. Leadership extras sit outside it.",
+        "source": "https://skillsengland.education.gov.uk/apprenticeships/st0070-v1-0"
+      },
+      {
+        "n": 2,
+        "ref": "ST0325",
+        "startYear": 3,
+        "label": "Retail manager L4",
+        "soldAs": null,
+        "soldAsNote": null,
+        "source": "https://skillsengland.education.gov.uk/apprenticeships/st0325-v1-2"
+      }
+    ],
+    "markers": [
+      {
+        "year": 2,
+        "label": "Competent",
+        "note": "Qualified, and six months into doing the job unsupervised."
+      },
+      {
+        "year": 5,
+        "label": "Senior",
+        "note": "Training finished at year four. The last year is earning it in role, not sitting a course."
+      }
+    ]
+  },
+  "options": {
+    "_note": "The four shown at step 6. `origin` says how each got onto the list: `filtered` means it survived every filter; `added-back` means our own filter removed it and we put it back so the visitor can see it fail.",
+    "list": [
+      {
+        "ref": "ST0325",
+        "origin": "filtered",
+        "removedBy": null
+      },
+      {
+        "ref": "ST0070",
+        "origin": "filtered",
+        "removedBy": null
+      },
+      {
+        "ref": "ST0384",
+        "origin": "added-back",
+        "removedBy": "funding"
+      },
+      {
+        "ref": "ST0118",
+        "origin": "added-back",
+        "removedBy": "route"
+      }
+    ]
+  },
+  "ksb": {
+    "_note": "Area headings as published, with the opening words of each statement. Quoted from the standard pages listed in `source`; full text is on those pages. Used to compare what each standard actually covers against what a first-line retail manager does. The `manages` flag is OUR classification of whether an area is about managing people or money, not something the published standard states. It is shown as a judgement on screen, not as a fact from the source.",
+    "ST0070": {
+      "source": "https://skillsengland.education.gov.uk/apprenticeships/st0070-v1-0",
+      "checked": "2026-11-03",
+      "overview": "Supporting and engaging with different parts of the organisation and interact with internal or external customers.",
+      "areas": [
+        {
+          "group": "Skills",
+          "area": "IT",
+          "opens": "Skilled in the use of multiple IT packages",
+          "manages": false
+        },
+        {
+          "group": "Skills",
+          "area": "Record and document production",
+          "opens": "Produces accurate records and documents",
+          "manages": false
+        },
+        {
+          "group": "Skills",
+          "area": "Decision making",
+          "opens": "Exercises proactivity and good judgement",
+          "manages": false
+        },
+        {
+          "group": "Skills",
+          "area": "Interpersonal skills",
+          "opens": "Builds and maintains positive relationships",
+          "manages": false
+        },
+        {
+          "group": "Skills",
+          "area": "Communications",
+          "opens": "Demonstrates good communication skills",
+          "manages": false
+        },
+        {
+          "group": "Skills",
+          "area": "Quality",
+          "opens": "Completes tasks to a high standard",
+          "manages": false
+        },
+        {
+          "group": "Skills",
+          "area": "Planning and organisation",
+          "opens": "Takes responsibility for initiating and completing tasks",
+          "manages": false
+        },
+        {
+          "group": "Skills",
+          "area": "Project management",
+          "opens": "Uses relevant project management principles",
+          "manages": false
+        },
+        {
+          "group": "Knowledge",
+          "area": "The organisation",
+          "opens": "Understands organisational purpose, activities",
+          "manages": false
+        },
+        {
+          "group": "Knowledge",
+          "area": "Value of their skills",
+          "opens": "Knows organisational structure",
+          "manages": false
+        },
+        {
+          "group": "Knowledge",
+          "area": "Stakeholders",
+          "opens": "Has a practical knowledge of managing stakeholders",
+          "manages": false
+        },
+        {
+          "group": "Knowledge",
+          "area": "Relevant regulation",
+          "opens": "Understands laws and regulations",
+          "manages": false
+        },
+        {
+          "group": "Knowledge",
+          "area": "Policies",
+          "opens": "Understands the organisation's internal policies",
+          "manages": false
+        },
+        {
+          "group": "Knowledge",
+          "area": "Business fundamentals",
+          "opens": "Understands the applicability of business principles",
+          "manages": false
+        },
+        {
+          "group": "Knowledge",
+          "area": "Processes",
+          "opens": "Understands the organisation's processes",
+          "manages": false
+        },
+        {
+          "group": "Knowledge",
+          "area": "External environment factors",
+          "opens": "Understands relevant external factors",
+          "manages": false
+        },
+        {
+          "group": "Behaviours",
+          "area": "Professionalism",
+          "opens": "Behaves in a professional way.",
+          "manages": false
+        },
+        {
+          "group": "Behaviours",
+          "area": "Personal qualities",
+          "opens": "Shows exemplary qualities that are valued",
+          "manages": false
+        },
+        {
+          "group": "Behaviours",
+          "area": "Managing performance",
+          "opens": "Takes responsibility for their own work",
+          "manages": false
+        },
+        {
+          "group": "Behaviours",
+          "area": "Adaptability",
+          "opens": "Is able to accept and deal with changing priorities",
+          "manages": false
+        },
+        {
+          "group": "Behaviours",
+          "area": "Responsibility",
+          "opens": "Demonstrates taking responsibility for team performance",
+          "manages": true
+        }
+      ]
+    },
+    "ST0325": {
+      "source": "https://skillsengland.education.gov.uk/apprenticeships/st0325-v1-2",
+      "checked": "2026-11-03",
+      "overview": "Managing staff, their work and sales within a retail environment.",
+      "areas": [
+        {
+          "group": "Standard",
+          "area": "Customer",
+          "opens": "Understand key drivers of customer journeys and how managing positive customer experiences increases sales",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Business",
+          "opens": "Understand the vision of the business, its competitive position and own role and responsibility",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Financial",
+          "opens": "Understand the key drivers of profitable retail performance and the relationship of forecasting",
+          "manages": true
+        },
+        {
+          "group": "Standard",
+          "area": "Leadership",
+          "opens": "Understand different leadership styles used in retail businesses and when to use them effectively",
+          "manages": true
+        },
+        {
+          "group": "Standard",
+          "area": "Marketing",
+          "opens": "Know the key factors influencing a marketing plan such as product launch and life cycle",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Communication",
+          "opens": "Understand how to communicate and cascade information effectively at all levels and to a diverse audience",
+          "manages": true
+        },
+        {
+          "group": "Standard",
+          "area": "Sales and promotions",
+          "opens": "Understand how to set sales targets that are challenging but realistic and how to lead team members",
+          "manages": true
+        },
+        {
+          "group": "Standard",
+          "area": "Product and service",
+          "opens": "Keep up to date knowledge of product ranges, brand development, promotions, current and future trends.",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Brand reputation",
+          "opens": "Understand the importance of upholding brand reputation, how brand reputation can become compromised",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Merchandising",
+          "opens": "Understand key features of merchandising and how these link with the business' merchandising plan",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Stock",
+          "opens": "Monitor the stock management system to minimise the cost of damage to stock and the loss of stock",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Technology",
+          "opens": "Understand the technology requirements of the business and how to manage them to achieve effective",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Developing self",
+          "opens": "Identify a variety of ways to inspire and motivate team members, how to positively influence",
+          "manages": true
+        },
+        {
+          "group": "Standard",
+          "area": "Team performance",
+          "opens": "Know how to recruit, retain and develop the right people for the right roles.",
+          "manages": true
+        },
+        {
+          "group": "Standard",
+          "area": "Legal and governance",
+          "opens": "Understand environmental, legislative, corporate, data protection and social responsibilities relating to retail businesses",
+          "manages": false
+        },
+        {
+          "group": "Standard",
+          "area": "Diversity",
+          "opens": "Understand how local demographics impact on business, customers, staff and products",
+          "manages": false
+        }
+      ]
+    }
+  }
+}
