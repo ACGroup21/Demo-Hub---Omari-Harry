@@ -563,6 +563,109 @@ function otjFor(ref, n) {
   };
 }
 
+/* ── KSB coverage, measured against the published standard ───────────────
+   This is the part the JD Matcher does properly and the earlier version of
+   this page faked. A percentage needs a real denominator: ST0070 publishes
+   21 KSBs — 8 knowledge, 8 skills, 5 behaviours — and each colleague's job
+   description was read against all 21, with the JD line that justifies every
+   mark. 56 marks across 105 person-KSB pairs.
+
+   The 50% line is the guidance convention the matcher reports against. It is
+   a convention, not a funding rule, and the report says so. */
+var KSB_THRESHOLD = 0.5;
+var KSB_GROUPS = [['K', 'Knowledge'], ['S', 'Skills'], ['B', 'Behaviours']];
+
+function ksbFor(id) {
+  var F = PW.ksbFull;
+  if (!F) return null;
+  var ev = F.evidenced[String(id)];
+  if (!ev) return null;
+  var by = {};
+  KSB_GROUPS.forEach(function (g) { by[g[0]] = { have: 0, of: 0 }; });
+  var items = F.items.map(function (it) {
+    var line = ev[it.code];
+    by[it.group].of++;
+    if (line != null) by[it.group].have++;
+    return { it: it, jd: line };
+  });
+  var have = items.filter(function (x) { return x.jd != null; }).length;
+  return {
+    items: items, by: by, have: have, of: items.length,
+    pct: have / items.length,
+    pass: have / items.length >= KSB_THRESHOLD
+  };
+}
+
+function ring(pct, low) {
+  var r = 26, c = 2 * Math.PI * r;
+  return '<div class="ring' + (low ? ' low' : '') + '">' +
+    '<svg width="62" height="62" viewBox="0 0 62 62" aria-hidden="true">' +
+    '<circle cx="31" cy="31" r="' + r + '" fill="none" stroke="rgba(159,177,202,.17)" stroke-width="5"/>' +
+    '<circle cx="31" cy="31" r="' + r + '" fill="none" stroke="' + (low ? '#f0a35c' : '#00C9CC') +
+    '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) +
+    '" stroke-dashoffset="' + (c * (1 - pct)).toFixed(1) + '"/></svg>' +
+    '<div class="rv">' + Math.round(pct * 100) + '%</div></div>';
+}
+
+function ksbCard(p, std) {
+  var k = ksbFor(p.id);
+  if (!k) return '';
+  return '<div class="learner">' +
+    '<div class="ksb-h">' + ring(k.pct, !k.pass) +
+    '<div class="ksb-who"><div class="n">' + esc(p.name) + '</div>' +
+    '<div class="r">' + esc(p.role) + '</div></div>' +
+    '<span class="ksb-band' + (k.pass ? '' : ' low') + '">' +
+      (k.pass ? 'Compatible — gaps to develop' : 'Below the 50% guidance line') + '</span>' +
+    '<div class="ksb-tot"><b>' + k.have + '</b> of ' + k.of + ' evidenced<br>' +
+      (k.of - k.have) + ' to develop</div></div>' +
+    '<div class="ksb-areas">' + KSB_GROUPS.map(function (g) {
+      var b = k.by[g[0]];
+      return '<div class="ka ' + g[0] + '"><span class="kl">' + g[1] + '</span>' +
+        '<span class="kb"><i style="width:' + (b.have / b.of * 100) + '%"></i></span>' +
+        '<span class="kn">' + b.have + ' / ' + b.of + '</span></div>';
+    }).join('') + '</div>' +
+    '<details><summary>All ' + k.of + ' knowledge, skills and behaviours</summary>' +
+    '<ul class="ksb-list">' + k.items.map(function (x) {
+      return '<li class="' + (x.jd != null ? 'ev' : '') + '">' +
+        '<span class="c">' + esc(x.it.code) + '</span><span>' +
+        (x.jd != null ? '<b>' + esc(x.it.area) + '</b>' : esc(x.it.area)) +
+        (x.jd != null ? '<span class="ln">' + esc(p.jd[x.jd]) + '</span>' : '') +
+        '</span></li>';
+    }).join('') + '</ul></details></div>';
+}
+
+function ksbSection() {
+  var std = STD[chosenStd] || STD[PW.pathway.instances[0].ref];
+  var F = PW.ksbFull;
+  if (!F || F.ref !== std.ref) {
+    return '<p class="subhead">Coverage against the standard</p>' +
+      '<p class="sub">Per-KSB coverage has been read for <b>' + esc(STD[F.ref].name) + '</b> only. ' +
+      'Pick that standard at step 6 to see it &mdash; measuring against ' + esc(std.name) +
+      ' would need its own pass, and estimating it would be the thing this page refuses to do.</p>';
+  }
+  var ppl = chosen().filter(function (p) { return F.evidenced[String(p.id)]; });
+  var tot = ppl.reduce(function (t, p) { var k = ksbFor(p.id); return t + k.have; }, 0);
+  var max = ppl.length * F.items.length;
+  var below = ppl.filter(function (p) { return !ksbFor(p.id).pass; });
+
+  return '<p class="subhead">Coverage against the standard</p>' +
+    '<p class="sub">Each job description read against <b>all ' + F.items.length + ' published ' +
+    'knowledge, skills and behaviours</b> of ' + esc(std.name) + ' &mdash; ' + F.items.filter(
+      function (i) { return i.group === 'K'; }).length + ' knowledge, ' + F.items.filter(
+      function (i) { return i.group === 'S'; }).length + ' skills, ' + F.items.filter(
+      function (i) { return i.group === 'B'; }).length + ' behaviours. <b>' + tot + ' of ' + max +
+    '</b> evidenced across your ' + ppl.length + '.</p>' +
+    ppl.map(function (p) { return ksbCard(p, std); }).join('') +
+    (below.length
+      ? '<p class="caveat"><b>' + andList(below.map(function (p) { return esc(p.name); })) +
+        '</b> ' + (below.length === 1 ? 'sits' : 'sit') + ' below the 50% line. That is not a bar to ' +
+        'starting &mdash; it is a measure of how much of the role has to widen first, and where.</p>'
+      : '') +
+    '<p class="caveat"><b>How this was measured.</b> ' + esc(F._method) + ' ' +
+    esc(F._codes) + ' <a href="' + esc(F.source) + '" target="_blank" rel="noopener">The standard ' +
+    'on Skills England</a>, checked ' + esc(F.checked) + '.</p>';
+}
+
 function buildReport() {
   var people = chosen();
   var areas = PW.coverage.areas;
@@ -654,6 +757,7 @@ function drawStep5() {
     'is how you end up promising a section that is not there.</p>' +
     '<ul class="contents">' + r.sections.map(function (s, i) {
       return '<li>' + (i + 1) + ' · ' + esc(s) + '</li>'; }).join('') + '</ul>' +
+    ksbSection() +
     r.html +
     '<div class="row"><button class="btn" id="go5">Pick the apprenticeship &rarr;</button>' +
     '<button class="btn ghost" id="printRep">Open full screen to print</button></div>';
@@ -727,7 +831,9 @@ function drawStep6() {
     return '<button class="opt' + (chosenStd === row.ref ? ' on' : '') +
       (row.pick ? '' : ' dead') + '" data-std="' + esc(row.ref) + '"' +
       (row.pick ? '' : ' aria-disabled="true"') + '>' +
-      '<div class="oh"><span class="on-name">' + esc(o.name) + '</span>' +
+      '<div class="oh"><span class="on-name">' + esc(o.name) +
+      (row.variant ? ' <span style="color:var(--muted);font-weight:500">— ' +
+        esc(row.variant) + '</span>' : '') + '</span>' +
       '<span class="ref">' + esc(o.ref) + '</span>' + badge +
       '<span class="price">' + fmt(o.band) + ' &times; ' + n + ' = <b>' + fmt(cost) + '</b></span></div>' +
       '<div class="ometa"><span>' + meta + '</span></div>' +
@@ -735,20 +841,23 @@ function drawStep6() {
   }).join('');
 
   $('body6').innerHTML =
-    '<p class="sub">Four, out of <b>' + Object.keys(STD).length + '</b>. Two came through the filters; ' +
-    'two our own filters threw out and we put back, so you can see <b>how</b> they fail rather than ' +
-    'just being told they do. Pick one.</p>' +
+    '<p class="sub"><b>' + opts.length + '</b>, out of <b>' + Object.keys(STD).length + '</b>. ' +
+    '<b>' + opts.filter(function (r) { return r.pick; }).length + ' are selectable</b>; the rest are ' +
+    'here because they are what a real employer reaches for, and each one fails differently. ' +
+    'Click an unsuitable one to see why.</p>' +
     cards +
     '<div id="verdict"></div>' +
     '<div class="row"><button class="btn" id="go6" disabled>See the five-year pathway &rarr;</button></div>' +
     '<details class="work"><summary>How four were chosen from ' + Object.keys(STD).length +
     ' <span class="chain" id="chain6"></span></summary>' +
     '<table class="funnel" id="work6"></table>' +
-    '<p class="ours"><b>The last line is us.</b> Thirty-four standards came through those filters; ' +
-    'four are on screen. Two of them our own filters had already removed &mdash; Team leader by funding, ' +
-    'Data analyst by route &mdash; and we put them back deliberately, because the Team leader is what ' +
-    'most people in this position reach for and the Data analyst is what a board asks for. A list that ' +
-    'quietly dropped both would teach you nothing.</p></details>';
+    '<p class="ours"><b>The last line is us.</b> The filters leave thirty-odd standards; <b>' +
+    opts.length + '</b> are on screen and only <b>' +
+    opts.filter(function (r) { return r.pick; }).length + '</b> can be chosen. The ' +
+    opts.filter(function (r) { return !r.pick; }).length + ' marked unsuitable were put there ' +
+    'deliberately: Team leader is what most people in this position reach for, Data analyst is what a ' +
+    'board asks for, and Customer service specialist is the cheapest thing in the right sector. A ' +
+    'list that quietly dropped all three would teach you nothing.</p></details>';
 
   drawWork6();
   $('go6').onclick = function () {
@@ -768,14 +877,15 @@ function drawWork6() {
   var c = b.filter(function (x) { return (x.level || 0) === 3 || (x.level || 0) === 4; });
   var d = c.filter(function (x) { return ROUTES.indexOf(x.route) > -1; });
   var e = d.filter(function (x) { return x.src === 'ksb'; });
-  $('chain6').textContent = '— ' + a.length + ' → ' + e.length + ' → 4';
+  $('chain6').textContent = '— ' + a.length + ' → ' + e.length + ' → ' + PW.options.list.length;
   $('work6').innerHTML = funnelRows([
     { label: 'standards in the library', value: String(a.length) },
     { label: 'funded for new starts', value: String(b.length), drop: String(a.length - b.length), indent: true },
     { label: 'level 3 or 4 — a first step into managing', value: String(c.length), drop: String(b.length - c.length), indent: true },
     { label: 'retail or general business route', value: String(d.length), drop: String(c.length - d.length), indent: true },
     { label: 'indexed from published KSBs', value: String(e.length), drop: String(d.length - e.length), indent: true },
-    { label: 'put in front of you, including 2 put back', value: '4', sum: true }
+    { label: 'put in front of you, including ' + PW.options.list.filter(function (r) { return !r.pick; }).length +
+        ' shown as unsuitable', value: String(PW.options.list.length), sum: true }
   ]);
 }
 

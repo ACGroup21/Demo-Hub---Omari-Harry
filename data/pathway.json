@@ -30,8 +30,8 @@
         "n": 1,
         "ref": "ST0070",
         "startYear": 0,
-        "label": "Business administrator L3",
-        "soldAs": "Management and business foundations",
+        "label": "Business administrator L3 — junior management pathway",
+        "soldAs": "Junior management pathway",
         "soldAsNote": "Providers package this standard as a management foundation programme, which is how the gap left by Team leader L3 is being filled. The levy buys the standard. Leadership extras sit outside it.",
         "source": "https://skillsengland.education.gov.uk/apprenticeships/st0070-v1-0"
       },
@@ -73,7 +73,9 @@
         "pick": true,
         "origin": "filtered",
         "removedBy": null,
-        "why": null
+        "why": null,
+        "variant": "Junior management pathway",
+        "variantNote": "The standard is Business administrator. “Junior management pathway” is how providers package it — the leadership content, the CMI route and the masterclasses are wrapped around the standard, and sit outside the levy. The levy buys the standard; the certificate says administration."
       },
       {
         "ref": "ST0384",
