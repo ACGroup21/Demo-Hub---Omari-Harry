@@ -451,11 +451,30 @@ function drawStep1() {
     { label: '× levy rate ' + (RULES.levyRate * 100).toFixed(1) + '%', value: fmt(levy.mGross), indent: true },
     { label: '− monthly allowance (' + fmt(RULES.allowance) + ' ÷ 12)',
       value: '−' + fmt(levy.mAllow), indent: true },
-    { label: '+ government top-up ' + Math.round(RULES.topUp * 100) + '%',
+    { label: '+ government top-up ' + Math.round(RULES.topUp * 100) + '%' +
+        (!RULES.topUp && RULES.topUpWas
+          ? ' <b>&mdash; was ' + Math.round(RULES.topUpWas * 100) + '%</b>' : ''),
       value: RULES.topUp ? '+' + fmt(levy.monthly - (levy.mGross - levy.mAllow)) : '£0', indent: true },
     { label: 'into your account that month', value: fmt(levy.monthly), sum: true },
     { label: '× 12 months', value: fmt(levy.annual) + '/yr', indent: true }
   ]);
+  /* A 0% line with nothing beside it reads as a bug, or as an error a reader
+     will hold against every other figure on the page. The rulebook knows why
+     it is 0; this prints the rulebook's own words and its source rather than
+     a sentence written here that could drift from them. */
+  var tn = $('topupNote');
+  if (tn) {
+    tn.hidden = !(!RULES.topUp && RULES.topUpNote);
+    if (!tn.hidden) {
+      /* quoted, because it is the rulebook's wording and not ours — which is
+         also why it reads as it does rather than being smoothed out here */
+      tn.innerHTML = '<b>That 0% is not a mistake.</b> The rulebook records it as: &ldquo;' +
+        esc(RULES.topUpNote) + '&rdquo;' +
+        (RULES.topUpSrc ? ' <a href="' + esc(RULES.topUpSrc) + '" target="_blank" ' +
+          'rel="noopener">The funding guide</a>, read ' + esc(RULES.topUpAsOf) + '.' : '');
+    }
+  }
+
   if (step(2).classList.contains('done') || !step(2).classList.contains('locked')) drawStep2();
   /* a visitor can reopen step 1 and move the slider after the report exists.
      Rebuild anything downstream that carries a money figure, or the report
@@ -2607,6 +2626,17 @@ Promise.all([
     RULES.levyRate = num(c, 'levy.rate', RULES.levyRate);
     RULES.allowance = num(c, 'levy.allowance', RULES.allowance);
     RULES.topUp = num(c, 'levy.topUp', RULES.topUp);
+    /* A rate of nought is the one value that needs its reason carried with it.
+       The rulebook holds why it is nought, what it used to be, and the gov.uk
+       page that says so; taking the number and leaving those behind is how a
+       page ends up stating a rule change as though it were a rounding. */
+    var tu = (c.levy || {}).topUp;
+    if (tu && typeof tu === 'object') {
+      RULES.topUpWas = (typeof tu.valueBefore === 'number') ? tu.valueBefore : null;
+      RULES.topUpNote = tu.note || '';
+      RULES.topUpSrc = tu.source || '';
+      RULES.topUpAsOf = tu.asOf || RULES.asOf;
+    }
     RULES.expiryMonths = num(c, 'expiry.monthsFrom', RULES.expiryMonths);
     RULES.drawTraining = num(c, 'delivery.drawTraining', RULES.drawTraining);
     RULES.drawEpa = num(c, 'delivery.drawEpa', RULES.drawEpa);
