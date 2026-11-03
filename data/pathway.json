@@ -81,7 +81,17 @@
         "removedBy": null,
         "why": null,
         "variant": "Junior management pathway",
-        "variantNote": "The standard is Business administrator. “Junior management pathway” is how providers package it — the leadership content, the CMI route and the masterclasses are wrapped around the standard, and sit outside the levy. The levy buys the standard; the certificate says administration."
+        "variantNote": "The standard is Business administrator. The junior management pathway is one provider’s packaging of it, not a market-wide option.",
+        "variantProvider": {
+          "name": "BPP",
+          "programme": "Management and Business Foundations",
+          "url": "https://www.bpp.com/leadership-and-management/apprenticeships/management-and-business-foundations",
+          "verified": "2026-11-03",
+          "quote": "Only the apprenticeship standard is levy funded",
+          "wrap": "CMI Leadership Academy qualification, CMI Foundation Chartered Manager status, Leader as Coach accreditation, a Leadership Cartridge and three Management Masterclasses",
+          "note": "Named because this example is modelled on their programme, and because the line above is their own published disclosure, not an accusation. Saying “providers do this” would implicate several hundred providers for something one company does openly and states plainly.",
+          "market": "As far as we know this is the only management-wrapped version of ST0070 on the market. The several hundred other providers on the government directory deliver the standard plain — so picking Business administrator off that list does NOT get you a management programme by default. That is the thing worth knowing."
+        }
       },
       {
         "ref": "ST0384",

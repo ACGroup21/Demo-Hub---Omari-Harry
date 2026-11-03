@@ -995,6 +995,8 @@ function drawStep6() {
     progCard(insts[0], one, 1, true) +
     progCard(insts[1], two, 2, false) +
 
+    variantNote() +
+
     '<p class="caveat"><b>Those provider links are not endorsements.</b> ' +
     esc(PW.providerLinks.disclosure) + ' ' + esc(PW.providerLinks.whyNotDirect) + '</p>' +
 
@@ -1040,6 +1042,28 @@ function drawStep6() {
     goTo(7);
   };
   wireDrop();
+}
+
+/* The junior management pathway is one named provider's product, and saying
+   so is more honest than "providers do this" — which implicates several
+   hundred of them for something one company does openly and discloses on its
+   own page. The critical line here is BPP's own words, quoted, not an
+   accusation we are making about them. */
+function variantNote() {
+  var row = PW.options.list.filter(function (r) { return r.variantProvider; })[0];
+  if (!row) return '';
+  var v = row.variantProvider;
+  var o = STD[row.ref];
+  return '<p class="caveat"><b>Where &ldquo;junior management pathway&rdquo; comes from.</b> ' +
+    'The standard is <b>' + esc(o.name) + '</b>. The pathway is <b>' + esc(v.name) + '&rsquo;s ' +
+    esc(v.programme) + '</b>, which wraps ' + esc(v.wrap) + ' around it. Their own page puts the ' +
+    'important part plainly: <b>&ldquo;' + esc(v.quote) + '&rdquo;</b> &mdash; so the leadership ' +
+    'content sits outside the funding, and the certificate your three receive says ' +
+    'administration. ' +
+    '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">Their programme page</a>, ' +
+    'checked ' + esc(v.verified) + '.</p>' +
+    '<p class="caveat" style="color:var(--bad)"><b>And this is the part that catches people out.</b> ' +
+    esc(v.market) + '</p>';
 }
 
 function progCard(inst, o, step, isDrop) {
@@ -1356,6 +1380,78 @@ function ratioBlock(n, std) {
     deptCheck();
 }
 
+/* ── walking one of them through the five years ──────────────────────────
+   Only on this chart, only on a control, and only with a real person from
+   the cohort. The point is to show the model moving — learner, then doing
+   the job, then learner again — which a static chart states but does not
+   demonstrate. A mascot wandering the whole page would be decoration; this
+   is the thing the page is arguing.
+
+   Commentary is derived from the pathway and the standards, not written per
+   beat, so it cannot drift from the chart above it. */
+function walkBeats(one, two, n) {
+  var o1 = STD[one.ref], o2 = STD[two.ref];
+  var e1 = one.startYear + o1.months / 12;
+  var e2 = two.startYear + o2.months / 12;
+  var k1 = ksbFor(walkWho().id, one.ref), k2 = ksbFor(walkWho().id, two.ref);
+  var who = walkWho().name.split(' ')[0];
+  return [
+    { y: 0, t: 'Day one on <b>' + esc(o1.name) + '</b>. ' + who + '’s job already evidences <b>' +
+        (k1 ? k1.have + ' of ' + k1.of : '?') + '</b> of its published areas — the rest is what ' +
+        'the next ' + o1.months + ' months are for.' },
+    { y: e1, t: 'Qualified, ' + o1.months + ' months in, at a cost of <b>' + fmt(o1.band) +
+        '</b> of levy and about <b>' + fmt((otjFor(one.ref, 1) || {}).cost || 0) + '</b> of ' +
+        who + '’s unfunded time.' },
+    { y: 2, t: '<b>Competent.</b> Six months of doing the job unsupervised, which is the part no ' +
+        'programme can supply and no invoice shows.' },
+    { y: two.startYear, t: 'Starting <b>' + esc(o2.name) + '</b>. On day one of the pathway ' + who +
+        ' evidenced only <b>' + (k2 ? k2.have + ' of ' + k2.of : '?') + '</b> of this standard. ' +
+        'Three years of the job is what closed the gap — not the training.' },
+    { y: e2, t: 'Qualified again, for another <b>' + fmt(o2.band) + '</b>. Two standards, <b>' +
+        fmt((o1.band + o2.band)) + '</b> of levy for ' + who + ', out of a levy you pay either way.' },
+    { y: 5, t: '<b>Senior.</b> Training stopped at year four. The last year is earning it in the ' +
+        'job, which is why the model says five and not four.' }
+  ];
+}
+function walkWho() {
+  var c = chosen();
+  return c.filter(function (p) { return ksbFor(p.id, PW.pathway.instances[0].ref); })[0] || c[0];
+}
+
+var walkAt = -1;
+function mountWalker(one, two, n) {
+  var track = document.querySelector('#body7 .tl-track');
+  if (!track) return;
+  var beats = walkBeats(one, two, n);
+  var p = walkWho();
+  var w = document.createElement('div');
+  w.className = 'walker';
+  w.innerHTML = avatar(p.name) + '<span class="wt"></span>';
+  track.appendChild(w);
+
+  var bar = document.createElement('div');
+  bar.className = 'walkbar';
+  bar.innerHTML = '<button class="btn ghost" id="walkGo">Walk ' + esc(p.name.split(' ')[0]) +
+    ' through it &rarr;</button><span class="wyr" id="walkYr"></span>' +
+    '<span class="wsay" id="walkSay">Five years, one colleague, every figure from the chart above.</span>';
+  track.parentNode.parentNode.insertBefore(bar, track.parentNode.nextSibling);
+
+  function show(i) {
+    walkAt = i;
+    var b = beats[i];
+    w.style.left = pct(b.y);
+    $('walkYr').textContent = 'Year ' + (Math.round(b.y * 10) / 10);
+    $('walkSay').innerHTML = b.t;
+    $('walkGo').textContent = i >= beats.length - 1
+      ? 'Walk it again ↻'
+      : 'Next — ' + (i + 2) + ' of ' + beats.length + ' →';
+  }
+  $('walkGo').onclick = function () {
+    show(walkAt >= beats.length - 1 ? 0 : walkAt + 1);
+  };
+  w.style.left = pct(0);
+}
+
 function drawStep7() {
   var n = chosen().length;
   var insts = PW.pathway.instances;
@@ -1487,6 +1583,7 @@ function drawStep7() {
     goTo(1);
   };
 
+  mountWalker(insts[0], insts[1], n);
   complete(7, fmt(spend) + ' over 5 years · ' + fmt(lost) + ' expired', false);
 }
 
