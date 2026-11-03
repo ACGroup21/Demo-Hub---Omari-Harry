@@ -777,21 +777,175 @@ function drawStep5() {
   };
 }
 
-/* ── 06 · pick the apprenticeship ────────────────────────────────────────
-   Four options. Two survived the filter chain; two our own filters removed
-   and we put back, so a visitor can watch them fail — for two different
-   reasons. Nothing here asserts a winner: every line is computed from the
-   library, and the one that wins, wins on the numbers. */
-var chosenStd = null;
+/* ── 06 · assign the cohort ──────────────────────────────────────────────
+   This step used to pretend to be a choice. It was not much of one — two
+   selectable out of five — so it now says plainly that the pathway has been
+   picked, gives the reasoning, and spends the interaction somewhere real:
+   you assign the people.
 
-/* how many funded standards sit ABOVE this one in its own route — i.e. does
-   finishing it lead anywhere, or is it a cul-de-sac? */
+   Drag works, and so does clicking, because HTML5 drag-and-drop does not
+   exist on touch and is awkward with a keyboard. A demo that only responds
+   to a mouse is a demo with a hole in it. */
+var chosenStd = null;   /* set to the pathway's first instance once step 6 draws */
+var assigned = {};
+
+function drawStep6() {
+  var insts = PW.pathway.instances;
+  var one = STD[insts[0].ref], two = STD[insts[1].ref];
+  chosenStd = insts[0].ref;          /* the pathway is set; step 7 reads this */
+  var n = chosen().length;
+
+  var unsuitable = PW.options.list.filter(function (r) { return !r.pick; });
+
+  $('body6').innerHTML =
+    '<p class="sub">No menu this time, and it would be dishonest to pretend otherwise. For a retail ' +
+    'chain putting supervisors into management on levy money, the funded route is <b>already decided ' +
+    'by what is fundable</b> &mdash; so we have picked it, and shown our working below. What is left ' +
+    'for you is the part that is genuinely yours: <b>who goes on it</b>.</p>' +
+
+    progCard(insts[0], one, 1, true) +
+    progCard(insts[1], two, 2, false) +
+
+    '<p class="assign-note">Drag each name into the first programme &mdash; or just click one, ' +
+    'which works the same way.</p>' +
+    '<div class="chip-row" id="pool"></div>' +
+    '<div class="cohort-out" id="cohortOut"></div>' +
+
+    '<div class="row"><button class="btn" id="go6" disabled>See the five-year pathway &rarr;</button>' +
+    '<button class="btn ghost" id="assignAll">Assign all ' + n + '</button></div>' +
+
+    '<details class="work"><summary>Why not the other ' + unsuitable.length +
+    ' <span class="chain" id="chain6"></span></summary>' +
+    unsuitable.map(function (row) {
+      var o = STD[row.ref];
+      return '<div class="opt dead" style="cursor:default">' +
+        '<div class="oh"><span class="on-name">' + esc(o.name) + '</span>' +
+        '<span class="ref">' + esc(o.ref) + '</span>' +
+        '<span class="badge gone">' + esc(row.whyShort) + '</span>' +
+        '<span class="price">' + fmt(o.band) + ' &times; ' + n + ' = <b>' + fmt(o.band * n) +
+        '</b></span></div>' +
+        '<p class="oline">' + esc(row.why) + '</p></div>';
+    }).join('') +
+    '<table class="funnel" id="work6" style="margin-top:14px"></table>' +
+    '<p class="ours"><b>The last line is us.</b> The filters leave thirty-odd standards; these ' +
+    PW.options.list.length + ' are the ones worth showing, and the ' + unsuitable.length +
+    ' marked unsuitable are here deliberately. Team leader is what most people in this position ' +
+    'reach for, Data analyst is what a board asks for, and Customer service specialist is the ' +
+    'cheapest thing in the right sector. A list that quietly dropped all three would teach you ' +
+    'nothing.</p></details>';
+
+  drawWork6();
+  drawPool();
+
+  $('assignAll').onclick = function () {
+    chosen().forEach(function (p) { assigned[p.id] = 1; });
+    drawPool();
+  };
+  $('go6').onclick = function () {
+    complete(6, Object.keys(assigned).length + ' assigned · ' + esc(one.name), true);
+    unlock(7);
+    drawStep7();
+    goTo(7);
+  };
+  wireDrop();
+}
+
+function progCard(inst, o, step, isDrop) {
+  var n = chosen().length;
+  return '<div class="prog' + (isDrop ? '' : ' later') + '">' +
+    '<div class="prog-h"><span class="yr">Year ' + inst.startYear + ' · step ' + step + '</span>' +
+    '<span class="pn">' + esc(o.name) + '</span>' +
+    (inst.soldAs ? '<span class="pv">— ' + esc(inst.soldAs) + '</span>' : '') +
+    '<span class="pm">L' + o.level + ' · ' + o.months + ' mo · <b>' + fmt(o.band) +
+    '</b> each</span></div>' +
+    (isDrop
+      ? '<div class="drop" id="drop1"></div>'
+      : '<p class="assign-note" style="margin-top:10px">The same people move up to this three years ' +
+        'later, once they are competent in the first. Nothing to assign &mdash; it follows.</p>') +
+    '</div>';
+}
+
+function drawPool() {
+  var pool = chosen().filter(function (p) { return !assigned[p.id]; });
+  var inZone = chosen().filter(function (p) { return assigned[p.id]; });
+  var one = STD[PW.pathway.instances[0].ref];
+
+  $('pool').innerHTML = pool.length
+    ? pool.map(nameChip).join('')
+    : '<span class="assign-note" style="margin:0">All assigned.</span>';
+
+  var d = $('drop1');
+  d.className = 'drop' + (inZone.length ? ' full' : '');
+  d.innerHTML = inZone.length
+    ? inZone.map(nameChip).join('')
+    : '<span class="ph">Drop your ' + chosen().length + ' here<br>' +
+      '<span style="font-size:11.5px">or click a name below</span></span>';
+
+  var cost = one.band * inZone.length;
+  $('cohortOut').innerHTML = inZone.length
+    ? 'Cohort <b>' + inZone.length + '</b> of ' + chosen().length + ' · ' + fmt(one.band) +
+      ' × ' + inZone.length + ' = <b>' + fmt(cost) + '</b> of levy' +
+      (function () {
+        var o = otjFor(one.ref, inZone.length);
+        return o ? ' · plus ' + fmt(o.cost) + ' of unfunded time' : '';
+      })()
+    : 'Cohort <b>0</b> of ' + chosen().length;
+  $('go6').disabled = inZone.length === 0;
+  $('assignAll').hidden = pool.length === 0;
+}
+
+function nameChip(p) {
+  return '<button class="namechip" draggable="true" data-chip="' + p.id + '">' +
+    avatar(p.name) + '<span>' + esc(p.name) +
+    '<span class="rl2"> · ' + esc(p.dept) + '</span></span></button>';
+}
+
+function wireDrop() {
+  var d = $('drop1');
+  if (!d) return;
+  d.addEventListener('dragover', function (e) { e.preventDefault(); d.classList.add('over'); });
+  d.addEventListener('dragleave', function () { d.classList.remove('over'); });
+  d.addEventListener('drop', function (e) {
+    e.preventDefault(); d.classList.remove('over');
+    var id = e.dataTransfer.getData('text/plain');
+    if (id) { assigned[id] = 1; drawPool(); }
+  });
+  $('pool').addEventListener('dragover', function (e) { e.preventDefault(); });
+  $('pool').addEventListener('drop', function (e) {
+    e.preventDefault();
+    var id = e.dataTransfer.getData('text/plain');
+    if (id) { delete assigned[id]; drawPool(); }
+  });
+}
+
+/* delegated so it survives every redraw */
+document.addEventListener('dragstart', function (e) {
+  var c = e.target.closest && e.target.closest('[data-chip]');
+  if (!c) return;
+  e.dataTransfer.setData('text/plain', c.getAttribute('data-chip'));
+  e.dataTransfer.effectAllowed = 'move';
+  c.classList.add('dragging');
+});
+document.addEventListener('dragend', function (e) {
+  var c = e.target.closest && e.target.closest('[data-chip]');
+  if (c) c.classList.remove('dragging');
+});
+/* click does the same job, for touch and keyboard */
+document.addEventListener('click', function (e) {
+  var c = e.target.closest && e.target.closest('[data-chip]');
+  if (!c) return;
+  var id = c.getAttribute('data-chip');
+  if (assigned[id]) delete assigned[id]; else assigned[id] = 1;
+  drawPool();
+});
+
 function ladder(o) {
   return Object.keys(STD).filter(function (k) {
     var s = STD[k];
     return s.funded !== false && s.route === o.route && (s.level || 0) > (o.level || 0);
   }).length;
 }
+
 function manageCover(ref) {
   var k = PW.ksb[ref];
   if (!k) return null;
@@ -799,77 +953,8 @@ function manageCover(ref) {
   return { n: n, of: k.areas.length };
 }
 
-function drawStep6() {
-  var n = chosen().length;
-  var opts = PW.options.list;
-
-  var cards = opts.map(function (row) {
-    var o = STD[row.ref];
-    var dead = o.funded === false;
-    var cost = o.band * n;
-    var otj = otjFor(row.ref, n);
-    var mc = manageCover(row.ref);
-    var lad = ladder(o);
-
-    var badge = row.pick
-      ? '<span class="badge kept">Suitable · selectable</span>'
-      : '<span class="badge gone">Not suitable · ' + esc(row.whyShort || '') + '</span>';
-
-    var meta = [
-      'Level <b>' + o.level + '</b>',
-      '<b>' + o.months + '</b> months',
-      otj ? '<b>' + otj.hours + '</b> hrs off the job' : '',
-      mc ? 'Management duties <b>' + mc.n + ' of ' + mc.of + '</b>' : 'Duty detail not gathered',
-      'Leads to <b>' + lad + '</b> funded standard' + (lad === 1 ? '' : 's') + ' above it'
-    ].filter(Boolean).join('</span><span>');
-
-    var line = row.pick
-      ? (mc ? 'Of its <b>' + mc.of + '</b> published areas, <b>' + mc.n + '</b> ' +
-          (mc.n === 1 ? 'is' : 'are') + ' about managing people or money.' : '')
-      : esc(row.why || '').replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>');
-
-    return '<button class="opt' + (chosenStd === row.ref ? ' on' : '') +
-      (row.pick ? '' : ' dead') + '" data-std="' + esc(row.ref) + '"' +
-      (row.pick ? '' : ' aria-disabled="true"') + '>' +
-      '<div class="oh"><span class="on-name">' + esc(o.name) +
-      (row.variant ? ' <span style="color:var(--muted);font-weight:500">— ' +
-        esc(row.variant) + '</span>' : '') + '</span>' +
-      '<span class="ref">' + esc(o.ref) + '</span>' + badge +
-      '<span class="price">' + fmt(o.band) + ' &times; ' + n + ' = <b>' + fmt(cost) + '</b></span></div>' +
-      '<div class="ometa"><span>' + meta + '</span></div>' +
-      (line ? '<p class="oline">' + line + '</p>' : '') + '</button>';
-  }).join('');
-
-  $('body6').innerHTML =
-    '<p class="sub"><b>' + opts.length + '</b>, out of <b>' + Object.keys(STD).length + '</b>. ' +
-    '<b>' + opts.filter(function (r) { return r.pick; }).length + ' are selectable</b>; the rest are ' +
-    'here because they are what a real employer reaches for, and each one fails differently. ' +
-    'Click an unsuitable one to see why.</p>' +
-    cards +
-    '<div id="verdict"></div>' +
-    '<div class="row"><button class="btn" id="go6" disabled>See the five-year pathway &rarr;</button></div>' +
-    '<details class="work"><summary>How four were chosen from ' + Object.keys(STD).length +
-    ' <span class="chain" id="chain6"></span></summary>' +
-    '<table class="funnel" id="work6"></table>' +
-    '<p class="ours"><b>The last line is us.</b> The filters leave thirty-odd standards; <b>' +
-    opts.length + '</b> are on screen and only <b>' +
-    opts.filter(function (r) { return r.pick; }).length + '</b> can be chosen. The ' +
-    opts.filter(function (r) { return !r.pick; }).length + ' marked unsuitable were put there ' +
-    'deliberately: Team leader is what most people in this position reach for, Data analyst is what a ' +
-    'board asks for, and Customer service specialist is the cheapest thing in the right sector. A ' +
-    'list that quietly dropped all three would teach you nothing.</p></details>';
-
-  drawWork6();
-  $('go6').onclick = function () {
-    var o = STD[chosenStd];
-    complete(6, esc(o.name) + ' · ' + fmt(o.band * n) + (o.funded === false ? ' (unfunded)' : ''), true);
-    unlock(7);
-    drawStep7();
-    goTo(7);
-  };
-}
-
 function drawWork6() {
+  if (!$('work6') || !$('chain6')) return;   /* the panel is optional; the step is not */
   var all = Object.values(STD);
   var ROUTES = ['Sales, marketing and procurement', 'Business and administration'];
   var a = all;
@@ -887,86 +972,6 @@ function drawWork6() {
     { label: 'put in front of you, including ' + PW.options.list.filter(function (r) { return !r.pick; }).length +
         ' shown as unsuitable', value: String(PW.options.list.length), sum: true }
   ]);
-}
-
-function pickStd(ref) {
-  chosenStd = ref;
-  var n = chosen().length;
-  var o = STD[ref];
-  var dead = o.funded === false;
-  var best = STD[PW.options.list[0].ref];
-  var inst1 = STD[PW.pathway.instances[0].ref];
-  var otj = otjFor(ref, n);
-  var v = $('verdict');
-
-  if (dead) {
-    v.innerHTML = '<div class="verdict bad"><h3>This is the one most people pick, and you cannot buy it</h3>' +
-      '<p>' + esc(o.name) + ' is the obvious first step into managing, and it was until <b>' +
-      esc(o.defundedFrom) + '</b>. Pick it today and your levy contributes <b>£0</b> &mdash; the ' +
-      '<b>' + fmt(o.band * n) + '</b> is your own cash, on top of <b>' + fmt(otj.cost) + '</b> of ' +
-      'unfunded time.</p>' +
-      '<p>Meanwhile <b>' + fmt(levy.annual) + '</b> of levy sits in the account doing nothing and ' +
-      'expiring on a ' + RULES.expiryMonths + '-month clock. That is the whole trap: the right-sounding ' +
-      'answer is the one that costs you everything.</p>' +
-      '<p>Choose a funded standard to carry on.</p></div>';
-    $('go6').disabled = true;
-  } else if (o.route !== best.route && o.route !== inst1.route) {
-    v.innerHTML = '<div class="verdict bad"><h3>Funded, and pointed somewhere else</h3>' +
-      '<p>Nothing is wrong with ' + esc(o.name) + ' &mdash; it is simply not the job your ' + n + ' do. ' +
-      'It costs <b>' + fmt(o.band * n) + '</b> against <b>' + fmt(best.band * n) + '</b>, takes <b>' +
-      (o.months - best.months) + ' months longer</b>, and leaves them qualified in ' + esc(o.route) +
-      ' while your shop floor still has nobody trained to run it.</p>' +
-      '<p>You can carry on with it. The pathway at the next step will show you where it leads.</p></div>';
-    $('go6').disabled = false;
-  } else {
-    var mc = manageCover(ref);
-    v.innerHTML = '<div class="verdict"><h3>' + esc(o.name) + ' — ' + fmt(o.band * n) +
-      ' of levy, ' + o.months + ' months</h3>' +
-      '<p>Funded, in your route, and it leads to <b>' + ladder(o) + '</b> funded standards above it.' +
-      (mc ? ' Of its <b>' + mc.of + '</b> published areas, <b>' + mc.n + '</b> ' +
-        (mc.n === 1 ? 'is' : 'are') + ' about managing people or money.' : '') + '</p>' +
-      (mc && mc.n <= 2
-        ? '<p>Which is the uncomfortable part. Providers package this one as a management foundation ' +
-          'and wrap leadership content around it &mdash; but the levy buys <b>the standard</b>, and the ' +
-          'standard your ' + n + ' are assessed against, and certificated in, is ' +
-          (ref === 'ST0070' ? 'administration' : 'this one') + '. The wrap sits outside the funding.</p>' +
-          '<p>That is not a reason to avoid it. It is the reason <b>one programme is not a pathway</b> ' +
-          '&mdash; which is what the next step is about.</p>'
-        : '<p>It covers the management duties your ' + n + ' are missing. The next step shows where it ' +
-          'sits across five years.</p>') +
-      '<p><b>' + fmt(otj.cost) + '</b> of unfunded time on top, at ' + otj.perWeek.toFixed(1) +
-      ' hours a week each.</p></div>';
-    $('go6').disabled = false;
-  }
-  drawStep6();
-  $('verdict').innerHTML = v.innerHTML;   /* redraw wiped it; put it back */
-  $('go6').disabled = dead;
-  v.scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
-}
-
-document.addEventListener('click', function (e) {
-  var b = e.target.closest && e.target.closest('[data-std]');
-  if (!b) return;
-  var ref = b.getAttribute('data-std');
-  var row = PW.options.list.filter(function (r) { return r.ref === ref; })[0];
-  /* three of the five are not selectable. Clicking one explains why rather
-     than silently doing nothing - the reason IS the content of this step. */
-  if (row && !row.pick) { explainStd(row); return; }
-  pickStd(ref);
-});
-
-function explainStd(row) {
-  var o = STD[row.ref];
-  var n = chosen().length;
-  $('verdict').innerHTML = '<div class="verdict bad"><h3>' + esc(o.name) + ' — ' +
-    esc(row.whyShort) + '</h3><p>' + esc(row.why) + '</p>' +
-    '<p><b>' + fmt(o.band) + '</b> a head, <b>' + o.months + ' months</b>, <b>' + o.otjHours +
-    '</b> off-the-job hours each. ' + (o.funded === false
-      ? 'And none of it fundable.'
-      : 'Fundable — which is exactly what makes it tempting.') + '</p>' +
-    '<p>Pick one of the two marked selectable to carry on.</p></div>';
-  $('go6').disabled = !chosenStd;
-  $('verdict').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
 }
 
 /* ── 07 · the five-year pathway ──────────────────────────────────────────
@@ -1259,7 +1264,7 @@ function drawStep7() {
     '<div class="row"><button class="btn ghost" id="restart">Start again &rarr;</button></div>';
 
   $('restart').onclick = function () {
-    picked = {}; chosenStd = null;
+    picked = {}; chosenStd = null; assigned = {};
     [7, 6, 5, 4, 3, 2].forEach(function (i) {
       var s = step(i);
       s.className = 'step locked';

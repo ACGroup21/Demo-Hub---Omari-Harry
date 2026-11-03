@@ -348,6 +348,43 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .ksb-list li.ev b{color:var(--ink);font-weight:600}
 .ksb-list li .ln{display:block;font-size:11px;color:var(--cyan);opacity:.75;margin-top:1px}
 
+/* ── step 6 · assigning the cohort ────────────────────────────────────── */
+.prog{border:1px solid var(--cyan-dim);border-radius:14px;padding:18px 20px;margin-top:14px;
+  background:linear-gradient(180deg,rgba(0,201,204,.06),rgba(0,201,204,.015))}
+.prog.later{border-color:var(--line);background:rgba(159,177,202,.03)}
+.prog-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.prog-h .yr{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid var(--cyan-dim);border-radius:999px;padding:3px 9px}
+.prog.later .prog-h .yr{color:var(--muted-2);border-color:var(--line)}
+.prog-h .pn{font-weight:700;font-size:16px}
+.prog-h .pv{font-size:13px;color:var(--muted);font-weight:500}
+.prog-h .pm{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.prog-h .pm b{color:var(--ink)}
+
+.drop{margin-top:14px;border:2px dashed var(--line);border-radius:12px;min-height:76px;
+  padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;align-content:flex-start;
+  transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--cyan);background:var(--cyan-ghost)}
+.drop.full{border-style:solid;border-color:var(--cyan-dim)}
+.drop .ph{color:var(--muted-2);font-size:13px;margin:auto;text-align:center;line-height:1.5}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;min-height:40px}
+.namechip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);
+  border-radius:999px;padding:6px 13px 6px 7px;background:rgba(159,177,202,.06);cursor:grab;
+  font:inherit;color:inherit;font-size:13.5px;font-weight:600;user-select:none}
+.namechip:hover{border-color:var(--cyan-dim)}
+.namechip:active{cursor:grabbing}
+.namechip.dragging{opacity:.4}
+.namechip .av{width:24px;height:24px;font-size:9.5px;margin:0;border-radius:50%}
+.namechip .rl2{font-weight:400;font-size:11.5px;color:var(--muted-2)}
+.drop .namechip{background:rgba(0,201,204,.13);border-color:var(--cyan-dim)}
+.drop .namechip .rl2{color:var(--muted)}
+.assign-note{margin:12px 0 0;font-size:12.5px;color:var(--muted-2)}
+.assign-note b{color:var(--ink)}
+.cohort-out{margin-top:16px;font-family:var(--mono);font-size:13px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.cohort-out b{color:var(--cyan);font-size:17px}
+
 /* ── step 6 · the options ─────────────────────────────────────────────── */
 .opt{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;
   border:1px solid var(--line);border-radius:13px;background:rgba(159,177,202,.03);
@@ -647,6 +684,6 @@ footer b{color:var(--muted)}
   <div id="vhost"></div>
 </div>
 
-<script src="journey.js?v=7"></script>
+<script src="journey.js?v=10"></script>
 </body>
 </html>
