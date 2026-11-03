@@ -1626,8 +1626,9 @@ function drawStep7() {
     '<ul class="rungs">' +
     above.slice(0, 3).map(function (s) {
       return '<li><span class="rn">' + esc(s.name) + '</span>' +
-        '<span class="rl">Level ' + s.level + '</span>' +
-        '<span class="rm">' + s.months + ' months · <b>' + fmt(s.band) + '</b></span></li>';
+        '<span class="rl">L' + s.level + '</span>' +
+        '<span class="rd">' + s.months + ' months</span>' +
+        '<span class="rb">' + fmt(s.band) + '</span></li>';
     }).join('') + '</ul>' +
 
     '<div class="endrow" id="endActions">' +
@@ -1666,14 +1667,18 @@ function drawStep7() {
 }
 
 /* ── the recap ───────────────────────────────────────────────────────────
-   Seven cards, assembled from what this visitor actually did rather than
-   written in advance — so a run with different people and a different pay
-   bill recaps differently. Same discipline as the report: build it, then
-   read the contents back.
+   Seven beats, assembled from what this visitor actually did rather than
+   written in advance — a run with different people and a different pay bill
+   recaps differently.
 
-   Advances on click. Never autoplays. Escape closes it, Skip is on the first
-   frame, and under prefers-reduced-motion the transitions go away entirely
-   rather than getting faster. */
+   It plays. Press play and it runs itself with the figure counting up and the
+   context boxes staggering in around it; otherwise step through with Next,
+   Back or the arrow keys. It does NOT autoplay on open: a thing that starts
+   moving before you have asked is a thing you have to chase.
+
+   Under prefers-reduced-motion every transition goes away and play is
+   disabled rather than merely slowed — motion is the point of play, so
+   offering it without motion would be a dead control. */
 function recapCards() {
   var insts = PW.pathway.instances;
   var one = STD[insts[0].ref], two = STD[insts[1].ref];
@@ -1690,42 +1695,80 @@ function recapCards() {
   ]);
   var spend = (one.band + two.band) * n;
   var head = PW.employer.headcount;
+  var holes = areas.filter(function (a) {
+    return !chosen().some(function (p) { return tally(p.id).yes.indexOf(a) > -1; });
+  });
+  var F1 = ksbSet(one.ref), F2 = ksbSet(two.ref);
 
   return [
-    { k: 'Your levy', v: fmt(levy.annual) + ' a year',
-      s: head.toLocaleString('en-GB') + ' staff at the UK average salary makes a ' +
-         fmt(payBill) + ' pay bill. Half a per cent of it, less the allowance, lands monthly.' },
-    { k: 'And it does not wait', v: RULES.expiryMonths + '-month clock',
-      s: fmt(levy.monthly) + ' arrives each month and dies ' + RULES.expiryMonths +
-         ' months later. Enough to start ' + affordable(two) + ' people a year on ' +
-         esc(two.name) + '.' },
-    { k: 'Who could go', v: sel + ' of ' + TEAM.length,
-      s: ready + ' of the ten have a job that evidences anything an assessor could look at. ' +
-         (ready - sel) + ' of those are a year away. You chose ' + n + '.' },
-    { k: 'What their jobs evidence', v: yes + ' of ' + (n * areas.length),
-      s: 'Of the six management duties, across your ' + n + '. The gap is in the jobs, not the ' +
-         'people — and it has to close before anyone enrols, not during.' },
-    { k: 'Against the standards', v: k1 + ' of ' + n + ', then ' + k2 + ' of ' + n,
-      s: 'Clearing the 50% line on ' + esc(one.name) + ', then on ' + esc(two.name) +
-         '. That gap is why the second programme sits three years out.' },
-    { k: 'What you committed', v: fmt(spend),
-      s: n + ' colleagues, two standards, five years — against ' + fmt(acct.received) +
-         ' of levy received over the same period.' },
-    { k: 'And what died anyway', v: fmt(acct.expired / 4) + ' a year',
-      s: fmt(acct.expired) + ' across the five, and none of it was ever a balance — levy lands ' +
-         'monthly and dies twelve months later, so this is the same loss four times over. The ' +
-         'constraint was never the money — it was how many jobs were ready.' }
+    { k: 'Your levy', v: fmt(levy.annual), tail: ' a year',
+      s: 'Before you decide anything, this is already leaving the payroll.',
+      c: [['Where it comes from', head.toLocaleString('en-GB') + ' staff at the published UK ' +
+            'average salary makes a ' + fmt(payBill) + ' pay bill'],
+          ['How it is worked out', 'Half a per cent of it, less the ' + fmt(RULES.allowance) +
+            ' allowance, a twelfth at a time'],
+          ['The part people miss', 'You pay this whether you use it or not']] },
+
+    { k: 'And it does not wait', v: RULES.expiryMonths + ' months', tail: '',
+      s: 'Each month of levy dies ' + RULES.expiryMonths + ' months after it lands.',
+      c: [['Arriving', fmt(levy.monthly) + ' every month, oldest spent first'],
+          ['What it would buy', affordable(two) + ' starts a year on ' + esc(two.name)],
+          ['Not a savings pot', 'Nothing accumulates — there is no balance to come back to']] },
+
+    { k: 'Who could actually go', v: sel + ' of ' + TEAM.length, tail: '',
+      s: 'You started with ten names and a budget for far more than ten.',
+      c: [['Nothing to assess', (TEAM.length - ready) + ' have jobs that give an assessor ' +
+            'nothing to look at'],
+          ['A year away', (ready - sel) + ' are held back rather than refused — the plan for ' +
+            'them is four things, not a no'],
+          ['The bar', 'Opportunity, not competence. Nobody has to be good at managing to start ' +
+            'learning it']] },
+
+    { k: 'What their jobs evidence', v: yes + ' of ' + (n * areas.length), tail: '',
+      s: 'Of the six management duties, across the ' + n + ' you chose.',
+      c: [['The hole', holes.length ? 'Nobody evidences ' + andList(holes.map(esc)) +
+            ' at all' : 'All six appear somewhere across the three'],
+          ['Whose problem', 'This is a finding about the jobs, not the people'],
+          ['When it has to close', 'Before anyone enrols — an apprentice is assessed on work ' +
+            'they actually do']] },
+
+    { k: 'Against the real standards', v: k1 + ' of ' + n + ', then ' + k2 + ' of ' + n, tail: '',
+      s: 'Clearing the 50% line on the first standard, then on the second.',
+      c: [[esc(one.name), (F1 ? F1.items.length : 21) + ' published knowledge, skills and ' +
+            'behaviours, each read against every job description'],
+          [esc(two.name), (F2 ? F2.items.length : 16) + ' published areas — and ' +
+            (k2 === 0 ? 'not one of them clears it' : k2 + ' clear it')],
+          ['Why that matters', 'It is the reason the second programme sits three years out ' +
+            'rather than beside the first']] },
+
+    { k: 'What you committed', v: fmt(spend), tail: '',
+      s: n + ' colleagues, two standards, five years.',
+      c: [['From the levy', fmt(one.band) + ' then ' + fmt(two.band) + ' a head, out of money ' +
+            'already gone from the payroll'],
+          ['What it does not cover', fmt((otjFor(one.ref, n) || {}).cost + (otjFor(two.ref, n) || {}).cost) +
+            ' of off-the-job time, which nobody funds'],
+          ['Against receipts', fmt(acct.received) + ' of levy arrived over the same five years']] },
+
+    { k: 'And what died anyway', v: fmt(acct.expired / 4), tail: ' a year',
+      s: 'The same loss, four times over.',
+      c: [['Across the five', fmt(acct.expired) + ' expired unused'],
+          ['Not a balance', 'Levy lands monthly and dies twelve months later — this is a ' +
+            'repeating annual loss, not a pot'],
+          ['The actual constraint', 'Never the money. It was how many jobs were ready']] }
   ];
 }
 
-var recapAt = 0;
+var recapAt = 0, recapTimer = null, recapPlaying = false;
+
 function openRecap() {
   var cards = recapCards();
+  var still = reduced();
   var host = document.createElement('div');
   host.id = 'recap';
   host.innerHTML =
     '<div class="rc-bar"><span class="rc-n" id="rcN"></span>' +
-    '<span class="rc-sp"></span>' +
+    '<span class="rc-track"><i id="rcFill"></i></span>' +
+    (still ? '' : '<button class="btn ghost" id="rcPlay">&#9654; Play</button>') +
     '<button class="btn ghost" id="rcSkip">Skip to the end</button>' +
     '<button class="btn ghost" id="rcClose">Close &times;</button></div>' +
     '<div class="rc-stage" id="rcStage"></div>' +
@@ -1733,30 +1776,85 @@ function openRecap() {
     '<button class="btn" id="rcNext">Next &rarr;</button></div>';
   document.body.appendChild(host);
   document.body.style.overflow = 'hidden';
-  recapAt = 0;
-  show();
+  recapAt = 0; recapPlaying = false;
+  show(0, 1);
 
-  function show() {
-    var c = cards[recapAt];
-    var col = stepColour(recapAt + 1, cards.length);
-    $('rcStage').innerHTML =
-      '<div class="rc-card" style="--stepc:' + col + '">' +
+  function show(i, dir) {
+    var prev = $('rcStage').firstElementChild;
+    if (prev && !still) {
+      prev.classList.add(dir > 0 ? 'rc-out-l' : 'rc-out-r');
+      setTimeout(function () { if (prev.parentNode) prev.remove(); }, 420);
+    } else if (prev) { prev.remove(); }
+
+    recapAt = i;
+    var c = cards[i];
+    var col = stepColour(i + 1, cards.length);
+    var card = document.createElement('div');
+    card.className = 'rc-card' + (still ? '' : (dir > 0 ? ' rc-in-r' : ' rc-in-l'));
+    card.style.setProperty('--stepc', col);
+    card.innerHTML =
       '<div class="rc-k">' + esc(c.k) + '</div>' +
-      '<div class="rc-v">' + c.v + '</div>' +
-      '<div class="rc-s">' + c.s + '</div></div>';
-    $('rcN').textContent = (recapAt + 1) + ' of ' + cards.length;
-    $('rcPrev').disabled = recapAt === 0;
-    $('rcNext').textContent = recapAt === cards.length - 1 ? 'Finish →' : 'Next →';
+      '<div class="rc-v"><span id="rcVal">' + c.v + '</span><span class="rc-tail">' +
+        esc(c.tail || '') + '</span></div>' +
+      '<div class="rc-s">' + c.s + '</div>' +
+      '<div class="rc-notes">' + c.c.map(function (n, j) {
+        return '<div class="rc-note" style="animation-delay:' + (still ? 0 : 0.34 + j * 0.16) +
+          's"><b>' + esc(n[0]) + '</b><span>' + n[1] + '</span></div>';
+      }).join('') + '</div>';
+    $('rcStage').appendChild(card);
+    if (!still) countUp($('rcVal'), c.v);
+
+    $('rcN').textContent = (i + 1) + ' of ' + cards.length;
+    $('rcFill').style.width = ((i + 1) / cards.length * 100) + '%';
+    $('rcPrev').disabled = i === 0;
+    $('rcNext').textContent = i === cards.length - 1 ? 'Finish →' : 'Next →';
   }
-  $('rcNext').onclick = function () {
-    if (recapAt < cards.length - 1) { recapAt++; show(); } else closeRecap(true);
+
+  function go(d) {
+    var next = recapAt + d;
+    if (next < 0 || next >= cards.length) { stop(); if (d > 0) closeRecap(true); return; }
+    show(next, d);
+  }
+  function tick() { recapTimer = setTimeout(function () { go(1); if (recapPlaying) tick(); }, 5200); }
+  function stop() {
+    recapPlaying = false; clearTimeout(recapTimer);
+    if ($('rcPlay')) $('rcPlay').innerHTML = '&#9654; Play';
+  }
+
+  $('rcNext').onclick = function () { stop(); go(1); };
+  $('rcPrev').onclick = function () { stop(); go(-1); };
+  $('rcSkip').onclick = function () { stop(); show(cards.length - 1, 1); };
+  $('rcClose').onclick = function () { stop(); closeRecap(false); };
+  if ($('rcPlay')) $('rcPlay').onclick = function () {
+    if (recapPlaying) return stop();
+    recapPlaying = true;
+    $('rcPlay').innerHTML = '&#10073;&#10073; Pause';
+    if (recapAt === cards.length - 1) show(0, 1);
+    tick();
   };
-  $('rcPrev').onclick = function () { if (recapAt > 0) { recapAt--; show(); } };
-  $('rcSkip').onclick = function () { recapAt = cards.length - 1; show(); };
-  $('rcClose').onclick = function () { closeRecap(false); };
   $('rcNext').focus();
 }
+
+/* numbers settle rather than appear — only on the numeric part, and only when
+   motion is allowed */
+function countUp(el, text) {
+  var m = String(text).match(/^(\D*)([\d,]+)(.*)$/);
+  if (!m) return;
+  var target = +m[2].replace(/,/g, '');
+  if (!isFinite(target) || target < 10) return;
+  var t0 = null, dur = 620;
+  function frame(t) {
+    if (!t0) t0 = t;
+    var k = Math.min(1, (t - t0) / dur);
+    var e = 1 - Math.pow(1 - k, 3);
+    el.textContent = m[1] + Math.round(target * e).toLocaleString('en-GB') + m[3];
+    if (k < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
 function closeRecap(finished) {
+  recapPlaying = false; clearTimeout(recapTimer);
   var h = $('recap');
   if (h) h.remove();
   document.body.style.overflow = '';
@@ -1770,6 +1868,7 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') closeRecap(false);
   if (e.key === 'ArrowRight') $('rcNext').click();
   if (e.key === 'ArrowLeft') $('rcPrev').click();
+  if (e.key === ' ' && $('rcPlay')) { e.preventDefault(); $('rcPlay').click(); }
 });
 
 /* Print is a different artefact from the screen. The recap is seven dark
