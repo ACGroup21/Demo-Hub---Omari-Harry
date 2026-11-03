@@ -855,6 +855,57 @@ document.addEventListener('click', function (e) {
    two unreconciled durations — so nothing is drawn for it. A tail of invented
    length would make the timeline look more precise than the source is. */
 var YEARS = 5;
+
+/* ── the account, month by month ─────────────────────────────────────────
+   Expiry is not "everything you did not spend". Levy lands monthly and each
+   month's funds die twelve months later, oldest spent first — so at the end
+   of year five the last twelve months of receipts are still ALIVE and have
+   not expired at all.
+
+   Subtracting spend from receipts, which is what this page did until it was
+   challenged, counts that final year as lost and overstates expiry by a full
+   year's levy. The fix is to run the account rather than net it off.
+
+   Draw-down follows the funding rules: 80% in instalments across the
+   practical period, the final 20% on completion after end-point assessment. */
+function accountModel(programmes) {
+  var perMonth = levy.monthly;
+  var draws = {};
+  programmes.forEach(function (p) {
+    if (!p.months || !p.total) return;
+    var inst = (p.total * RULES.drawTraining) / p.months;
+    for (var i = 0; i < p.months; i++) {
+      var m = p.start + i;
+      draws[m] = (draws[m] || 0) + inst;
+    }
+    var done = p.start + p.months + EPA_MONTHS - 1;
+    draws[done] = (draws[done] || 0) + p.total * RULES.drawEpa;
+  });
+
+  var q = [], received = 0, spent = 0, expired = 0, byYear = {};
+  var total = YEARS * 12;
+  for (var m = 1; m <= total; m++) {
+    q.push({ m: m, amt: perMonth });
+    received += perMonth;
+
+    var need = draws[m] || 0;
+    spent += need;
+    while (need > 1e-9 && q.length) {
+      var take = Math.min(need, q[0].amt);
+      q[0].amt -= take; need -= take;
+      if (q[0].amt < 1e-9) q.shift();
+    }
+    /* anything that landed RULES.expiryMonths ago and is still here is gone */
+    while (q.length && q[0].m <= m - RULES.expiryMonths) {
+      var y = Math.ceil(m / 12);
+      byYear[y] = (byYear[y] || 0) + q[0].amt;
+      expired += q[0].amt;
+      q.shift();
+    }
+  }
+  var live = q.reduce(function (t, x) { return t + x.amt; }, 0);
+  return { received: received, spent: spent, expired: expired, live: live, byYear: byYear };
+}
 /* End-point assessment is NOT in a standard's typical duration — ST0325's own
    page says so, and then gives a second duration elsewhere that does not
    reconcile with the first. No standard publishes the EPA window, so three
@@ -897,10 +948,15 @@ function drawStep7() {
 
   /* the money, across the whole five years rather than one invoice */
   var spend = (one.band + two.band) * n;
-  var levy5 = levy.annual * YEARS;
   var otj1 = otjFor(one.ref, n), otj2 = otjFor(two.ref, n);
   var otjAll = (otj1 ? otj1.cost : 0) + (otj2 ? otj2.cost : 0);
-  var lost = Math.max(0, levy5 - spend);
+  var acct = accountModel([
+    { start: 1, months: one.months, total: one.band * n },
+    { start: y2.start * 12 + 1, months: two.months, total: two.band * n }
+  ]);
+  var levy5 = acct.received;
+  var lost = acct.expired;
+  var perYear = lost / (YEARS - 1);   /* nothing can expire in year one */
   var couldHave = two.band ? Math.floor(lost / two.band) : 0;
 
   /* where it goes after year five — computed, not listed by hand */
@@ -931,7 +987,9 @@ function drawStep7() {
     '<div class="t"><div class="k">Levy over 5 years</div><div class="v">' + fmt(levy5) +
       '</div><div class="s">at ' + fmt(levy.annual) + ' a year</div></div>' +
     '<div class="t waste"><div class="k">Expires unused</div><div class="v">' + fmt(lost) +
-      '</div><div class="s">on a ' + RULES.expiryMonths + '-month clock</div></div>' +
+      '</div><div class="s">about ' + fmt(perYear) + ' <b>every year</b></div></div>' +
+    '<div class="t"><div class="k">Still in the account</div><div class="v">' + fmt(acct.live) +
+      '</div><div class="s">landed in the last 12 months, not yet expired</div></div>' +
     '<div class="t"><div class="k">Unfunded time</div><div class="v">' + fmt(otjAll) +
       '</div><div class="s">both programmes, your cost</div></div>' +
     '</div>' +
@@ -940,13 +998,18 @@ function drawStep7() {
     '<p>Those <b>' + (gapTo - gapFrom).toFixed(1).replace(/\.0$/, '') + ' years</b> between the two ' +
     'programmes are not idle. That is someone doing the job they have just qualified for, with a funded ' +
     'next rung already visible. It is the part that keeps people, and it costs nothing.</p>' +
-    '<p>The uncomfortable figure is the other one. Across five years this plan commits <b>' + fmt(spend) +
-    '</b> of a <b>' + fmt(levy5) + '</b> levy. <b>' + fmt(lost) + '</b> expires unused &mdash; enough for ' +
-    'another <b>' + couldHave + '</b> people on ' + esc(two.name) + ', at no extra cost to Brayford, ' +
+    '<p>The uncomfortable figure is the other one, and it is not a one-off at the end. Levy lands ' +
+    'every month and dies <b>' + RULES.expiryMonths + ' months later</b>, so this plan loses about ' +
+    '<b>' + fmt(perYear) + ' a year, every year</b> &mdash; <b>' + fmt(lost) + '</b> gone across the ' +
+    'five, out of <b>' + fmt(levy5) + '</b> received and <b>' + fmt(spend) + '</b> committed. That is ' +
+    'enough for another <b>' + couldHave + '</b> people on ' + esc(two.name) + ' at no extra cost, ' +
     'because the money has already left the payroll.</p>' +
+    '<p>The <b>' + fmt(acct.live) + '</b> still in the account has not been saved &mdash; it only ' +
+    'landed in the last twelve months. On this plan it expires too, in the year after this chart ' +
+    'ends.</p>' +
     '<p>That is the real finding of this walkthrough, and it is not about these three. It is that ' +
     '<b>' + Math.round(spend / levy5 * 100) + '%</b> of a levy is a normal amount for an employer to ' +
-    'use, and the rest goes back to the Treasury twelve months after it lands.</p></div>' +
+    'use, and the rest goes back to the Treasury on a rolling twelve-month clock.</p></div>' +
 
     '<p class="subhead">After year five</p>' +
     '<p class="sub">Where ' + esc(two.name) + ' leads, if they stay. <b>' + above.length + '</b> funded ' +
