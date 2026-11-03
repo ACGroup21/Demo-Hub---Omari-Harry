@@ -496,6 +496,53 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .contents li{font-family:var(--mono);font-size:10.5px;color:var(--muted-2);
   border:1px solid var(--line);border-radius:999px;padding:4px 10px}
 
+/* ── the recap ────────────────────────────────────────────────────────── */
+#recap{position:fixed;inset:0;z-index:80;background:#02050a;display:flex;flex-direction:column}
+.rc-bar{display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid var(--line)}
+.rc-n{font-family:var(--mono);font-size:11px;color:var(--muted-2)}
+.rc-sp{flex:1}
+.rc-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:28px 24px;min-height:0}
+.rc-card{max-width:760px;text-align:center;animation:rcIn .45s cubic-bezier(.2,.7,.3,1) both}
+.rc-k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--stepc);margin-bottom:20px}
+.rc-v{font-family:var(--mono);font-size:clamp(34px,7vw,68px);font-weight:600;line-height:1.05;
+  color:var(--stepc);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.rc-s{margin:24px auto 0;font-size:clamp(15px,2vw,18px);line-height:1.62;color:var(--muted);
+  max-width:56ch}
+.rc-s b{color:var(--ink)}
+@keyframes rcIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.rc-foot{display:flex;gap:12px;justify-content:center;padding:16px 20px 28px;
+  border-top:1px solid var(--line)}
+.endrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:26px;
+  padding-top:22px;border-top:1px solid var(--line)}
+
+/* ── print ────────────────────────────────────────────────────────────── */
+#printdoc{display:none}
+@media print{
+  html.printing,html.printing body{background:#fff !important;color:#111 !important}
+  html.printing body::before{display:none}
+  html.printing .wrap,html.printing #stepper,html.printing #splash,html.printing #viewer,
+  html.printing #recap,html.printing footer{display:none !important}
+  html.printing #printdoc{display:block}
+  html.printing .doc{background:#fff;border:0;padding:0}
+  html.printing .doc h3,html.printing .doc td b,html.printing .doc p b,
+  html.printing .ksb-who .n,html.printing .payoff b{color:#111 !important}
+  html.printing .doc h4,html.printing .subhead,html.printing .ksb-band,
+  html.printing .rv,html.printing .doc-head .meta{color:#0a6f71 !important}
+  html.printing .doc p,html.printing .doc td,html.printing .ksb-tot,
+  html.printing .ksb-who .r,html.printing .caveat,html.printing .sub,
+  html.printing .payoff p{color:#333 !important}
+  html.printing .learner{border-color:#ccc;background:none;break-inside:avoid}
+  html.printing .doc td{border-bottom-color:#ddd}
+  html.printing .ka .kb{border-color:#ccc;background:#eee}
+  html.printing details{display:block}
+  html.printing summary{display:none}
+  html.printing .payoff,html.printing .check{border-color:#bbb;background:none}
+  html.printing .payoff::before,html.printing .check::before{background:#999}
+  html.printing a{color:#0a6f71 !important;text-decoration:underline}
+  @page{margin:16mm}
+}
+
 /* ── in-page viewer ───────────────────────────────────────────────────── */
 #viewer{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.93);display:flex;flex-direction:column}
 #viewer[hidden]{display:none}
@@ -556,7 +603,8 @@ footer b{color:var(--muted)}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  #splash,#splash img,#splash .tag,#enter,.step.active .node{animation:none}
+  #splash,#splash img,#splash .tag,#enter,.step.active .node,.rc-card{animation:none}
+  .walker{transition:none}
   *{transition-duration:.01ms !important}
 }
 </style>
@@ -741,6 +789,6 @@ footer b{color:var(--muted)}
   <div id="vhost"></div>
 </div>
 
-<script src="journey.js?v=21"></script>
+<script src="journey.js?v=22"></script>
 </body>
 </html>

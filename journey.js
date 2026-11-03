@@ -1627,8 +1627,14 @@ function drawStep7() {
         '<span class="rm">' + s.months + ' months · <b>' + fmt(s.band) + '</b></span></li>';
     }).join('') + '</ul>' +
 
-    '<div class="row"><button class="btn ghost" id="restart">Start again &rarr;</button></div>';
+    '<div class="endrow" id="endActions">' +
+      '<button class="btn" id="recapGo">Recap the five years &rarr;</button>' +
+      '<button class="btn ghost" id="printGo">Print the report</button>' +
+      '<button class="btn ghost" id="restart">Start again</button>' +
+    '</div>';
 
+  $('recapGo').onclick = openRecap;
+  $('printGo').onclick = printReport;
   $('restart').onclick = function () {
     picked = {}; chosenStd = null; assigned = {};
     [7, 6, 5, 4, 3, 2].forEach(function (i) {
@@ -1651,6 +1657,132 @@ function drawStep7() {
 
   mountWalker(insts[0], insts[1], n);
   complete(7, fmt(spend) + ' over 5 years · ' + fmt(lost) + ' expired', false);
+}
+
+/* ── the recap ───────────────────────────────────────────────────────────
+   Seven cards, assembled from what this visitor actually did rather than
+   written in advance — so a run with different people and a different pay
+   bill recaps differently. Same discipline as the report: build it, then
+   read the contents back.
+
+   Advances on click. Never autoplays. Escape closes it, Skip is on the first
+   frame, and under prefers-reduced-motion the transitions go away entirely
+   rather than getting faster. */
+function recapCards() {
+  var insts = PW.pathway.instances;
+  var one = STD[insts[0].ref], two = STD[insts[1].ref];
+  var n = chosen().length;
+  var ready = TEAM.filter(function (p) { return eligible(p.id); }).length;
+  var sel = TEAM.filter(function (p) { return selectable(p.id); }).length;
+  var areas = PW.coverage.areas;
+  var yes = chosen().reduce(function (t, p) { return t + tally(p.id).yes.length; }, 0);
+  var k1 = chosen().filter(function (p) { var k = ksbFor(p.id, one.ref); return k && k.pass; }).length;
+  var k2 = chosen().filter(function (p) { var k = ksbFor(p.id, two.ref); return k && k.pass; }).length;
+  var acct = accountModel([
+    { start: 1, months: one.months, total: one.band * n },
+    { start: insts[1].startYear * 12 + 1, months: two.months, total: two.band * n }
+  ]);
+  var spend = (one.band + two.band) * n;
+  var head = PW.employer.headcount;
+
+  return [
+    { k: 'Your levy', v: fmt(levy.annual) + ' a year',
+      s: head.toLocaleString('en-GB') + ' staff at the UK average salary makes a ' +
+         fmt(payBill) + ' pay bill. Half a per cent of it, less the allowance, lands monthly.' },
+    { k: 'And it does not wait', v: RULES.expiryMonths + '-month clock',
+      s: fmt(levy.monthly) + ' arrives each month and dies ' + RULES.expiryMonths +
+         ' months later. Enough to start ' + affordable(two) + ' people a year on ' +
+         esc(two.name) + '.' },
+    { k: 'Who could go', v: sel + ' of ' + TEAM.length,
+      s: ready + ' of the ten have a job that evidences anything an assessor could look at. ' +
+         (ready - sel) + ' of those are a year away. You chose ' + n + '.' },
+    { k: 'What their jobs evidence', v: yes + ' of ' + (n * areas.length),
+      s: 'Of the six management duties, across your ' + n + '. The gap is in the jobs, not the ' +
+         'people — and it has to close before anyone enrols, not during.' },
+    { k: 'Against the standards', v: k1 + ' of ' + n + ', then ' + k2 + ' of ' + n,
+      s: 'Clearing the 50% line on ' + esc(one.name) + ', then on ' + esc(two.name) +
+         '. That gap is why the second programme sits three years out.' },
+    { k: 'What you committed', v: fmt(spend),
+      s: n + ' colleagues, two standards, five years — against ' + fmt(acct.received) +
+         ' of levy received over the same period.' },
+    { k: 'And what left anyway', v: fmt(acct.expired),
+      s: 'Expired unused on a rolling clock, about ' + fmt(acct.expired / 4) + ' a year. The ' +
+         'constraint was never the money — it was how many jobs were ready.' }
+  ];
+}
+
+var recapAt = 0;
+function openRecap() {
+  var cards = recapCards();
+  var host = document.createElement('div');
+  host.id = 'recap';
+  host.innerHTML =
+    '<div class="rc-bar"><span class="rc-n" id="rcN"></span>' +
+    '<span class="rc-sp"></span>' +
+    '<button class="btn ghost" id="rcSkip">Skip to the end</button>' +
+    '<button class="btn ghost" id="rcClose">Close &times;</button></div>' +
+    '<div class="rc-stage" id="rcStage"></div>' +
+    '<div class="rc-foot"><button class="btn ghost" id="rcPrev">&larr; Back</button>' +
+    '<button class="btn" id="rcNext">Next &rarr;</button></div>';
+  document.body.appendChild(host);
+  document.body.style.overflow = 'hidden';
+  recapAt = 0;
+  show();
+
+  function show() {
+    var c = cards[recapAt];
+    var col = stepColour(recapAt + 1, cards.length);
+    $('rcStage').innerHTML =
+      '<div class="rc-card" style="--stepc:' + col + '">' +
+      '<div class="rc-k">' + esc(c.k) + '</div>' +
+      '<div class="rc-v">' + c.v + '</div>' +
+      '<div class="rc-s">' + c.s + '</div></div>';
+    $('rcN').textContent = (recapAt + 1) + ' of ' + cards.length;
+    $('rcPrev').disabled = recapAt === 0;
+    $('rcNext').textContent = recapAt === cards.length - 1 ? 'Finish →' : 'Next →';
+  }
+  $('rcNext').onclick = function () {
+    if (recapAt < cards.length - 1) { recapAt++; show(); } else closeRecap(true);
+  };
+  $('rcPrev').onclick = function () { if (recapAt > 0) { recapAt--; show(); } };
+  $('rcSkip').onclick = function () { recapAt = cards.length - 1; show(); };
+  $('rcClose').onclick = function () { closeRecap(false); };
+  $('rcNext').focus();
+}
+function closeRecap(finished) {
+  var h = $('recap');
+  if (h) h.remove();
+  document.body.style.overflow = '';
+  if (finished) {
+    var f = $('endActions');
+    if (f) f.scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' });
+  }
+}
+document.addEventListener('keydown', function (e) {
+  if (!$('recap')) return;
+  if (e.key === 'Escape') closeRecap(false);
+  if (e.key === 'ArrowRight') $('rcNext').click();
+  if (e.key === 'ArrowLeft') $('rcPrev').click();
+});
+
+/* Print is a different artefact from the screen. The recap is seven dark
+   full-bleed cards and would print appallingly; the report is a document and
+   prints fine once the page stops being black. They share their SOURCE, not
+   their styling. */
+function printReport() {
+  document.documentElement.classList.add('printing');
+  var r = buildReport();
+  var host = document.createElement('div');
+  host.id = 'printdoc';
+  host.innerHTML = r.html + ksbSection();
+  document.body.appendChild(host);
+  var done = function () {
+    document.documentElement.classList.remove('printing');
+    var h = $('printdoc'); if (h) h.remove();
+    window.removeEventListener('afterprint', done);
+  };
+  window.addEventListener('afterprint', done);
+  setTimeout(function () { window.print(); setTimeout(done, 800); }, 60);
 }
 
 /* ── the in-page viewer ──────────────────────────────────────────────────
