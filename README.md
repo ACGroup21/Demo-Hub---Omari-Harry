@@ -69,9 +69,9 @@ Its index was rebuilt from source and it now survives on merit.
 ## The numbers it lands on
 
 1,340 staff at the published UK average salary is a £54.8m pay bill, which is **£259,104 of levy a
-year**. Three colleagues on two standards across five years commits £30,000 of the £1.3m that
-arrives in that time — so **£1,006,415 expires unused**, about a quarter of a million a year on a
-rolling twelve-month clock, because the money left the payroll either way.
+year**. Three colleagues on two standards commits £30,000 of it across five years — so roughly
+**a quarter of a million dies every year**, because levy lands monthly and expires twelve months
+later. It is not a balance building up somewhere: it is the same annual loss, repeated.
 
 Expiry is not the point, though, and the page says so. The point is the ratio: three of 1,340 is
 **one colleague in 447**, against a 5% Club target of 67 and a levy that would already fund 51

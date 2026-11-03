@@ -949,8 +949,11 @@ function buildReport() {
         fmt(levy.monthly) + '</td></tr>' +
       '<tr><td>Committed by this plan (' + people.length + ' × ' + esc(inst1.name) + ')</td>' +
         '<td class="num">' + fmt(inst1.band * people.length) + '</td></tr>' +
-      '<tr><td><b>Left unspent against this year’s levy</b></td><td class="num"><b>' +
-        fmt(Math.max(0, levy.annual - inst1.band * people.length)) + '</b></td></tr></table>') +
+      '<tr><td><b>Gone within ' + RULES.expiryMonths + ' months of landing</b></td><td class="num"><b>' +
+        fmt(Math.max(0, levy.annual - inst1.band * people.length)) + '</b></td></tr></table>' +
+      '<p class="warnline">Not a balance carried forward. Levy lands monthly and dies ' +
+      RULES.expiryMonths + ' months later, so this is an <b>annual loss that repeats</b> &mdash; not ' +
+      'a pot building up somewhere waiting to be spent.</p>') +
 
     sec('Who is being put forward',
       '<p>Chosen from <b>' + TEAM.filter(function (p) { return eligible(p.id); }).length + '</b> of ' +
@@ -1592,8 +1595,8 @@ function drawStep7() {
       '</div><div class="s">' + n + ' people × 2 programmes</div></div>' +
     '<div class="t"><div class="k">Levy over 5 years</div><div class="v">' + fmt(levy5) +
       '</div><div class="s">at ' + fmt(levy.annual) + ' a year</div></div>' +
-    '<div class="t waste"><div class="k">Expires unused</div><div class="v">' + fmt(lost) +
-      '</div><div class="s">about ' + fmt(perYear) + ' <b>every year</b></div></div>' +
+    '<div class="t waste"><div class="k">Dies every year</div><div class="v">' + fmt(perYear) +
+      '</div><div class="s">' + fmt(lost) + ' over the five — four annual losses, not a balance</div></div>' +
     '<div class="t"><div class="k">Unfunded time</div><div class="v">' + fmt(otjAll) +
       '</div><div class="s">both programmes, your cost</div></div>' +
     '</div>' +
@@ -1708,8 +1711,9 @@ function recapCards() {
     { k: 'What you committed', v: fmt(spend),
       s: n + ' colleagues, two standards, five years — against ' + fmt(acct.received) +
          ' of levy received over the same period.' },
-    { k: 'And what left anyway', v: fmt(acct.expired),
-      s: 'Expired unused on a rolling clock, about ' + fmt(acct.expired / 4) + ' a year. The ' +
+    { k: 'And what died anyway', v: fmt(acct.expired / 4) + ' a year',
+      s: fmt(acct.expired) + ' across the five, and none of it was ever a balance — levy lands ' +
+         'monthly and dies twelve months later, so this is the same loss four times over. The ' +
          'constraint was never the money — it was how many jobs were ready.' }
   ];
 }
