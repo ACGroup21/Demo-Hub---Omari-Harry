@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Golden cases — the funding maths, checked against gov.uk</title>
+<meta name="description" content="58 published gov.uk worked examples, run live against the Fundable calculation core. Every case cites the rule it tests and links its source.">
+<link rel="icon" href="../assets/fundable-favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000; --cyan:#00C9CC; --cyan-dim:rgba(0,201,204,.45);
+  --ink:#eef4fc; --muted:#9fb1ca; --muted-2:#6f829c;
+  --warm:#f0a35c; --bad:#e8705f; --good:#4fd6a0;
+  --line:rgba(159,177,202,.16); --card:rgba(11,20,38,.9);
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --r-lg:14px; --r-md:10px; --r-sm:6px; --r-pill:999px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.6;
+  font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 540px at 10% -14%,rgba(0,201,204,.085),transparent 62%)}
+.wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:0 20px}
+a{color:var(--cyan)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:var(--r-sm)}
+
+header{padding:46px 0 0;max-width:74ch}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted-2);margin-bottom:12px}
+.eyebrow a{color:var(--muted-2);text-decoration:none;border-bottom:1px solid var(--line)}
+.eyebrow a:hover{color:var(--cyan)}
+h1{margin:0;font-size:clamp(26px,3.4vw,36px);line-height:1.14;letter-spacing:-.02em;
+  font-weight:800;text-wrap:balance}
+.lede{margin:16px 0 0;color:var(--muted);font-size:16.5px;line-height:1.68;max-width:66ch}
+.lede b{color:var(--ink);font-weight:600}
+
+.verdict{margin:30px 0 0;border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--card);padding:22px 24px}
+.verdict.pass{border-color:rgba(79,214,160,.45)}
+.verdict.fail{border-color:rgba(232,112,95,.55)}
+#out{font-size:14px}
+#out table{width:100%;border-collapse:collapse;margin-top:6px}
+#out a{font-family:var(--mono)}
+#out strong{color:var(--ink)}
+
+.what{margin:28px 0 0;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.what div{border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;
+  background:rgba(159,177,202,.03)}
+.what b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--warm);margin-bottom:7px;font-weight:500}
+.what span{font-size:13px;line-height:1.62;color:var(--muted-2)}
+.what span b{display:inline;font-family:inherit;font-size:inherit;letter-spacing:0;
+  text-transform:none;color:var(--muted);margin:0}
+
+footer{margin:54px 0 70px;padding-top:24px;border-top:1px solid var(--line);
+  color:var(--muted-2);font-size:13px;line-height:1.75;display:grid;gap:9px}
+footer b{color:var(--muted)}
+
+@media screen and (max-width:1023.98px){
+  .wrap{padding:0 16px}
+  h1{font-size:23px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow"><a href="../index.html">&larr; Sandbox</a> &middot; correctness</div>
+    <h1>The funding maths, checked against gov.uk&rsquo;s own worked examples</h1>
+    <p class="lede">Every figure in the Sandbox walkthrough comes out of one calculation core. This
+    page runs that core against <b>49 published worked examples</b> &mdash; the levy formula, the
+    August 2026 top-up boundary, co-investment and its age waivers, funding-band drawdown, FIFO
+    expiry, the incentive and hiring payments, and timezone-safe date handling.</p>
+    <p class="lede">It runs <b>now, in your browser</b>. Nothing here is a screenshot of a result:
+    each row calls the function and prints what came back beside what gov.uk says it should be. Each
+    case links the rule it rests on.</p>
+  </header>
+
+  <div class="verdict" id="verdict">
+    <div id="out">Running&hellip;</div>
+  </div>
+
+  <div class="what">
+    <div><b>What it tests</b><span>The <b>calculation core</b> itself &mdash; the module with no
+      interface attached &mdash; not a re-implementation written to agree with it.</span></div>
+    <div><b>Where the rules come from</b><span>A governed rulebook loaded at runtime, so a rule
+      change moves these cases rather than being patched into a page.</span></div>
+    <div><b>Why to the penny</b><span>Funding maths that is nearly right is wrong. Every case
+      asserts an exact figure, not a tolerance.</span></div>
+    <div><b>What is not here</b><span>The full suite has 58. Nine test the application&rsquo;s
+      <b>projection and plan-stage verdict</b> &mdash; its reading of the maths rather than the
+      maths &mdash; and need page state this extract does not carry. One of those nine was passing
+      without testing anything, which is why none of them are here.</span></div>
+  </div>
+
+  <footer>
+    <span><b>Sandbox by Omari Harry</b> &middot; powered by Fundable</span>
+    <span>This page carries the calculation core and the cases, and nothing else &mdash; no
+      interface, no data, no client work.</span>
+  </footer>
+
+</div>
+
+<script src="levy-engine.js"></script>
+<script src="golden-cases.js"></script>
+<script>
+/* The suite registers window.runGoldenCases and returns finished markup. It
+   is rendered here rather than in a panel behind a keyboard shortcut: the
+   whole point of the page is that a reader who was told the figures are
+   checked can watch them being checked. */
+(function () {
+  var out = document.getElementById('out'), v = document.getElementById('verdict');
+  if (typeof runGoldenCases !== 'function') {
+    out.innerHTML = '<b>The suite did not load.</b> That is itself a failure worth seeing, ' +
+      'rather than a page that quietly shows nothing.';
+    v.className = 'verdict fail';
+    return;
+  }
+  try {
+    var html = runGoldenCases();
+    out.innerHTML = html;
+    v.className = 'verdict ' + (html.indexOf('FAIL') > -1 ? 'fail' : 'pass');
+  } catch (err) {
+    out.innerHTML = '<b>The suite threw while running:</b> ' +
+      String(err && err.message || err).replace(/[<>]/g, '');
+    v.className = 'verdict fail';
+    if (window.console) console.error(err);
+  }
+})();
+</script>
+</body>
+</html>
