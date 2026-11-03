@@ -212,6 +212,28 @@ function gate(btnId, ok, why, doneLabel) {
    from step 7. */
 var RAIL_STOPS = ['#c9443a', '#c6662a', '#bc8426', '#ad9f36',
                   '#9ab757', '#85cd80', '#6fe0ae'];
+
+/* A colour that works as a 62px figure does not necessarily work as a 9.5px
+   label. Step one's red is 3.90:1 on a card — fine for large text, which needs
+   3.0, and a FAILURE for the recap's eyebrow and note headings, which need 4.5.
+   So each stop carries two companions, both measured rather than guessed:
+     INK  the stop lightened until small text on a dark card clears 4.6:1
+     ON   black or white, whichever has more contrast ON the stop itself,
+          for the tick inside a filled node
+   Only step one actually moves; the rest are already light enough to be
+   their own ink. */
+var RAIL_INK = ['#cf5950', '#c6662a', '#bc8426', '#ad9f36',
+                '#9ab757', '#85cd80', '#6fe0ae'];
+var RAIL_ON  = ['#ffffff', '#07121a', '#07121a', '#07121a',
+                '#07121a', '#07121a', '#07121a'];
+function stepInk(n, total) {
+  var t = (n - 1) / Math.max(1, (total || 7) - 1);
+  return RAIL_INK[Math.round(t * (RAIL_INK.length - 1))];
+}
+function stepOn(n, total) {
+  var t = (n - 1) / Math.max(1, (total || 7) - 1);
+  return RAIL_ON[Math.round(t * (RAIL_ON.length - 1))];
+}
 function stepColour(n, total) {
   var t = (n - 1) / Math.max(1, (total || 7) - 1);
   return RAIL_STOPS[Math.round(t * (RAIL_STOPS.length - 1))];
@@ -221,6 +243,8 @@ function paintRail() {
   [].forEach.call(steps, function (s, i) {
     var c = stepColour(i + 1, steps.length);
     s.style.setProperty('--stepc', c);
+    s.style.setProperty('--stepc-ink', stepInk(i + 1, steps.length));
+    s.style.setProperty('--stepc-on', stepOn(i + 1, steps.length));
     s.style.setProperty('--stepc-next', stepColour(Math.min(i + 2, steps.length), steps.length));
   });
 }
@@ -294,7 +318,9 @@ function lightActs() {
     var first = ACT_FIRST[a.getAttribute('data-act')];
     var s = step(first);
     a.classList.toggle('lit', !!s && !s.classList.contains('locked'));
-    a.style.setProperty('--stepc', stepColour(first, document.querySelectorAll('.step').length));
+    var tot = document.querySelectorAll('.step').length;
+    a.style.setProperty('--stepc', stepColour(first, tot));
+    a.style.setProperty('--stepc-ink', stepInk(first, tot));
   });
 }
 
@@ -1792,6 +1818,7 @@ function openRecap() {
     var card = document.createElement('div');
     card.className = 'rc-card' + (still ? '' : (dir > 0 ? ' rc-in-r' : ' rc-in-l'));
     card.style.setProperty('--stepc', col);
+    card.style.setProperty('--stepc-ink', stepInk(i + 1, cards.length));
     card.innerHTML =
       '<div class="rc-k">' + esc(c.k) + '</div>' +
       '<div class="rc-v"><span id="rcVal">' + c.v + '</span><span class="rc-tail">' +

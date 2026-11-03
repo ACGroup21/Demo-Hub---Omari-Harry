@@ -99,7 +99,7 @@ h1 em{font-style:normal;color:var(--cyan)}
 .act-label{display:flex;align-items:baseline;gap:14px;padding:40px 0 16px;flex-wrap:wrap}
 .act-label b{font-family:var(--mono);font-size:11px;letter-spacing:.19em;text-transform:uppercase;
   color:var(--muted-2);font-weight:500;transition:color .5s}
-.act.lit .act-label b{color:var(--cyan)}
+.act.lit .act-label b{color:var(--stepc-ink,var(--cyan))}
 .act-label i{font-style:normal;font-size:13px;color:var(--muted-2)}
 
 /* ── the roadmap ──────────────────────────────────────────────────────── */
@@ -118,7 +118,7 @@ h1 em{font-style:normal;color:var(--cyan)}
 @keyframes arrive{0%,100%{box-shadow:0 0 0 5px rgba(240,163,92,.16)}
   50%{box-shadow:0 0 0 9px rgba(240,163,92,.05)}}
 .step.done .node{border-color:var(--stepc,var(--cyan));background:var(--stepc,var(--cyan));
-  color:#07121a;font-weight:600;animation:none}
+  color:var(--stepc-on,#07121a);font-weight:600;animation:none}
 .step.done .node span{display:none}
 .step.done .node::after{content:'\2713';font-size:15px}
 
@@ -524,7 +524,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   padding:26px 24px;min-height:0;overflow:hidden}
 .rc-card{position:absolute;max-width:860px;width:100%;text-align:center}
 .rc-k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--stepc);margin-bottom:16px}
+  color:var(--stepc-ink,var(--stepc));margin-bottom:16px}
 .rc-v{font-family:var(--mono);font-size:clamp(32px,6.4vw,62px);font-weight:600;line-height:1.04;
   color:var(--stepc);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .rc-v .rc-tail{font-size:.42em;color:var(--muted);letter-spacing:0;margin-left:.35em}
@@ -536,7 +536,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   padding:12px 14px;background:rgba(159,177,202,.035);opacity:0;
   animation:rcNote .5s cubic-bezier(.2,.7,.3,1) both}
 .rc-note b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--stepc);margin-bottom:6px;font-weight:500}
+  text-transform:uppercase;color:var(--stepc-ink,var(--stepc));margin-bottom:6px;font-weight:500}
 .rc-note span{font-size:13px;line-height:1.55;color:var(--muted)}
 @keyframes rcNote{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .rc-in-r{animation:rcInR .48s cubic-bezier(.2,.7,.3,1) both}
@@ -836,6 +836,6 @@ footer b{color:var(--muted)}
   <div id="vhost"></div>
 </div>
 
-<script src="journey.js?v=26"></script>
+<script src="journey.js?v=27"></script>
 </body>
 </html>
