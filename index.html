@@ -40,15 +40,45 @@ a{color:var(--cyan)}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* ── chrome ───────────────────────────────────────────────────────────── */
-.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;padding:20px 0 0;flex-wrap:wrap}
-.topbar img{height:50px;width:auto}
-.stamp{font-family:var(--mono);font-size:10.5px;color:var(--muted-2);margin:0;text-align:right;line-height:1.75;max-width:62ch}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:22px;
+  padding:24px 0 0;flex-wrap:wrap}
+.topbar img{height:52px;width:auto}
+/* the provenance was a wall of 10px mono beside the logo; it is now one line
+   that opens, because it matters but it is not the headline */
+details.prov{font-family:var(--mono);font-size:10.5px;color:var(--muted-2);max-width:70ch}
+details.prov>summary{cursor:pointer;list-style:none;text-align:right;letter-spacing:.04em;
+  padding:5px 0}
+details.prov>summary::-webkit-details-marker{display:none}
+details.prov>summary:hover,details.prov[open]>summary{color:var(--cyan)}
+details.prov>summary b{color:var(--muted);font-weight:500}
+.stamp{font-family:var(--mono);font-size:10.5px;color:var(--muted-2);margin:8px 0 0;
+  text-align:right;line-height:1.95}
 .stamp b{color:var(--muted);font-weight:500}
-header{padding:30px 0 10px}
-h1{margin:0 0 12px;font-size:clamp(27px,4.3vw,42px);line-height:1.09;font-weight:800;letter-spacing:-.022em;text-wrap:balance}
+header{padding:56px 0 18px;max-width:72ch}
+h1{margin:0 0 18px;font-size:clamp(30px,4.8vw,48px);line-height:1.05;font-weight:800;
+  letter-spacing:-.027em;text-wrap:balance}
 h1 em{font-style:normal;color:var(--cyan)}
-.lede{margin:0;max-width:64ch;color:var(--muted);font-size:clamp(15px,1.75vw,17px)}
+.lede{margin:0;max-width:60ch;color:var(--muted);font-size:clamp(15px,1.8vw,17.5px);line-height:1.68}
 .lede b{color:var(--ink);font-weight:600}
+
+/* ── acts ─────────────────────────────────────────────────────────────────
+   Seven steps is a lot to hold. Three acts give the page a shape you can see
+   from the top, and the rail runs straight through them so the spine is not
+   interrupted. */
+.act{display:grid;grid-template-columns:var(--rail) 1fr;gap:0 24px;align-items:stretch}
+.act .rail{position:relative;justify-self:center;width:var(--rail)}
+.act .rail::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;
+  background:var(--line);transition:background .5s}
+.act.lit .rail::after{background:var(--cyan-dim)}
+.act .rail::before{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;
+  margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#05080f;box-shadow:0 0 0 2px var(--line);
+  z-index:2;transition:box-shadow .5s,background .5s}
+.act.lit .rail::before{background:var(--cyan);box-shadow:0 0 0 2px var(--cyan)}
+.act-label{display:flex;align-items:baseline;gap:14px;padding:40px 0 16px;flex-wrap:wrap}
+.act-label b{font-family:var(--mono);font-size:11px;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--muted-2);font-weight:500;transition:color .5s}
+.act.lit .act-label b{color:var(--cyan)}
+.act-label i{font-style:normal;font-size:13px;color:var(--muted-2)}
 
 /* ── the roadmap ──────────────────────────────────────────────────────── */
 .step{display:grid;grid-template-columns:var(--rail) 1fr;gap:0 24px;align-items:start}
@@ -66,13 +96,15 @@ h1 em{font-style:normal;color:var(--cyan)}
 .step.done .node span{display:none}
 .step.done .node::after{content:'\2713';font-size:15px}
 
-.card{margin:16px 0 0;border:1px solid var(--line);border-radius:16px;background:var(--card);
-  padding:22px 24px;transition:opacity .4s,filter .4s}
-.step.locked .card{opacity:.3;pointer-events:none;filter:grayscale(.5)}
-.step.folded .card{padding:14px 20px}
-.card-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.card-h h2{margin:0;font-size:18.5px;font-weight:700;letter-spacing:-.015em}
-.fold-sum{margin:0;color:var(--cyan);font-size:13.5px;font-family:var(--mono)}
+.card{margin:18px 0 0;border:1px solid var(--line);border-radius:16px;background:var(--card);
+  padding:26px 28px 28px;transition:opacity .4s,filter .4s,border-color .4s}
+.step.active .card{border-color:rgba(0,201,204,.22)}
+.step.locked .card{opacity:.28;pointer-events:none;filter:grayscale(.55)}
+.step.folded .card{padding:15px 22px}
+.card-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.card-h h2{margin:0;font-size:23px;font-weight:700;letter-spacing:-.022em;line-height:1.2}
+.step.folded .card-h h2{font-size:16px;font-weight:600;color:var(--muted)}
+.fold-sum{margin:0;color:var(--cyan);font-size:13px;font-family:var(--mono)}
 .reopen{margin-left:auto;background:none;border:0;color:var(--muted-2);font:inherit;font-size:12px;
   cursor:pointer;text-decoration:underline;padding:0}
 .reopen:hover{color:var(--cyan)}
@@ -80,8 +112,31 @@ h1 em{font-style:normal;color:var(--cyan)}
   text-decoration:underline;text-underline-offset:2px}
 .linklike:hover{filter:brightness(1.2)}
 .step.folded .card-body{display:none}
-.sub{margin:6px 0 16px;color:var(--muted);font-size:14px;max-width:74ch}
+.sub{margin:10px 0 20px;color:var(--muted);font-size:14.5px;line-height:1.68;max-width:70ch}
 .sub b{color:var(--ink);font-weight:600}
+
+/* ── payoff ───────────────────────────────────────────────────────────────
+   The moments the walkthrough is actually for — the readout, the reality
+   check, the verdict, the five-year tally. They were the same grey as the
+   paragraphs around them, so they read as more text rather than as an
+   arrival. One shared surface, lifted off the card. */
+.payoff,.check,.verdict,.why{border-radius:14px;padding:22px 24px;margin-top:20px;position:relative;
+  background:linear-gradient(180deg,rgba(0,201,204,.075),rgba(0,201,204,.015));
+  border:1px solid var(--cyan-dim)}
+.payoff::before,.check::before,.verdict::before,.why::before{content:'';position:absolute;left:0;top:18px;bottom:18px;width:2px;
+  border-radius:2px;background:var(--cyan)}
+.payoff.warn,.check,.why{background:linear-gradient(180deg,rgba(240,163,92,.08),rgba(240,163,92,.015));
+  border-color:rgba(240,163,92,.42)}
+.payoff.warn::before,.check::before,.why::before{background:var(--warm)}
+.payoff.stop,.verdict.bad{background:linear-gradient(180deg,rgba(232,112,95,.09),rgba(232,112,95,.015));
+  border-color:rgba(232,112,95,.45)}
+.payoff.stop::before,.verdict.bad::before{background:var(--bad)}
+.payoff>h3,.check h3,.verdict h3,.why h4{margin:0 0 10px;font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--cyan)}
+.payoff.warn>h3,.check h3,.why h4{color:var(--warm)}
+.payoff.stop>h3,.verdict.bad h3{color:var(--bad)}
+.payoff>p,.check p,.verdict p,.why p{margin:0 0 10px;font-size:14px;line-height:1.66;color:var(--muted);max-width:74ch}
+.payoff>p:last-child,.check p:last-child,.verdict p:last-child,.why p:last-child{margin-bottom:0}
+.payoff b,.check b,.verdict b,.why b{color:var(--ink)}
 
 /* ── working-out panel ────────────────────────────────────────────────── */
 details.work{margin-top:18px;border-top:1px dashed var(--line);padding-top:13px}
@@ -111,6 +166,19 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .btn:disabled{opacity:.3;cursor:not-allowed;filter:none}
 .scale{display:flex;justify-content:space-between;max-width:520px;font-family:var(--mono);
   font-size:10.5px;color:var(--muted-2);margin-top:4px}
+/* Brayford's actual pay bill, marked on the track. The slider is there to be
+   played with; the scenario still has one real number, and the step will not
+   let you leave on someone else's. */
+.sliderwrap{position:relative;max-width:520px;padding-top:20px}
+.mark{position:absolute;top:12px;height:28px;width:2px;background:var(--warm);
+  border-radius:2px;pointer-events:none;transform:translateX(-1px)}
+.mark i{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-style:normal;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--warm);white-space:nowrap}
+.hint{margin:14px 0 0;font-size:13px;line-height:1.6;max-width:62ch;color:var(--muted)}
+.hint b{color:var(--ink)}
+.hint.off{color:var(--warm)}
+.hint.off b{color:var(--warm)}
 .big{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--ink);
   font-variant-numeric:tabular-nums;line-height:1.2;margin-bottom:10px}
 
@@ -145,12 +213,6 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .person .flag.soft{color:var(--muted-2)}
 .person .flag{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
   color:var(--warm);margin-top:7px}
-.why{margin-top:14px;border:1px solid var(--warm);border-radius:13px;padding:15px 17px;
-  background:rgba(240,163,92,.06)}
-.why h4{margin:0 0 7px;font-size:14px;font-weight:700;color:var(--warm)}
-.why p{margin:0 0 8px;font-size:13.5px;color:var(--muted);max-width:76ch}
-.why p:last-child{margin-bottom:0}
-.why b{color:var(--ink)}
 .why .dismiss{background:none;border:0;padding:0;font:inherit;font-size:12px;color:var(--muted-2);
   cursor:pointer;text-decoration:underline}
 .why .dismiss:hover{color:var(--cyan)}
@@ -185,12 +247,6 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .learner details>summary{cursor:pointer;font-size:12px;color:var(--muted-2);list-style:none}
 .learner details>summary::-webkit-details-marker{display:none}
 .learner details>summary:hover{color:var(--cyan)}
-.check{margin-top:20px;border:1px solid var(--warm);border-radius:13px;padding:16px 18px;
-  background:rgba(240,163,92,.06)}
-.check h3{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--warm);letter-spacing:.01em}
-.check p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:76ch}
-.check p:last-child{margin-bottom:0}
-.check b{color:var(--ink)}
 
 /* ── step 7 · the pathway ─────────────────────────────────────────────── */
 .tl-wrap{overflow-x:auto;padding-bottom:4px}
@@ -264,14 +320,6 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .oline{margin:9px 0 0;font-size:13px;color:var(--muted);max-width:78ch}
 .oline b{color:var(--ink)}
 .opt.dead .oline b{color:var(--bad)}
-.verdict{margin-top:18px;border:1px solid var(--cyan-dim);border-radius:13px;padding:16px 18px;
-  background:var(--cyan-ghost)}
-.verdict.bad{border-color:var(--bad);background:rgba(232,112,95,.07)}
-.verdict h3{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--cyan)}
-.verdict.bad h3{color:var(--bad)}
-.verdict p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:78ch}
-.verdict p:last-child{margin-bottom:0}
-.verdict b{color:var(--ink)}
 
 /* ── step 5 · the report ──────────────────────────────────────────────── */
 .doc{border:1px solid var(--line);border-radius:13px;background:#060a14;padding:24px 26px;margin-top:4px}
@@ -292,7 +340,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .doc td b{color:var(--ink)}
 .doc td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
   white-space:nowrap;color:var(--ink);padding-right:0}
-.doc .act{color:var(--warm)}
+.doc .warnline{color:var(--warm)}
 .doc-foot{margin-top:22px;padding-top:13px;border-top:1px solid var(--line);
   font-family:var(--mono);font-size:10px;color:var(--muted-2);line-height:1.9}
 .doc-foot a{color:var(--muted)}
@@ -310,8 +358,23 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 #vhost{flex:1 1 auto;min-height:0}
 #vhost iframe{width:100%;height:100%;border:0;background:#05080f}
 
-footer{margin:56px 0 70px;padding-top:22px;border-top:1px solid var(--line);
-  color:var(--muted-2);font-size:13px;display:flex;gap:18px;flex-wrap:wrap;justify-content:space-between}
+/* next rungs — its own treatment rather than borrowing step 4's learner card */
+.rungs{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.rungs li{display:flex;align-items:baseline;gap:14px;padding:13px 2px;
+  border-bottom:1px solid rgba(159,177,202,.07);flex-wrap:wrap}
+.rungs .rn{font-weight:600;font-size:14.5px}
+.rungs .rl{font-family:var(--mono);font-size:10.5px;color:var(--muted-2);
+  border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.rungs .rm{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.rungs .rm b{color:var(--ink)}
+.subhead{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--cyan);font-weight:500;margin:30px 0 10px}
+
+footer{margin:66px 0 80px;padding-top:26px;border-top:1px solid var(--line);
+  color:var(--muted-2);font-size:13px;line-height:1.75;display:grid;gap:10px}
+footer .f1{color:var(--muted)}
+footer .f1 b{color:var(--ink);font-weight:600}
 footer b{color:var(--muted)}
 
 @media (max-width:640px){
@@ -319,7 +382,12 @@ footer b{color:var(--muted)}
   .step{gap:0 12px}
   .node{width:28px;height:28px;font-size:9.5px;margin-top:22px}
   .card{padding:18px 16px}
-  .stamp{text-align:left}
+  .stamp,details.prov>summary{text-align:left}
+  details.prov{width:100%}
+  .act-label{padding:28px 0 12px}
+  .card{padding:20px 17px 22px}
+  .card-h h2{font-size:20px}
+  .payoff,.check,.verdict,.why{padding:17px 18px}
   .topbar img{height:40px}
   .big{font-size:24px}
 }
@@ -343,10 +411,11 @@ footer b{color:var(--muted)}
 
   <div class="topbar">
     <img src="assets/sandbox-logo-transparent.svg" alt="Sandbox by Omari Harry">
-    <div>
-      <p class="stamp" id="stampRules">Loading the funding rulebook&hellip;</p>
+    <details class="prov">
+      <summary id="provSum">Loading the funding rulebook&hellip;</summary>
+      <p class="stamp" id="stampRules"></p>
       <p class="stamp" id="stampStds"></p>
-    </div>
+    </details>
   </div>
 
   <header>
@@ -356,7 +425,9 @@ footer b{color:var(--muted)}
     the next, and every narrowing shows its working.</p>
   </header>
 
-  <!-- 01 ─────────────────────────────────────────────────────────────── -->
+    <div class="act" data-act="The money"><div class="rail"></div><div class="act-label"><b>The money</b><i>what you have, and what it really is</i></div></div>
+
+<!-- 01 ─────────────────────────────────────────────────────────────── -->
   <section class="step active" id="s1" data-n="1">
     <div class="rail"><div class="node"><span>01</span></div></div>
     <div class="card">
@@ -369,8 +440,12 @@ footer b{color:var(--muted)}
         number than employers expect. Move it if you like; the story continues either way.</p>
         <label for="paybill">Annual pay bill</label>
         <div class="big" id="pbOut">&pound;30,000,000</div>
-        <input type="range" id="paybill" min="3000000" max="90000000" step="500000" value="30000000">
+        <div class="sliderwrap">
+          <input type="range" id="paybill" min="3000000" max="90000000" step="500000" value="30000000">
+          <div class="mark" id="pbMark"><i>Brayford</i></div>
+        </div>
         <div class="scale"><span>&pound;3m</span><span>&pound;45m</span><span>&pound;90m</span></div>
+        <p class="hint" id="pbHint"></p>
         <div class="row"><button class="btn" id="go1">This is my budget &rarr;</button></div>
         <details class="work"><summary>How that becomes a levy <span class="chain" id="chain1"></span></summary>
           <table class="funnel" id="work1"></table>
@@ -396,7 +471,9 @@ footer b{color:var(--muted)}
     </div>
   </section>
 
-  <!-- 03 ─────────────────────────────────────────────────────────────── -->
+    <div class="act" data-act="The people"><div class="rail"></div><div class="act-label"><b>The people</b><i>who can be put forward, and what their jobs evidence</i></div></div>
+
+<!-- 03 ─────────────────────────────────────────────────────────────── -->
   <section class="step locked" id="s3" data-n="3">
     <div class="rail"><div class="node"><span>03</span></div></div>
     <div class="card">
@@ -444,7 +521,9 @@ footer b{color:var(--muted)}
     </div>
   </section>
 
-  <!-- 06 ─────────────────────────────────────────────────────────────── -->
+    <div class="act" data-act="The decision"><div class="rail"></div><div class="act-label"><b>The decision</b><i>what to buy, and where it leads</i></div></div>
+
+<!-- 06 ─────────────────────────────────────────────────────────────── -->
   <section class="step locked" id="s6" data-n="6">
     <div class="rail"><div class="node"><span>06</span></div></div>
     <div class="card">
@@ -465,10 +544,12 @@ footer b{color:var(--muted)}
   </section>
 
   <footer>
-    <span><b>Sandbox by Omari Harry</b> &middot; powered by Fundable. Invented employer, real funding rules.</span>
+    <span class="f1"><b>Sandbox by Omari Harry</b> &middot; powered by Fundable</span>
+    <span>Brayford Stores and its ten colleagues are invented. The levy arithmetic, the funding bands,
+      the published duties and the off-the-job hours are real, sourced and dated.</span>
     <span>The full calculator this was cut from opens
-      <button class="linklike" data-view="apps/fundable.html" data-title="Fundable &mdash; the full calculator">here
-      in this page</button> &mdash; run the 58 golden cases yourself.</span>
+      <button class="linklike" data-view="apps/fundable.html" data-title="Fundable &mdash; the full calculator">here,
+      inside this page</button> &mdash; run its 58 golden cases against gov.uk&rsquo;s own worked examples yourself.</span>
   </footer>
 
 </div>

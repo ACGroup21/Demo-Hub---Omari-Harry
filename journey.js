@@ -116,6 +116,7 @@ function unlock(n) {
   if (!s || !s.classList.contains('locked')) return;
   s.classList.remove('locked');
   s.classList.add('active');
+  lightActs();
 }
 function complete(n, summary, foldable) {
   var s = step(n);
@@ -128,6 +129,7 @@ function complete(n, summary, foldable) {
     var b = s.querySelector('.reopen');
     if (b) b.hidden = false;
   }
+  lightActs();
 }
 function goTo(n) {
   unlock(n);
@@ -138,6 +140,17 @@ function goTo(n) {
 }
 function reduced() {
   return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/* An act lights once anything inside it is reachable, so the three labels on
+   the rail fill in as you descend rather than all being lit from the start. */
+var ACT_FIRST = { 'The money': 1, 'The people': 3, 'The decision': 6 };
+function lightActs() {
+  [].forEach.call(document.querySelectorAll('.act'), function (a) {
+    var first = ACT_FIRST[a.getAttribute('data-act')];
+    var s = step(first);
+    a.classList.toggle('lit', !!s && !s.classList.contains('locked'));
+  });
 }
 
 /* reopen a folded step without losing what is below it */
@@ -170,6 +183,28 @@ function drawStep1() {
   payBill = +$('paybill').value;
   levy = calcLevy(payBill);
   $('pbOut').innerHTML = fmt(payBill);
+
+  /* Brayford's real pay bill, marked on the track. Explore freely; you cannot
+     leave the step on another company's number, because every figure in the
+     six steps below is derived from this one. */
+  var target = (PW && PW.employer.payBill) || 30000000;
+  var el = $('paybill'), lo = +el.min, hi = +el.max;
+  var frac = (target - lo) / (hi - lo);
+  $('pbMark').style.left = 'calc(9px + (100% - 18px) * ' + frac.toFixed(5) + ')';
+
+  var onTarget = payBill === target;
+  var t = calcLevy(target);
+  var diff = levy.annual - t.annual;
+  $('go1').disabled = !onTarget;
+  $('pbHint').className = 'hint' + (onTarget ? '' : ' off');
+  $('pbHint').innerHTML = onTarget
+    ? 'That is Brayford’s actual pay bill. Move the slider to see what a bigger or smaller ' +
+      'employer would have &mdash; then come back here to carry on.'
+    : 'At ' + fmt(payBill) + ' the levy would be <b>' + fmt(levy.annual) + '</b> a year, ' +
+      '<b>' + fmt(Math.abs(diff)) + '</b> ' + (diff > 0 ? 'more' : 'less') + ' than Brayford’s. ' +
+      'Slide back to the <b>' + fmtM(target) + '</b> marker to continue &mdash; the rest of the ' +
+      'walkthrough runs on Brayford’s real numbers.';
+
   $('chain1').textContent = '— ' + fmtM(payBill) + ' → ' + fmt(levy.annual) + '/yr';
   $('work1').innerHTML = funnelRows([
     { label: 'annual pay bill', value: fmt(levy.payBill) },
@@ -505,7 +540,7 @@ function buildReport() {
       rows + '</table>') +
 
     sec('What has to change before anyone enrols', gaps.length
-      ? '<p class="act">Not one of these ' + people.length + ' currently evidences <b>' + gaps.map(esc).join('</b>, <b>') +
+      ? '<p class="warnline">Not one of these ' + people.length + ' currently evidences <b>' + gaps.map(esc).join('</b>, <b>') +
         '</b>. An apprentice is assessed on the job they do, so each needs to become a real, standing ' +
         'responsibility <b>before</b> the programme starts &mdash; not something the training is expected ' +
         'to supply.</p>'
@@ -521,7 +556,7 @@ function buildReport() {
         '<td class="num">£' + otj.rate.toFixed(2) + '</td></tr>' +
         '<tr><td><b>Cost of that time to Brayford</b></td><td class="num"><b>' + fmt(otj.cost) +
         '</b></td></tr></table>' +
-        '<p class="act">The levy pays for training. It does not pay for the hours. On this plan the ' +
+        '<p class="warnline">The levy pays for training. It does not pay for the hours. On this plan the ' +
         'unfunded time costs <b>' + fmt(otj.cost) + '</b> against <b>' + fmt(inst1.band * otj.people) +
         '</b> of funded training — and it comes off a shop floor already covered to the hour.</p>'
       : '<p>No published minimum-hours figure for this standard.</p>');
@@ -854,15 +889,14 @@ function drawStep7() {
     '<b>' + Math.round(spend / levy5 * 100) + '%</b> of a levy is a normal amount for an employer to ' +
     'use, and the rest goes back to the Treasury twelve months after it lands.</p></div>' +
 
-    '<h4 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;' +
-    'color:var(--cyan);font-weight:500;margin:24px 0 9px">After year five</h4>' +
+    '<p class="subhead">After year five</p>' +
     '<p class="sub">Where ' + esc(two.name) + ' leads, if they stay. <b>' + above.length + '</b> funded ' +
     'standards sit above it in the same route &mdash; counted from the library, not chosen by us.</p>' +
-    '<ul class="hits" style="list-style:none;margin:0;padding:0">' +
+    '<ul class="rungs">' +
     above.slice(0, 3).map(function (s) {
-      return '<li class="learner" style="margin-top:8px"><div class="lh">' +
-        '<span class="ln">' + esc(s.name) + '</span><span class="lr">Level ' + s.level + '</span>' +
-        '<span class="lscore">' + s.months + ' months · <b>' + fmt(s.band) + '</b></span></div></li>';
+      return '<li><span class="rn">' + esc(s.name) + '</span>' +
+        '<span class="rl">Level ' + s.level + '</span>' +
+        '<span class="rm">' + s.months + ' months · <b>' + fmt(s.band) + '</b></span></li>';
     }).join('') + '</ul>' +
 
     '<div class="row"><button class="btn ghost" id="restart">Start again &rarr;</button></div>';
@@ -883,6 +917,7 @@ function drawStep7() {
     step(1).querySelector('.reopen').hidden = true;
     $('why3').innerHTML = '';
     drawTeam();
+    lightActs();
     goTo(1);
   };
 
@@ -982,6 +1017,8 @@ Promise.all([
   STDMETA = res[1].meta || {};
   PW = res[2];
 
+  $('provSum').innerHTML = 'Rules verified <b>' + esc(RULES.asOf) + '</b> &middot; standards ' +
+    esc(((STDMETA.funding || {}).accurateAsOf) || '') + ' &middot; <b>where these figures come from &darr;</b>';
   $('stampRules').innerHTML = 'Funding rules: <b>' + (RULES.levyRate * 100).toFixed(1) + '%</b> levy &middot; ' +
     '<b>' + fmt(RULES.allowance) + '</b> allowance &middot; <b>' + Math.round(RULES.topUp * 100) + '%</b> top-up &middot; ' +
     '<b>' + RULES.expiryMonths + '-month</b> expiry &middot; ' + esc(RULES.src) + ', verified <b>' + esc(RULES.asOf) + '</b>';
@@ -996,6 +1033,7 @@ Promise.all([
   drawStep1();
   drawTeam();
   drawWork3();
+  lightActs();
 }).catch(function (err) {
   $('stampRules').innerHTML = 'Could not load the funding data — figures below are not trustworthy.';
   if (window.console) console.error(err);
