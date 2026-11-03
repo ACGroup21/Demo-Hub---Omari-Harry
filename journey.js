@@ -1652,6 +1652,9 @@ function drawStep7() {
     $('why3').innerHTML = '';
     drawTeam();
     lightActs();
+    /* restart sets the step classes directly rather than going through
+       complete(), so the stepper never heard about it and kept reading 7 of 7 */
+    syncStepper();
     goTo(1);
   };
 
@@ -1785,6 +1788,111 @@ function printReport() {
   setTimeout(function () { window.print(); setTimeout(done, 800); }, 60);
 }
 
+/* ── developer tools ─────────────────────────────────────────────────────
+   Off unless you ask for it: add ?dev to the URL, or press Ctrl+Shift+D.
+   A hiring reader opening the plain link never sees this.
+
+   "Run to" drives the REAL controls in sequence — it clicks the same buttons
+   a visitor would and waits for each gate to open. If a gate is broken, this
+   stalls on it rather than sailing past, which is the only version of a skip
+   button worth having. */
+var DEV = /[?&]dev\b/.test(location.search) || location.hash === '#dev';
+
+function devWait(fn, ms) {
+  var end = Date.now() + (ms || 4000);
+  return new Promise(function (res, rej) {
+    (function poll() {
+      if (fn()) return res(true);
+      if (Date.now() > end) return rej(new Error('timed out waiting'));
+      setTimeout(poll, 40);
+    })();
+  });
+}
+
+function devRunTo(target) {
+  var log = $('devLog');
+  var say = function (t) { if (log) log.textContent = t; };
+  return (async function () {
+    try {
+      if ($('splash') && !$('splash').classList.contains('gone')) $('enter').click();
+      await devWait(function () { return !$('go1').disabled; });
+      if (target <= 1) return say('at 1');
+
+      say('1 → levy');
+      $('go1').click();
+      await devWait(function () { return !step(3).classList.contains('locked'); });
+      if (target <= 3) return say('at 3');
+
+      say('3 → picking ' + PICK);
+      for (var i = 0; i < PICK; i++) {
+        var c = document.querySelectorAll('.person:not(.blocked)')[i];
+        if (!c) throw new Error('only ' + i + ' selectable');
+        c.click();
+        await devWait(function () { return true; }, 200);
+      }
+      await devWait(function () { return !$('go3').disabled; });
+      $('go3').click();
+      await devWait(function () { return !!document.querySelector('#body4 .learner'); });
+      if (target <= 4) return say('at 4');
+
+      say('4 → opening evidence');
+      document.querySelector('#body4 .learner details').open = true;
+      await devWait(function () { return !$('go4').disabled; });
+      $('go4').click();
+      await devWait(function () { return !!document.querySelector('#body5 .learner details'); });
+      if (target <= 5) return say('at 5');
+
+      say('5 → opening breakdown');
+      document.querySelectorAll('#body5 .learner details')[0].open = true;
+      await devWait(function () { return !$('go5').disabled; });
+      $('go5').click();
+      await devWait(function () { return !!$('assignAll'); });
+      if (target <= 6) return say('at 6');
+
+      say('6 → assigning');
+      $('assignAll').click();
+      await devWait(function () { return !$('go6').disabled; });
+      $('go6').click();
+      await devWait(function () { return !!$('recapGo'); });
+      say('complete — at 7');
+    } catch (err) {
+      say('STALLED: ' + err.message);
+      if (window.console) console.warn('[dev] stalled', err);
+    }
+  })();
+}
+
+function mountDev() {
+  if (!DEV || $('devbar')) return;
+  var el = document.createElement('div');
+  el.id = 'devbar';
+  el.innerHTML = '<b>dev</b>' +
+    [1, 3, 4, 5, 6, 7].map(function (n) {
+      return '<button data-dev="' + n + '">' + n + '</button>';
+    }).join('') +
+    '<button data-dev="7" class="pri">complete</button>' +
+    '<button data-devreset="1">reset</button>' +
+    '<span id="devLog"></span>';
+  document.body.appendChild(el);
+  el.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.hasAttribute('data-devreset')) {
+      if ($('restart')) { $('restart').click(); $('devLog').textContent = 'reset'; }
+      else location.reload();
+      return;
+    }
+    devRunTo(+b.getAttribute('data-dev'));
+  });
+}
+document.addEventListener('keydown', function (e) {
+  if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+    DEV = !DEV;
+    if (DEV) mountDev();
+    else { var d = $('devbar'); if (d) d.remove(); }
+  }
+});
+
 /* ── the in-page viewer ──────────────────────────────────────────────────
    Everything stays on this page. The iframe is built on open rather than
    sitting hidden in the markup, because a hidden iframe either loads 5MB
@@ -1902,6 +2010,7 @@ Promise.all([
   paintRail();
   lightActs();
   mountStepper();
+  mountDev();
   syncStepper();
 }).catch(function (err) {
   $('stampRules').innerHTML = 'Could not load the funding data — figures below are not trustworthy.';
