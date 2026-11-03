@@ -126,9 +126,17 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .ro-sum b{color:var(--ink)}
 
 /* ── people ───────────────────────────────────────────────────────────── */
-.team{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(228px,1fr))}
-.person{display:flex;flex-direction:column;gap:2px;text-align:left;font:inherit;color:inherit;width:100%;
-  background:rgba(159,177,202,.035);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.team{display:grid;gap:12px;justify-content:center;
+  grid-template-columns:repeat(auto-fit,minmax(214px,232px))}
+.person{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;
+  font:inherit;color:inherit;width:100%;
+  background:rgba(159,177,202,.035);border:1px solid var(--line);border-radius:12px;
+  padding:16px 14px 14px;cursor:pointer}
+.av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.02em;margin-bottom:9px;
+  border:1px solid rgba(255,255,255,.14);flex:0 0 auto}
+.person.on .av{box-shadow:0 0 0 3px var(--cyan-ghost)}
+.person.blocked .av{filter:grayscale(1) brightness(.8)}
 .person:hover{border-color:var(--cyan-dim)}
 .person.on{border-color:var(--cyan);background:var(--cyan-ghost)}
 .person.blocked{border-style:dashed;opacity:.5;cursor:help}
@@ -314,7 +322,7 @@ footer b{color:var(--muted)}
         <p class="fold-sum" id="sum3"></p>
         <button class="reopen" data-open="3" hidden>change</button></div>
       <div class="card-body">
-        <p class="sub">Ten people one rung below management. <b>Pick three.</b> Which of them has
+        <p class="sub">Ten people one rung below management. <b>Pick five.</b> Which of them has
         potential is your call &mdash; this tool will not guess at that, and software pretending to
         would be a feature that does not exist. What it will tell you is whose <b>current job</b>
         gives an assessor something to look at, because that is written in a job description rather

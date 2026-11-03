@@ -334,7 +334,7 @@
         },
         {
           "area": "Communication",
-          "state": "partly",
+          "state": "yes",
           "jd": 3
         }
       ],
@@ -454,7 +454,7 @@
         },
         {
           "area": "Leadership",
-          "state": "partly",
+          "state": "yes",
           "jd": 3
         }
       ],
@@ -470,6 +470,10 @@
           "jd": 3
         }
       ]
-    }
+    },
+    "_revisions": [
+      "Jordan A. Leadership partly -> yes: the same act as Dan F., who was already marked yes. Consistency, not a loosening.",
+      "Priya N. Communication partly -> yes: a daily team brief is cascading information. Both reads are defensible; the evidence line is shown so a reader can take the other one."
+    ]
   }
 }

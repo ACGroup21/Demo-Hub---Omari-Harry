@@ -100,6 +100,7 @@ var RULES = {
 var STD = {}, STDMETA = {}, PW = null;
 var payBill = 30000000;
 var picked = {};
+var PICK = 5;            /* how many the scenario asks for */
 var levy = {};
 
 /* ── the step machine ────────────────────────────────────────────────────── */
@@ -219,11 +220,24 @@ function tally(id) {
 }
 function eligible(id) { return tally(id).yes.length > 0; }
 
+/* Initials, not faces. A generated portrait of an invented colleague would be
+   the one thing on this page pretending to be real, and these people are not.
+   The hue is derived from the name so it is stable between renders. */
+function avatar(name) {
+  var initials = name.replace(/[^A-Za-z. ]/g, '').split(/\s+/)
+    .map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase();
+  var h = 0;
+  for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 360;
+  return '<span class="av" aria-hidden="true" style="background:hsl(' + h + ',32%,26%);color:hsl(' +
+    h + ',55%,78%)">' + esc(initials) + '</span>';
+}
+
 function drawTeam() {
   $('team').innerHTML = TEAM.map(function (p) {
     var ok = eligible(p.id);
     return '<button class="person' + (picked[p.id] ? ' on' : '') + (ok ? '' : ' blocked') +
       '" data-p="' + p.id + '"' + (ok ? '' : ' aria-disabled="true"') + '>' +
+      avatar(p.name) +
       '<span class="nm">' + esc(p.name) + '</span>' +
       '<span class="rl">' + esc(p.role) + ' · ' + p.yrs + ' yr' + (p.yrs === 1 ? '' : 's') + '</span>' +
       '<span class="nt">' + esc(p.note) + '</span>' +
@@ -234,11 +248,11 @@ function drawTeam() {
   var n = chosen().length;
   $('count3').innerHTML =
     '<b>' + ready + ' of your ' + TEAM.length + '</b> can be put forward today. ' +
-    (n === 0 ? 'Pick <b>three</b>.'
-      : n < 3 ? 'Picked <b>' + n + '</b> — choose ' + (3 - n) + ' more.'
-      : n === 3 ? '<b>Three chosen.</b> Everything below now runs on your three.'
-      : '<b>' + n + ' chosen</b> — more than three works, the cost just scales.');
-  $('go3').disabled = n < 3;
+    (n === 0 ? 'Pick <b>' + PICK + '</b>.'
+      : n < PICK ? 'Picked <b>' + n + '</b> — choose ' + (PICK - n) + ' more.'
+      : n === PICK ? '<b>' + PICK + ' chosen.</b> Everything below now runs on your ' + PICK + '.'
+      : '<b>' + n + ' chosen</b> — more than ' + PICK + ' works, the cost just scales.');
+  $('go3').disabled = n < PICK;
 }
 function chosen() {
   return TEAM.filter(function (p) { return picked[p.id]; });
@@ -342,11 +356,11 @@ function drawStep4() {
   $('body4').innerHTML =
     '<p class="sub">These six are the areas of the published <b>Retail manager</b> standard that are ' +
     'about managing people or money. An apprenticeship assumes the apprentice is already doing the job ' +
-    'well enough to be assessed on it &mdash; so the question is not whether your three are capable, ' +
+    'well enough to be assessed on it &mdash; so the question is not whether your ' + people.length + ' are capable, ' +
     'but whether <b>the job you currently give them</b> contains any of this.</p>' +
     cards +
     '<div class="check"><h3>The reality check</h3>' +
-    '<p>Across your three, <b>' + totalYes + ' of ' + max + '</b> management areas are clearly evidenced ' +
+    '<p>Across your ' + people.length + ', <b>' + totalYes + ' of ' + max + '</b> management areas are clearly evidenced ' +
     'by their current job descriptions.' +
     (never.length ? ' Not one of them has <b>' + never.map(esc).join('</b>, <b>') + '</b> in their role ' +
       'today.' : '') + '</p>' +
@@ -448,11 +462,11 @@ function buildReport() {
       rows + '</table>') +
 
     sec('What has to change before anyone enrols', gaps.length
-      ? '<p class="act">Not one of these three currently evidences <b>' + gaps.map(esc).join('</b>, <b>') +
+      ? '<p class="act">Not one of these ' + people.length + ' currently evidences <b>' + gaps.map(esc).join('</b>, <b>') +
         '</b>. An apprentice is assessed on the job they do, so each needs to become a real, standing ' +
         'responsibility <b>before</b> the programme starts &mdash; not something the training is expected ' +
         'to supply.</p>'
-      : '<p>All six areas are evidenced somewhere across the three. No role changes needed before enrolment.</p>') +
+      : '<p>All six areas are evidenced somewhere across the ' + people.length + '. No role changes needed before enrolment.</p>') +
 
     sec('The cost nobody funds', otj
       ? '<table><tr><td>Minimum off-the-job training, per apprentice</td><td class="num">' +
