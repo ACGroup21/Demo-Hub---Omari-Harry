@@ -166,6 +166,12 @@ document.addEventListener('toggle', function (e) {
    A step does not unlock the next until its own work is done, and the button
    says what is missing rather than just greying out. A disabled control with
    no reason given is the most annoying thing a page can do. */
+/* the gate names a real colleague rather than saying "one colleague" */
+function firstName() {
+  var c = chosen();
+  return c.length ? esc(c[0].name.split(' ')[0]) : 'a colleague';
+}
+
 function gate(btnId, ok, why, doneLabel) {
   var b = $(btnId);
   if (!b) return;
@@ -191,15 +197,19 @@ function gate(btnId, ok, why, doneLabel) {
    funded and warm means your own cost. These nodes are chrome, not data —
    they are a gradient down a rail, which is why they read as position rather
    than as a verdict. */
-var RAIL_STOPS = [[232, 112, 95], [240, 163, 92], [0, 201, 204], [79, 214, 160]];
+/* Seven explicit stops, not an interpolation. Interpolating RGB from orange to
+   cyan passes through a muddy green, which landed step 4 at rgb(120,182,148)
+   — 23.9 dE from step 7's green, close enough to read as the same thing. And
+   steps 6 and 7 came out 15 apart, effectively identical.
+
+   These were picked and then MEASURED in CIELAB: step 4 against step 7 is now
+   59 dE, no non-adjacent pair is under 31, and the closest pair of all is 15.3
+   between neighbours — which is what a ramp should look like. */
+var RAIL_STOPS = ['#c7443a', '#e8705f', '#f0a35c', '#efc86b',
+                  '#49a9a4', '#00c9cc', '#6fe0ae'];
 function stepColour(n, total) {
   var t = (n - 1) / Math.max(1, (total || 7) - 1);
-  var seg = Math.min(RAIL_STOPS.length - 2, Math.floor(t * (RAIL_STOPS.length - 1)));
-  var f = t * (RAIL_STOPS.length - 1) - seg;
-  var a = RAIL_STOPS[seg], b = RAIL_STOPS[seg + 1];
-  return 'rgb(' + a.map(function (v, i) {
-    return Math.round(v + (b[i] - v) * f);
-  }).join(',') + ')';
+  return RAIL_STOPS[Math.round(t * (RAIL_STOPS.length - 1))];
 }
 function paintRail() {
   var steps = document.querySelectorAll('.step');
@@ -441,7 +451,7 @@ function drawTeam() {
       : n < PICK ? 'Picked <b>' + n + '</b> — choose ' + (PICK - n) + ' more.'
       : n === PICK ? '<b>' + PICK + ' chosen.</b> Everything below now runs on your ' + PICK + '.'
       : '<b>' + n + ' chosen</b> — more than ' + PICK + ' works, the cost just scales.');
-  gate('go3', n >= PICK, 'Choose ' + (PICK - n) + ' more before you carry on.',
+  gate('go3', n >= PICK, 'Pick ' + (PICK - n) + ' more — then the next stage opens.',
        'Ready — ' + n + ' chosen.');
 }
 function chosen() {
@@ -682,8 +692,8 @@ function drawStep4() {
     'any of it. Which of the six areas count as management is our call too, not the standard&rsquo;s.</p>' +
     '</details>';
 
-  gate('go4', false, 'Open one colleague’s job description below to see what each line — ' +
-       'and what it does not — evidences.');
+  gate('go4', false, 'Open ' + firstName() + '’s job description below to see what each line — ' +
+       'and what it does not — evidences, then move to the next stage.');
   $('go4').onclick = function () {
     complete(4, totalYes + ' of ' + max + ' areas evidenced', true);
     unlock(5);
@@ -939,8 +949,8 @@ function drawStep5() {
     '<div class="row"><button class="btn" id="go5">Pick the apprenticeship &rarr;</button>' +
     '<button class="btn ghost" id="printRep">Open full screen to print</button></div>';
 
-  gate('go5', false, 'Open one colleague’s full list of knowledge, skills and behaviours ' +
-       'before you carry on — the counts above are the summary, not the evidence.');
+  gate('go5', false, 'Open ' + firstName() + '’s full list of published areas to see the evidence — ' +
+       'the rings above are only the summary — then move to the next stage.');
   $('go5').onclick = function () {
     complete(5, r.sections.length + '-section report built', true);
     unlock(6);
@@ -1078,7 +1088,9 @@ function drawPool() {
       })()
     : 'Cohort <b>0</b> of ' + chosen().length;
   gate('go6', inZone.length === chosen().length,
-       inZone.length + ' of ' + chosen().length + ' assigned — put the rest on the programme.',
+       'Drag the remaining ' + (chosen().length - inZone.length) + ' name' +
+       ((chosen().length - inZone.length) === 1 ? '' : 's') + ' onto Business administrator — ' +
+       'or click them — then the pathway opens.',
        'All ' + chosen().length + ' on the programme.');
   $('assignAll').hidden = pool.length === 0;
 }
