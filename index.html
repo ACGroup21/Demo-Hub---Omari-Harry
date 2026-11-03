@@ -415,6 +415,21 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .walkbar .wyr{font-family:var(--mono);font-size:11px;color:var(--warm);white-space:nowrap}
 .caveat{margin:14px 0 0;font-size:12.5px;color:var(--muted-2);max-width:76ch;line-height:1.65}
 .caveat b{color:var(--muted)}
+/* the provider-context card. Matches .prog's box so stage 6 reads as one
+   stack of equal-width cards rather than cards with footnotes between them. */
+.stopcard{border:1px solid rgba(240,163,92,.38);border-radius:14px;padding:18px 20px;
+  margin-top:14px;background:rgba(240,163,92,.05)}
+.stopcard h3{margin:0;font-size:16px;font-weight:700;color:var(--warm);letter-spacing:-.01em}
+.stopsub{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted);max-width:74ch}
+.stopgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  margin-top:16px}
+.stopnote{border-left:2px solid rgba(240,163,92,.4);padding-left:13px}
+.stopnote>b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--warm);margin-bottom:7px;font-weight:500;line-height:1.5}
+.stopnote>span{display:block;font-size:12.5px;line-height:1.65;color:var(--muted-2)}
+.stopnote>span b{color:var(--muted)}
+.stopnote .bad{color:var(--bad)}
+.stopnote a{color:var(--cyan);text-decoration:none;border-bottom:1px solid var(--cyan-dim)}
 .tally{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));margin-top:20px}
 .tally .t{border:1px solid var(--line);border-radius:12px;padding:14px 15px;
   background:rgba(159,177,202,.03)}
@@ -583,6 +598,10 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   max-width:340px}
 .rc-track i{display:block;height:100%;background:var(--cyan);width:0;transition:width .45s ease}
 .rc-bar .btn{padding:7px 14px;font-size:13px}
+/* Close to the far right in every state. On the closing slide Play and
+   Skip are hidden, and without this it drifted in to sit against the
+   progress track. */
+.rc-bar #rcClose{margin-left:auto}
 .rc-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;
   padding:26px 24px;min-height:0;overflow:hidden}
 .rc-card{position:absolute;max-width:860px;width:100%;text-align:center}
@@ -614,6 +633,14 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   border-top:1px solid var(--line)}
 .endrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:26px;
   padding-top:22px;border-top:1px solid var(--line)}
+/* the recap's closing slide */
+.rc-end{text-align:center}
+.rc-end-h{font-size:clamp(26px,4.6vw,44px);font-weight:700;line-height:1.1;letter-spacing:-.02em;
+  color:var(--ink);margin-bottom:18px;text-wrap:balance}
+.rc-end-s{margin:0 auto;max-width:56ch;font-size:clamp(14px,1.9vw,17px);line-height:1.68;
+  color:var(--muted)}
+.rc-end-opts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:34px}
+.rc-end-opts .btn{padding:11px 20px}
 
 
 /* ── print ────────────────────────────────────────────────────────────── */
@@ -906,6 +933,6 @@ footer b{color:var(--muted)}
 <div id="halo" aria-hidden="true"></div>
 <button id="nudge" type="button"></button>
 
-<script src="journey.js?v=41"></script>
+<script src="journey.js?v=43"></script>
 </body>
 </html>

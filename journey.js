@@ -1126,10 +1126,7 @@ function drawStep6() {
     progCard(insts[0], one, 1, true) +
     progCard(insts[1], two, 2, false) +
 
-    variantNote() +
-
-    '<p class="caveat"><b>Those provider links are not endorsements.</b> ' +
-    esc(PW.providerLinks.disclosure) + ' ' + esc(PW.providerLinks.whyNotDirect) + '</p>' +
+    providerNotes() +
 
     '<p class="assign-note">Drag each name into the first programme &mdash; or just click one, ' +
     'which works the same way.</p>' +
@@ -1175,6 +1172,34 @@ function drawStep6() {
   wireDrop();
 }
 
+/* These three used to be loose .caveat paragraphs sitting between the
+   programme cards, at max-width 76ch while everything around them ran the
+   full width of the card — so the one passage a reader most needs to stop
+   and read was also the one that looked like a footnote and lined up with
+   nothing. They are now a single card the width of the rest, titled to stop
+   you, and laid out three-up so the card is filled rather than trailing off.
+   The grid is the same auto-fit pattern the recap's notes already use. */
+/* small counts read as words in a sentence and as figures in a table; this
+   page has the mono/Inter split for exactly that distinction, and "your 3
+   receive" sat on the wrong side of it. */
+function words(n) {
+  return ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+          'ten'][n] || String(n);
+}
+
+function providerNotes() {
+  var notes = variantNote();
+  notes.push(['The links are not endorsements',
+    esc(PW.providerLinks.disclosure) + ' ' + esc(PW.providerLinks.whyNotDirect)]);
+  return '<div class="stopcard">' +
+    '<h3>Stop. We need to explain ' + words(notes.length) + ' things.</h3>' +
+    '<p class="stopsub">None of this changes the cost above. All of it changes what you would be ' +
+    'buying, so it belongs before you assign anyone rather than in a footnote after.</p>' +
+    '<div class="stopgrid">' + notes.map(function (n) {
+      return '<div class="stopnote"><b>' + n[0] + '</b><span>' + n[1] + '</span></div>';
+    }).join('') + '</div></div>';
+}
+
 /* The junior management pathway is one named provider's product, and saying
    so is more honest than "providers do this" — which implicates several
    hundred of them for something one company does openly and discloses on its
@@ -1182,19 +1207,20 @@ function drawStep6() {
    accusation we are making about them. */
 function variantNote() {
   var row = PW.options.list.filter(function (r) { return r.variantProvider; })[0];
-  if (!row) return '';
+  if (!row) return [];
   var v = row.variantProvider;
   var o = STD[row.ref];
-  return '<p class="caveat"><b>Where &ldquo;junior management pathway&rdquo; comes from.</b> ' +
-    'The standard is <b>' + esc(o.name) + '</b>. The pathway is <b>' + esc(v.name) + '&rsquo;s ' +
-    esc(v.programme) + '</b>, which wraps ' + esc(v.wrap) + ' around it. Their own page puts the ' +
-    'important part plainly: <b>&ldquo;' + esc(v.quote) + '&rdquo;</b> &mdash; so the leadership ' +
-    'content sits outside the funding, and the certificate your three receive says ' +
-    'administration. ' +
-    '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">Their programme page</a>, ' +
-    'checked ' + esc(v.verified) + '.</p>' +
-    '<p class="caveat" style="color:var(--bad)"><b>And this is the part that catches people out.</b> ' +
-    esc(v.market) + '</p>';
+  return [
+    ['Where &ldquo;junior management pathway&rdquo; comes from',
+     'The standard is <b>' + esc(o.name) + '</b>. The pathway is <b>' + esc(v.name) + '&rsquo;s ' +
+     esc(v.programme) + '</b>, which wraps ' + esc(v.wrap) + ' around it. Their own page puts the ' +
+     'important part plainly: <b>&ldquo;' + esc(v.quote) + '&rdquo;</b> &mdash; so the leadership ' +
+     'content sits outside the funding, and the certificate your ' + words(chosen().length) +
+     ' receive says administration. ' +
+     '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">Their programme page</a>, ' +
+     'checked ' + esc(v.verified) + '.'],
+    ['And this is what catches people out', '<span class="bad">' + esc(v.market) + '</span>']
+  ];
 }
 
 function progCard(inst, o, step, isDrop) {
@@ -1899,13 +1925,67 @@ function openRecap() {
     $('rcN').textContent = (i + 1) + ' of ' + cards.length;
     $('rcFill').style.width = ((i + 1) / cards.length * 100) + '%';
     $('rcPrev').disabled = i === 0;
+    $('rcNext').hidden = false;                 /* restored: showEnd hides these */
+    $('rcSkip').hidden = false;
+    if ($('rcPlay')) $('rcPlay').hidden = false;
     $('rcNext').textContent = i === cards.length - 1 ? 'Finish →' : 'Next →';
   }
 
+  /* The last beat used to drop you straight back onto the page. A film that
+     cuts to the menu the instant the last frame lands is missing its ending,
+     and the three things a reader might want next were down the page behind
+     the overlay they had just been thrown out of. So the end is a slide like
+     any other, and reachable with Back. */
   function go(d) {
     var next = recapAt + d;
-    if (next < 0 || next >= cards.length) { stop(); if (d > 0) closeRecap(true); return; }
+    if (next < 0 || next > cards.length) { stop(); return; }
+    if (next === cards.length) { stop(); showEnd(); return; }
     show(next, d);
+  }
+
+  function showEnd() {
+    var prev = $('rcStage').firstElementChild;
+    if (prev && !still) {
+      prev.classList.add('rc-out-l');
+      setTimeout(function () { if (prev.parentNode) prev.remove(); }, 420);
+    } else if (prev) { prev.remove(); }
+
+    recapAt = cards.length;
+    var names = chosen().map(function (x) { return esc(x.name); });
+    var card = document.createElement('div');
+    card.className = 'rc-card rc-end' + (still ? '' : ' rc-in-r');
+    card.innerHTML =
+      '<div class="rc-k">That is the walkthrough</div>' +
+      '<div class="rc-end-h">Thank you for going through it</div>' +
+      '<p class="rc-end-s">You costed a five-year management pathway for ' +
+      andList(names) + ' at ' + esc(PW.employer.name) + ' &mdash; on published standards and the ' +
+      'funding rules as they stand today. Every figure you were shown came out of the plan you ' +
+      'built, not out of a script.</p>' +
+      '<div class="rc-end-opts">' +
+        '<button class="btn" id="rcAgain">Replay the recap</button>' +
+        '<button class="btn ghost" id="rcPrint">Print the report</button>' +
+        '<button class="btn ghost" id="rcRestart">Start again</button>' +
+      '</div>';
+    $('rcStage').appendChild(card);
+
+    $('rcN').textContent = 'End';
+    $('rcFill').style.width = '100%';
+    $('rcNext').hidden = true;
+    $('rcSkip').hidden = true;
+    if ($('rcPlay')) $('rcPlay').hidden = true;
+    $('rcPrev').disabled = false;
+
+    $('rcAgain').onclick = function () { show(0, 1); };
+    /* print and restart both leave first: the recap is a fixed overlay at
+       z-index 80, so printing through it prints the overlay, and restarting
+       behind it leaves you looking at a finished recap of a plan that no
+       longer exists. */
+    $('rcPrint').onclick = function () { closeRecap(false); setTimeout(printReport, 80); };
+    $('rcRestart').onclick = function () {
+      closeRecap(false);
+      setTimeout(function () { if ($('restart')) $('restart').click(); }, 80);
+    };
+    $('rcAgain').focus();
   }
   function tick() { recapTimer = setTimeout(function () { go(1); if (recapPlaying) tick(); }, 5200); }
   function stop() {
