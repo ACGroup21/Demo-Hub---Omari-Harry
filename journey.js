@@ -1767,7 +1767,11 @@ function drawStep7() {
       $('sum' + i).innerHTML = '';
     });
     ['body4', 'body5', 'body6', 'body7'].forEach(function (id) {
-      $(id).innerHTML = '<p class="sub">Built next.</p>';
+      /* the pre-render state of a stage, which a visitor reaches by starting
+         again. "Built next." read like a note to self about an unfinished
+         project; this says what is actually true of the stage in front of
+         them. */
+      $(id).innerHTML = '<p class="sub">Opens when the stage before it is done.</p>';
     });
     step(1).className = 'step active';
     $('sum1').innerHTML = '';
