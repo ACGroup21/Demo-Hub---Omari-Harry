@@ -21,10 +21,22 @@ var esc = function (s) { return String(s == null ? '' : s)
 var fmt = function (n) { return '£' + Math.round(n).toLocaleString('en-GB'); };
 var fmtM = function (n) { return '£' + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + 'm'; };
 /* "a, b and c" — a plain join gives "a and b and c", which reads as a fault */
+/* Joins "a, b and c". It used to emit `</b>, <b>` as its separator, which
+   meant it only produced valid markup if the caller had already opened a <b>
+   and would close one after -- an invisible precondition, with no error when
+   you got it wrong: the stray leading </b> is dropped and the trailing <b> is
+   never closed, so EVERYTHING after the list goes bold to the end of the
+   paragraph. Three of its six callers had it wrong, including a recap note
+   and the closing slide, and it is invisible until you look at the weight of
+   the text rather than its words.
+
+   So it joins and nothing else. A caller that wants each item bold wraps each
+   item itself, where the tags are balanced in one expression and visibly so. */
 function andList(a, sep) {
   if (a.length < 2) return a.join('');
-  return a.slice(0, -1).join((sep || '</b>, <b>')) + '</b> and <b>' + a[a.length - 1];
+  return a.slice(0, -1).join(sep || ', ') + ' and ' + a[a.length - 1];
 }
+function bList(a) { return andList(a.map(function (x) { return '<b>' + x + '</b>'; })); }
 
 /* ── the ten ──────────────────────────────────────────────────────────────
    Brayford is invented, so these people are written. Each JD line is phrased
@@ -589,8 +601,8 @@ function explain(p) {
      nothing in the data that ranks one brushed area above another, so it names
      them all and leaves the choice where it belongs. */
   var nearest = t.part.length
-    ? 'The nearest ' + (t.part.length === 1 ? 'is' : 'are') + ' <b>' +
-      andList(t.part.map(esc)) + '</b>, which the role already brushes above: making ' +
+    ? 'The nearest ' + (t.part.length === 1 ? 'is' : 'are') + ' ' +
+      bList(t.part.map(esc)) + ', which the role already brushes above: making ' +
       (t.part.length === 1 ? 'that' : 'either of those') + ' standing rather than occasional is a ' +
       'smaller change than adding a duty from nothing.'
     : 'Nothing in the role points to one of the six over another, so which to add is a scoping ' +
@@ -683,7 +695,7 @@ function couldDo(p) {
 
     '<p><b>2. Assign a project with a budget and a deadline.</b>' +
     (holes.length
-      ? ' Across everyone who could be put forward, <b>' + andList(holes.map(esc)) + '</b> ' +
+      ? ' Across everyone who could be put forward, ' + bList(holes.map(esc)) + ' ' +
         (holes.length === 1 ? 'appears' : 'appear') + ' in nobody&rsquo;s role at all &mdash; a ' +
         'gap in the cohort, not just in one person. A defined piece of work with a number attached ' +
         'is the cheapest way to create it.'
@@ -1473,8 +1485,8 @@ function deptCheck() {
     'and because a ratio measured only across a whole workforce will tell you everything is fine ' +
     'right up until a department cannot open.</p>' +
     (breaches.length
-      ? '<p class="caveat" style="color:var(--bad)">This cohort puts <b>' +
-        andList(breaches.map(esc)) + '</b> over the limit.</p>'
+      ? '<p class="caveat" style="color:var(--bad)">This cohort puts ' +
+        bList(breaches.map(esc)) + ' over the limit.</p>'
       : '<p class="caveat" style="color:var(--good)">This cohort clears it &mdash; the ' +
         chosen().length + ' sit in ' + Object.keys(byDept).length + ' different departments.</p>');
 }
@@ -1843,13 +1855,17 @@ function recapCards() {
 
     { k: 'What their jobs evidence', v: yes + ' of ' + (n * areas.length), tail: '',
       s: 'Of the six management duties, across the ' + n + ' you chose.',
-      c: [['The hole', holes.length ? 'Nobody evidences ' + andList(holes.map(esc)) +
+      c: [['The hole', holes.length ? 'Nobody evidences ' + bList(holes.map(esc)) +
             ' at all' : 'All six appear somewhere across the three'],
           ['Whose problem', 'This is a finding about the jobs, not the people'],
           ['When it has to close', 'Before anyone enrols — an apprentice is assessed on work ' +
             'they actually do']] },
 
-    { k: 'Against the real standards', v: k1 + ' of ' + n + ', then ' + k2 + ' of ' + n, tail: '',
+    /* this was "2 of 3, then 0 of 3" in the headline slot -- two figures and
+       a clause where every other slide has one short figure, so it alone ran
+       wide and the set looked unset. The second figure moves to the tail,
+       which is what the tail is for. */
+    { k: 'Against the real standards', v: k1 + ' of ' + n, tail: 'then ' + k2 + ' of ' + n,
       s: 'Clearing the 50% line on the first standard, then on the second.',
       c: [[esc(one.name), (F1 ? F1.items.length : 21) + ' published knowledge, skills and ' +
             'behaviours, each read against every job description'],
@@ -1878,11 +1894,19 @@ function recapCards() {
 var recapAt = 0, recapTimer = null, recapPlaying = false;
 
 function openRecap() {
+  /* A second click while one is already open used to stack another overlay on
+     top of the first -- an empty stage over a live one, so the recap went
+     blank and stayed blank, and the duplicate left its background canvas
+     registered with the field, which went on painting to it. On the page the
+     button sits behind the overlay so you cannot reach it, but anything that
+     calls this twice (a keyboard shortcut, a script, a double fire) hit it. */
+  if ($('recap')) return;
   var cards = recapCards();
   var still = reduced();
   var host = document.createElement('div');
   host.id = 'recap';
   host.innerHTML =
+    '<canvas class="rc-bg" aria-hidden="true"></canvas>' +
     '<div class="rc-bar"><span class="rc-n" id="rcN"></span>' +
     '<span class="rc-track"><i id="rcFill"></i></span>' +
     (still ? '' : '<button class="btn ghost" id="rcPlay">&#9654; Play</button>') +
@@ -1892,6 +1916,7 @@ function openRecap() {
     '<div class="rc-foot"><button class="btn ghost" id="rcPrev">&larr; Back</button>' +
     '<button class="btn" id="rcNext">Next &rarr;</button></div>';
   document.body.appendChild(host);
+  if (window.bgSurface) bgSurface.add(host.querySelector('.rc-bg'));
   document.body.style.overflow = 'hidden';
   recapAt = 0; recapPlaying = false;
   show(0, 1);
@@ -1954,13 +1979,15 @@ function openRecap() {
     var names = chosen().map(function (x) { return esc(x.name); });
     var card = document.createElement('div');
     card.className = 'rc-card rc-end' + (still ? '' : ' rc-in-r');
+    card.style.setProperty('--stepc', stepColour(cards.length, cards.length));
+    card.style.setProperty('--stepc-ink', stepInk(cards.length, cards.length));
     card.innerHTML =
       '<div class="rc-k">That is the walkthrough</div>' +
       '<div class="rc-end-h">Thank you for going through it</div>' +
       '<p class="rc-end-s">You costed a five-year management pathway for ' +
-      andList(names) + ' at ' + esc(PW.employer.name) + ' &mdash; on published standards and the ' +
-      'funding rules as they stand today. Every figure you were shown came out of the plan you ' +
-      'built, not out of a script.</p>' +
+      bList(names) + ' at ' + esc(PW.employer.name) + ' &mdash; on published standards and the ' +
+      'funding rules as they stand today. This has been a guided example of how you might ' +
+      'organise training with real funds, and change real futures for the better.</p>' +
       '<div class="rc-end-opts">' +
         '<button class="btn" id="rcAgain">Replay the recap</button>' +
         '<button class="btn ghost" id="rcPrint">Print the report</button>' +
@@ -2027,8 +2054,11 @@ function countUp(el, text) {
 
 function closeRecap(finished) {
   recapPlaying = false; clearTimeout(recapTimer);
-  var h = $('recap');
-  if (h) h.remove();
+  /* every one of them, not just the first getElementById finds */
+  [].forEach.call(document.querySelectorAll('#recap'), function (h) {
+    if (window.bgSurface) bgSurface.remove(h.querySelector('.rc-bg'));
+    h.remove();
+  });
   document.body.style.overflow = '';
   if (finished) {
     var f = $('endActions');
@@ -2370,15 +2400,65 @@ aim();
    two or more. The lab page found the same thing about all seven.
 
    It draws one frame synchronously before asking for any, so a surface that
-   never composites -- see the pointer -- still gets a constellation rather
-   than an empty canvas. Under prefers-reduced-motion that single frame is
-   all it ever draws. */
+   never composites -- see the pointer -- still gets a field rather than an
+   empty canvas. Under prefers-reduced-motion that single frame is all it
+   ever draws.
+
+   The links are gone: loose stars, no lines. Which also retires the standing
+   objection the sketch carried -- long horizontal lines being the shape of a
+   line of text -- so it no longer depends on the near-solid card surface to
+   stay out of the way, though that is worth keeping on its own merits. With
+   nothing joining them the points have to carry the field themselves, so
+   there are about three times as many and they vary in size and brightness;
+   a grid of identical dots reads as a texture, not as a sky. */
 (function () {
   var C = document.getElementById('bg');
   if (!C || !C.getContext) return;
-  var X = C.getContext('2d');
+  /* More than one canvas can show this field, because the recap is an opaque
+     overlay and the constellation has to carry on behind it rather than stop
+     dead. They share the node list, so what the overlay shows is the same
+     field at the same moment -- open the recap and nothing jumps. */
+  var surfaces = [{ c: C, x: C.getContext('2d') }];
+  var X = surfaces[0].x;
   var W = 0, H = 0, DPR = 1, nodes = [];
-  var LINK = 135, LINE_A = 0.15;   /* both settled by looking, see above */
+  var STARS_PER = 9500;            /* one star per this many css pixels */
+
+  /* The links take the rail's colour at wherever you have got to, so the
+     field cools from red to cyan-green as you descend, exactly as the spine
+     beside it does. It reuses the stops the rail already has rather than
+     inventing a second gradient, and it follows the SCROLL rather than the
+     active stage, so it moves continuously instead of snapping at each card.
+
+     With the recap open there is no scroll to read, so it follows the slide
+     instead -- taken off the card's own --stepc, so the two cannot disagree.
+
+     With the links gone the stars carry it, so the rail colour is mixed into
+     them rather than applied flat -- they stay starlight with a cast, not
+     coloured dots. */
+  var TINT = [0xc9, 0x44, 0x3a], WANT = TINT.slice();
+
+  function hexRGB(h) {
+    return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  }
+  function railMix(t) {
+    t = Math.max(0, Math.min(1, t)) * (RAIL_STOPS.length - 1);
+    var i = Math.floor(t), f = t - i;
+    var a = hexRGB(RAIL_STOPS[i]), b = hexRGB(RAIL_STOPS[Math.min(i + 1, RAIL_STOPS.length - 1)]);
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
+  function wantTint() {
+    var card = document.querySelector('#recap .rc-card');
+    if (card) {
+      var c = (card.style.getPropertyValue('--stepc') || '').trim();
+      return /^#[0-9a-f]{6}$/i.test(c) ? hexRGB(c) : hexRGB(RAIL_STOPS[RAIL_STOPS.length - 1]);
+    }
+    var steps = document.querySelectorAll('.step');
+    if (!steps.length) return TINT;
+    var top = steps[0].getBoundingClientRect().top + window.pageYOffset;
+    var bot = steps[steps.length - 1].getBoundingClientRect().bottom + window.pageYOffset;
+    if (bot <= top) return TINT;
+    return railMix((window.pageYOffset + window.innerHeight * 0.5 - top) / (bot - top));
+  }
 
   function size() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -2386,39 +2466,69 @@ aim();
        bitmap came out 15px wider than the box it is drawn into and the whole
        field was squashed 1.5% horizontally. */
     W = C.clientWidth; H = C.clientHeight;
-    C.width = Math.round(W * DPR); C.height = Math.round(H * DPR);
-    X.setTransform(DPR, 0, 0, DPR, 0, 0);
-    var n = Math.max(18, Math.min(70, Math.round(W * H / 29000)));
+    surfaces.forEach(function (s) {
+      s.c.width = Math.round(W * DPR); s.c.height = Math.round(H * DPR);
+      s.x.setTransform(DPR, 0, 0, DPR, 0, 0);
+    });
+    var n = Math.max(40, Math.min(190, Math.round(W * H / STARS_PER)));
     while (nodes.length > n) nodes.pop();
     while (nodes.length < n) nodes.push({
       x: Math.random() * W, y: Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.17, vy: (Math.random() - 0.5) * 0.17
+      vx: (Math.random() - 0.5) * 0.14, vy: (Math.random() - 0.5) * 0.14,
+      /* weighted toward the faint: a sky is mostly small stars with a few
+         bright ones, and an even spread reads as a dot grid */
+      r: 0.5 + Math.pow(Math.random(), 2.1) * 1.5,
+      a: 0.1 + Math.pow(Math.random(), 1.9) * 0.4
     });
     draw(false);
   }
 
   function draw(move) {
+    if (move) {
+      WANT = wantTint();
+      /* eased rather than snapped: on the page a fast scroll would otherwise
+         strobe through six colours, and in the recap each slide would cut. */
+      for (var t = 0; t < 3; t++) TINT[t] += (WANT[t] - TINT[t]) * 0.055;
+      for (var k = 0; k < nodes.length; k++) {
+        var p = nodes[k];
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+      }
+    }
+    for (var si = 0; si < surfaces.length; si++) paint(surfaces[si].x);
+  }
+
+  function paint(X) {
     X.clearRect(0, 0, W, H);
+    /* starlight, carrying a cast of the rail colour rather than becoming it */
+    var r = (190 + (TINT[0] - 190) * 0.42) | 0;
+    var g = (214 + (TINT[1] - 214) * 0.42) | 0;
+    var b = (236 + (TINT[2] - 236) * 0.42) | 0;
+    var head = 'rgba(' + r + ',' + g + ',' + b + ',';
     for (var i = 0; i < nodes.length; i++) {
-      var a = nodes[i];
-      if (move) {
-        a.x += a.vx; a.y += a.vy;
-        if (a.x < 0 || a.x > W) a.vx *= -1;
-        if (a.y < 0 || a.y > H) a.vy *= -1;
-      }
-      for (var j = i + 1; j < nodes.length; j++) {
-        var b = nodes[j], dx = a.x - b.x, dy = a.y - b.y;
-        var d = Math.sqrt(dx * dx + dy * dy);
-        if (d >= LINK) continue;
-        X.strokeStyle = 'rgba(0,201,204,' + ((1 - d / LINK) * LINE_A).toFixed(4) + ')';
-        X.lineWidth = 1;
-        X.beginPath(); X.moveTo(a.x, a.y); X.lineTo(b.x, b.y); X.stroke();
-      }
-      X.fillStyle = 'rgba(190,214,236,.22)';
-      X.beginPath(); X.arc(a.x, a.y, 1.4, 0, 6.3); X.fill();
+      var p = nodes[i];
+      X.fillStyle = head + p.a.toFixed(3) + ')';
+      X.beginPath(); X.arc(p.x, p.y, p.r, 0, 6.3); X.fill();
     }
   }
 
+  /* an overlay borrows the field by handing over a canvas of its own */
+  window.bgSurface = {
+    add: function (el) {
+      if (!el || !el.getContext) return;
+      var x = el.getContext('2d');
+      el.width = Math.round(W * DPR); el.height = Math.round(H * DPR);
+      x.setTransform(DPR, 0, 0, DPR, 0, 0);
+      surfaces.push({ c: el, x: x });
+      paint(x);                       /* so it is there on the first frame */
+    },
+    remove: function (el) {
+      surfaces = surfaces.filter(function (s) { return s.c !== el; });
+    }
+  };
+
+  TINT = wantTint().slice();       /* so the single static frame is not red */
   size();
   window.addEventListener('resize', size, { passive: true });
   if (reduced()) return;           /* the one frame above is the whole of it */

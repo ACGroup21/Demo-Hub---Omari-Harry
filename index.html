@@ -592,6 +592,12 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
    of this stylesheet, which also hides the play control, because offering
    play without motion would be a dead button. */
 #recap{position:fixed;inset:0;z-index:80;background:#02050a;display:flex;flex-direction:column}
+/* The recap is opaque, so it used to blank the constellation the moment it
+   opened. It carries its own surface of the same field instead — same nodes,
+   same positions, so opening and closing the overlay does not restart it. */
+.rc-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block;
+  pointer-events:none}
+.rc-bar,.rc-stage,.rc-foot{position:relative;z-index:1}
 .rc-bar{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--line)}
 .rc-n{font-family:var(--mono);font-size:11px;color:var(--muted-2);white-space:nowrap}
 .rc-track{flex:1;height:2px;background:rgba(159,177,202,.14);border-radius:2px;overflow:hidden;
@@ -617,8 +623,13 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .rc-note{border:1px solid var(--line);border-left:2px solid var(--stepc);border-radius:10px;
   padding:12px 14px;background:rgba(159,177,202,.035);opacity:0;
   animation:rcNote .5s cubic-bezier(.2,.7,.3,1) both}
-.rc-note b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
+/* direct child only. This matched EVERY <b> in a note, so a bold word inside
+   the body text came out as a block-level uppercase mono label mid-sentence —
+   which is what made slide 4 look like a different page from the rest. */
+.rc-note>b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--stepc-ink,var(--stepc));margin-bottom:6px;font-weight:500}
+.rc-note span b{display:inline;font-family:inherit;font-size:inherit;letter-spacing:inherit;
+  text-transform:none;color:var(--ink);margin:0;font-weight:600}
 .rc-note span{font-size:13px;line-height:1.55;color:var(--muted)}
 @keyframes rcNote{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .rc-in-r{animation:rcInR .48s cubic-bezier(.2,.7,.3,1) both}
@@ -933,6 +944,6 @@ footer b{color:var(--muted)}
 <div id="halo" aria-hidden="true"></div>
 <button id="nudge" type="button"></button>
 
-<script src="journey.js?v=43"></script>
+<script src="journey.js?v=47"></script>
 </body>
 </html>
