@@ -142,6 +142,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .person.blocked{border-style:dashed;opacity:.5;cursor:help}
 .person.blocked:hover{opacity:.78;border-color:var(--warm)}
 .person.blocked .nm{color:var(--muted)}
+.person .flag.soft{color:var(--muted-2)}
 .person .flag{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
   color:var(--warm);margin-top:7px}
 .why{margin-top:14px;border:1px solid var(--warm);border-radius:13px;padding:15px 17px;
@@ -190,6 +191,41 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .check p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:76ch}
 .check p:last-child{margin-bottom:0}
 .check b{color:var(--ink)}
+
+/* ── step 6 · the options ─────────────────────────────────────────────── */
+.opt{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;
+  border:1px solid var(--line);border-radius:13px;background:rgba(159,177,202,.03);
+  padding:15px 17px;margin-top:11px}
+.opt:hover{border-color:var(--cyan-dim)}
+.opt.on{border-color:var(--cyan);background:var(--cyan-ghost)}
+.opt.dead{border-style:dashed}
+.opt.dead:hover{border-color:var(--bad)}
+.opt.on.dead{border-color:var(--bad);background:rgba(232,112,95,.08)}
+.oh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.oh .on-name{font-weight:700;font-size:15px}
+.opt.on .oh .on-name{color:var(--cyan)}
+.opt.on.dead .oh .on-name{color:var(--bad)}
+.oh .ref{font-family:var(--mono);font-size:10.5px;color:var(--muted-2)}
+.oh .price{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted-2)}
+.badge.kept{border-color:var(--cyan-dim);color:var(--cyan)}
+.badge.back{border-color:var(--warm);color:var(--warm)}
+.badge.gone{border-color:var(--bad);color:var(--bad)}
+.ometa{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:9px;font-size:12.5px;color:var(--muted)}
+.ometa b{color:var(--ink)}
+.oline{margin:9px 0 0;font-size:13px;color:var(--muted);max-width:78ch}
+.oline b{color:var(--ink)}
+.opt.dead .oline b{color:var(--bad)}
+.verdict{margin-top:18px;border:1px solid var(--cyan-dim);border-radius:13px;padding:16px 18px;
+  background:var(--cyan-ghost)}
+.verdict.bad{border-color:var(--bad);background:rgba(232,112,95,.07)}
+.verdict h3{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--cyan)}
+.verdict.bad h3{color:var(--bad)}
+.verdict p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:78ch}
+.verdict p:last-child{margin-bottom:0}
+.verdict b{color:var(--ink)}
 
 /* ── step 5 · the report ──────────────────────────────────────────────── */
 .doc{border:1px solid var(--line);border-radius:13px;background:#060a14;padding:24px 26px;margin-top:4px}

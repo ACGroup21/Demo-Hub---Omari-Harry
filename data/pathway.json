@@ -451,11 +451,6 @@
           "area": "Financial",
           "state": "partly",
           "jd": 2
-        },
-        {
-          "area": "Leadership",
-          "state": "yes",
-          "jd": 3
         }
       ],
       "10": [
@@ -473,7 +468,8 @@
     },
     "_revisions": [
       "Jordan A. Leadership partly -> yes: the same act as Dan F., who was already marked yes. Consistency, not a loosening.",
-      "Priya N. Communication partly -> yes: a daily team brief is cascading information. Both reads are defensible; the evidence line is shown so a reader can take the other one."
+      "Priya N. Communication partly -> yes: a daily team brief is cascading information. Both reads are defensible; the evidence line is shown so a reader can take the other one.",
+      "Jordan A.: his JD line “allocate the backroom team” was rewritten to “sequence put-away against replenishment priorities”. The scenario needed five colleagues who cannot be put forward; changing the authored role is honest, re-scoring the same words to a different answer would not be. The Leadership entry went with the line it rested on."
     ]
   }
 }

@@ -20,6 +20,11 @@ var esc = function (s) { return String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
 var fmt = function (n) { return '£' + Math.round(n).toLocaleString('en-GB'); };
 var fmtM = function (n) { return '£' + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + 'm'; };
+/* "a, b and c" — a plain join gives "a and b and c", which reads as a fault */
+function andList(a, sep) {
+  if (a.length < 2) return a.join('');
+  return a.slice(0, -1).join((sep || '</b>, <b>')) + '</b> and <b>' + a[a.length - 1];
+}
 
 /* ── the ten ──────────────────────────────────────────────────────────────
    Brayford is invented, so these people are written. Each JD line is phrased
@@ -80,7 +85,7 @@ var TEAM = [
     jd: ['Receive and check deliveries against purchase orders',
          'Manage backroom stock location and capacity',
          'Raise and chase supplier claims for damages and shortages',
-         'Allocate the backroom team across unloading and put-away'] },
+         'Sequence put-away against replenishment priorities for the day'] },
   { id: 10, name: 'Sam O.', role: 'Store administrator', yrs: 2,
     note: 'Does the payroll, rotas and reporting for 180 colleagues',
     jd: ['Produce accurate records, rotas and payroll submissions',
@@ -100,7 +105,7 @@ var RULES = {
 var STD = {}, STDMETA = {}, PW = null;
 var payBill = 30000000;
 var picked = {};
-var PICK = 5;            /* how many the scenario asks for */
+var PICK = 3;            /* how many the scenario asks for */
 var levy = {};
 
 /* ── the step machine ────────────────────────────────────────────────────── */
@@ -220,6 +225,20 @@ function tally(id) {
 }
 function eligible(id) { return tally(id).yes.length > 0; }
 
+/* Among those who CAN be put forward, some are better bets than others — and
+   that is a ranking, not a gate. The tool advises and the employer decides;
+   blocking here would be the tool making a call it has no standing to make.
+   Order is by areas clearly evidenced, then by areas touched in part. */
+function ranked() {
+  return TEAM.filter(function (p) { return eligible(p.id); })
+    .map(function (p) { var t = tally(p.id); return { p: p, yes: t.yes.length, part: t.part.length }; })
+    .sort(function (a, b) { return (b.yes - a.yes) || (b.part - a.part); });
+}
+function isWeaker(id) {
+  var r = ranked();
+  return r.slice(PICK).some(function (x) { return x.p.id === id; });
+}
+
 /* Initials, not faces. A generated portrait of an invented colleague would be
    the one thing on this page pretending to be real, and these people are not.
    The hue is derived from the name so it is stable between renders. */
@@ -241,7 +260,8 @@ function drawTeam() {
       '<span class="nm">' + esc(p.name) + '</span>' +
       '<span class="rl">' + esc(p.role) + ' · ' + p.yrs + ' yr' + (p.yrs === 1 ? '' : 's') + '</span>' +
       '<span class="nt">' + esc(p.note) + '</span>' +
-      (ok ? '' : '<span class="flag">Not yet — why?</span>') + '</button>';
+      (ok ? (isWeaker(p.id) ? '<span class="flag soft">Thinner evidence</span>' : '')
+          : '<span class="flag">Not yet — why?</span>') + '</button>';
   }).join('');
 
   var ready = TEAM.filter(function (p) { return eligible(p.id); }).length;
@@ -281,6 +301,29 @@ function explain(p) {
     'qualify &mdash; and the apprenticeship has something to assess.</p>' +
     '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
   $('why3').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+}
+
+/* Advice, not a veto. Two of the five who CAN be put forward evidence less
+   than the other three, and picking one is a worse use of the same £5,000 —
+   but it is a legitimate choice an employer might make for reasons the tool
+   cannot see, so it says so and gets out of the way. */
+function adviseIfWeaker(p) {
+  if (!isWeaker(p.id)) { $('why3').innerHTML = ''; return; }
+  var t = tally(p.id);
+  var better = ranked().slice(0, PICK).filter(function (x) { return !picked[x.p.id]; });
+  $('why3').innerHTML =
+    '<div class="why"><h4>' + esc(p.name) + ' is a thinner bet &mdash; your call</h4>' +
+    '<p>Their job description clearly evidences <b>' + t.yes.length + '</b> of the six' +
+    (t.part.length ? ' and touches <b>' + t.part.length + '</b> more in part' : '') +
+    '. That is enough to be assessed on, so they are not blocked.</p>' +
+    (better.length
+      ? '<p>But <b>' + andList(better.map(function (x) { return esc(x.p.name); })) +
+        '</b> evidence more for <b>the same ' + fmt((STD[PW.pathway.instances[0].ref] || {}).band || 0) +
+        '</b>, and would start with less of their role to change first.</p>'
+      : '') +
+    '<p>You may still have good reasons &mdash; retention, succession, someone who has been waiting. ' +
+    'The tool cannot see any of that, so it is <b>not stopping you</b>.</p>' +
+    '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
 }
 
 function drawWork3() {
@@ -520,6 +563,7 @@ function drawStep5() {
   $('go5').addEventListener('click', function () {
     complete(5, r.sections.length + '-section report built', true);
     unlock(6);
+    drawStep6();
     goTo(6);
   });
   $('printRep').addEventListener('click', function () {
@@ -530,6 +574,181 @@ function drawStep5() {
     document.body.style.overflow = 'hidden';
   });
 }
+
+/* ── 06 · pick the apprenticeship ────────────────────────────────────────
+   Four options. Two survived the filter chain; two our own filters removed
+   and we put back, so a visitor can watch them fail — for two different
+   reasons. Nothing here asserts a winner: every line is computed from the
+   library, and the one that wins, wins on the numbers. */
+var chosenStd = null;
+
+/* how many funded standards sit ABOVE this one in its own route — i.e. does
+   finishing it lead anywhere, or is it a cul-de-sac? */
+function ladder(o) {
+  return Object.keys(STD).filter(function (k) {
+    var s = STD[k];
+    return s.funded !== false && s.route === o.route && (s.level || 0) > (o.level || 0);
+  }).length;
+}
+function manageCover(ref) {
+  var k = PW.ksb[ref];
+  if (!k) return null;
+  var n = k.areas.filter(function (a) { return a.manages; }).length;
+  return { n: n, of: k.areas.length };
+}
+
+function drawStep6() {
+  var n = chosen().length;
+  var opts = PW.options.list;
+
+  var cards = opts.map(function (row) {
+    var o = STD[row.ref];
+    var dead = o.funded === false;
+    var cost = o.band * n;
+    var otj = otjFor(row.ref, n);
+    var mc = manageCover(row.ref);
+    var lad = ladder(o);
+
+    var badge = dead
+      ? '<span class="badge gone">Defunded ' + esc(o.defundedFrom || '') + '</span>'
+      : row.origin === 'filtered'
+        ? '<span class="badge kept">Survived all four filters</span>'
+        : '<span class="badge back">Removed by the ' + esc(row.removedBy) + ' filter — shown anyway</span>';
+
+    var meta = [
+      'Level <b>' + o.level + '</b>',
+      '<b>' + o.months + '</b> months',
+      otj ? '<b>' + otj.hours + '</b> hrs off the job' : '',
+      mc ? 'Management duties <b>' + mc.n + ' of ' + mc.of + '</b>' : 'Duty detail not gathered',
+      'Leads to <b>' + lad + '</b> funded standard' + (lad === 1 ? '' : 's') + ' above it'
+    ].filter(Boolean).join('</span><span>');
+
+    var line = dead
+      ? '<b>Your levy cannot pay for this.</b> New starts stopped being government funded on ' +
+        esc(o.defundedFrom) + '. Anyone already on it finishes on funding; nobody new joins. ' +
+        'The ' + fmt(cost) + ' would come out of your own cash.'
+      : row.removedBy === 'route'
+        ? 'Funded, and a perfectly good standard — for a different job. At <b>' + fmt(o.band) +
+          '</b> a head it is <b>' + (o.band / STD[opts[0].ref].band).toFixed(0) + '×</b> the cost of ' +
+          'the cheapest option here, runs <b>' + (o.months - STD[opts[0].ref].months) + ' months longer</b>, ' +
+          'and sits in the ' + esc(o.route) + ' route rather than yours.'
+        : mc
+          ? 'Of its <b>' + mc.of + '</b> published areas, <b>' + mc.n + '</b> ' +
+            (mc.n === 1 ? 'is' : 'are') + ' about managing people or money.'
+          : '';
+
+    return '<button class="opt' + (chosenStd === row.ref ? ' on' : '') + (dead ? ' dead' : '') +
+      '" data-std="' + esc(row.ref) + '">' +
+      '<div class="oh"><span class="on-name">' + esc(o.name) + '</span>' +
+      '<span class="ref">' + esc(o.ref) + '</span>' + badge +
+      '<span class="price">' + fmt(o.band) + ' &times; ' + n + ' = <b>' + fmt(cost) + '</b></span></div>' +
+      '<div class="ometa"><span>' + meta + '</span></div>' +
+      (line ? '<p class="oline">' + line + '</p>' : '') + '</button>';
+  }).join('');
+
+  $('body6').innerHTML =
+    '<p class="sub">Four, out of <b>' + Object.keys(STD).length + '</b>. Two came through the filters; ' +
+    'two our own filters threw out and we put back, so you can see <b>how</b> they fail rather than ' +
+    'just being told they do. Pick one.</p>' +
+    cards +
+    '<div id="verdict"></div>' +
+    '<div class="row"><button class="btn" id="go6" disabled>See the five-year pathway &rarr;</button></div>' +
+    '<details class="work"><summary>How four were chosen from ' + Object.keys(STD).length +
+    ' <span class="chain" id="chain6"></span></summary>' +
+    '<table class="funnel" id="work6"></table>' +
+    '<p class="ours"><b>The last line is us.</b> Thirty-four standards came through those filters; ' +
+    'four are on screen. Two of them our own filters had already removed &mdash; Team leader by funding, ' +
+    'Data analyst by route &mdash; and we put them back deliberately, because the Team leader is what ' +
+    'most people in this position reach for and the Data analyst is what a board asks for. A list that ' +
+    'quietly dropped both would teach you nothing.</p></details>';
+
+  drawWork6();
+  $('go6').addEventListener('click', function () {
+    var o = STD[chosenStd];
+    complete(6, esc(o.name) + ' · ' + fmt(o.band * n) + (o.funded === false ? ' (unfunded)' : ''), true);
+    unlock(7);
+    goTo(7);
+  });
+}
+
+function drawWork6() {
+  var all = Object.values(STD);
+  var ROUTES = ['Sales, marketing and procurement', 'Business and administration'];
+  var a = all;
+  var b = a.filter(function (x) { return x.funded !== false; });
+  var c = b.filter(function (x) { return (x.level || 0) === 3 || (x.level || 0) === 4; });
+  var d = c.filter(function (x) { return ROUTES.indexOf(x.route) > -1; });
+  var e = d.filter(function (x) { return x.src === 'ksb'; });
+  $('chain6').textContent = '— ' + a.length + ' → ' + e.length + ' → 4';
+  $('work6').innerHTML = funnelRows([
+    { label: 'standards in the library', value: String(a.length) },
+    { label: 'funded for new starts', value: String(b.length), drop: String(a.length - b.length), indent: true },
+    { label: 'level 3 or 4 — a first step into managing', value: String(c.length), drop: String(b.length - c.length), indent: true },
+    { label: 'retail or general business route', value: String(d.length), drop: String(c.length - d.length), indent: true },
+    { label: 'indexed from published KSBs', value: String(e.length), drop: String(d.length - e.length), indent: true },
+    { label: 'put in front of you, including 2 put back', value: '4', sum: true }
+  ]);
+}
+
+function pickStd(ref) {
+  chosenStd = ref;
+  var n = chosen().length;
+  var o = STD[ref];
+  var dead = o.funded === false;
+  var best = STD[PW.options.list[0].ref];
+  var inst1 = STD[PW.pathway.instances[0].ref];
+  var otj = otjFor(ref, n);
+  var v = $('verdict');
+
+  if (dead) {
+    v.innerHTML = '<div class="verdict bad"><h3>This is the one most people pick, and you cannot buy it</h3>' +
+      '<p>' + esc(o.name) + ' is the obvious first step into managing, and it was until <b>' +
+      esc(o.defundedFrom) + '</b>. Pick it today and your levy contributes <b>£0</b> &mdash; the ' +
+      '<b>' + fmt(o.band * n) + '</b> is your own cash, on top of <b>' + fmt(otj.cost) + '</b> of ' +
+      'unfunded time.</p>' +
+      '<p>Meanwhile <b>' + fmt(levy.annual) + '</b> of levy sits in the account doing nothing and ' +
+      'expiring on a ' + RULES.expiryMonths + '-month clock. That is the whole trap: the right-sounding ' +
+      'answer is the one that costs you everything.</p>' +
+      '<p>Choose a funded standard to carry on.</p></div>';
+    $('go6').disabled = true;
+  } else if (o.route !== best.route && o.route !== inst1.route) {
+    v.innerHTML = '<div class="verdict bad"><h3>Funded, and pointed somewhere else</h3>' +
+      '<p>Nothing is wrong with ' + esc(o.name) + ' &mdash; it is simply not the job your ' + n + ' do. ' +
+      'It costs <b>' + fmt(o.band * n) + '</b> against <b>' + fmt(best.band * n) + '</b>, takes <b>' +
+      (o.months - best.months) + ' months longer</b>, and leaves them qualified in ' + esc(o.route) +
+      ' while your shop floor still has nobody trained to run it.</p>' +
+      '<p>You can carry on with it. The pathway at the next step will show you where it leads.</p></div>';
+    $('go6').disabled = false;
+  } else {
+    var mc = manageCover(ref);
+    v.innerHTML = '<div class="verdict"><h3>' + esc(o.name) + ' — ' + fmt(o.band * n) +
+      ' of levy, ' + o.months + ' months</h3>' +
+      '<p>Funded, in your route, and it leads to <b>' + ladder(o) + '</b> funded standards above it.' +
+      (mc ? ' Of its <b>' + mc.of + '</b> published areas, <b>' + mc.n + '</b> ' +
+        (mc.n === 1 ? 'is' : 'are') + ' about managing people or money.' : '') + '</p>' +
+      (mc && mc.n <= 2
+        ? '<p>Which is the uncomfortable part. Providers package this one as a management foundation ' +
+          'and wrap leadership content around it &mdash; but the levy buys <b>the standard</b>, and the ' +
+          'standard your ' + n + ' are assessed against, and certificated in, is ' +
+          (ref === 'ST0070' ? 'administration' : 'this one') + '. The wrap sits outside the funding.</p>' +
+          '<p>That is not a reason to avoid it. It is the reason <b>one programme is not a pathway</b> ' +
+          '&mdash; which is what the next step is about.</p>'
+        : '<p>It covers the management duties your ' + n + ' are missing. The next step shows where it ' +
+          'sits across five years.</p>') +
+      '<p><b>' + fmt(otj.cost) + '</b> of unfunded time on top, at ' + otj.perWeek.toFixed(1) +
+      ' hours a week each.</p></div>';
+    $('go6').disabled = false;
+  }
+  drawStep6();
+  $('verdict').innerHTML = v.innerHTML;   /* redraw wiped it; put it back */
+  $('go6').disabled = dead;
+  v.scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+}
+
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('[data-std]');
+  if (b) pickStd(b.getAttribute('data-std'));
+});
 
 /* ── the in-page viewer ──────────────────────────────────────────────────
    Everything stays on this page. The iframe is built on open rather than
@@ -582,8 +801,8 @@ document.addEventListener('click', function (e) {
   var id = +el.getAttribute('data-p');
   var person = TEAM.filter(function (p) { return p.id === id; })[0];
   if (!eligible(id)) { explain(person); return; }   /* blocked: explain, do not select */
-  $('why3').innerHTML = '';
-  if (picked[id]) delete picked[id]; else picked[id] = 1;
+  if (picked[id]) { delete picked[id]; $('why3').innerHTML = ''; }
+  else { picked[id] = 1; adviseIfWeaker(person); }
   drawTeam();
 });
 $('go3').addEventListener('click', function () {
