@@ -73,18 +73,23 @@ are all read from the governed rulebook and shown with their source, not typed i
 ### JD Matcher
 
 A ranking problem, not a lookup. A pasted job description is scored against **322 standards**,
-and the result shows which of your terms it matched and how strongly. Terms are weighted by
-**how distinctive they are** — `log(1 + N/df)`, so a word that appears in every standard
-contributes almost nothing while a rare one carries the match. Two earlier scoring approaches
-were built and thrown away before this one worked; a straight overlap count just returns
-whichever standard has the longest vocabulary.
+and each result reports how much of your JD it actually covered rather than just asserting a
+winner. Terms are weighted by **how distinctive they are** — `log(1 + N/df)`, so a word that
+appears in every standard contributes almost nothing while a rare one carries the match, and
+the role title is weighted separately because a JD that covers a standard's *name* is saying
+something a body-text overlap is not. Two earlier scoring approaches were built and thrown away
+before this worked; a straight overlap count just returns whichever standard has the longest
+vocabulary.
 
-Two decisions matter more than the formula. The index is built from each standard's **published
-Knowledge, Skills and Behaviours** rather than its summary, because that is the vocabulary the
-role is actually described in — and where KSBs have not been published, the app says the index
-is thin instead of quietly scoring it the same. And when nothing clears the bar it reports
-**"no good match"** rather than returning its least-bad guess, which is the failure mode that
-makes a matcher untrustworthy.
+This one is the first generation, kept as it shipped: a 42-term index per standard, which is
+enough for a shortlist. **The second generation is in Sandbox**, and the two sitting side by
+side is the point — it indexes every standard's **published Knowledge, Skills and Behaviours**
+instead, because that is the vocabulary the role is really described in; it names the terms it
+matched on rather than counting them; it flags a standard whose index is thin instead of quietly
+scoring it the same; and it has a score floor, so it will answer **"no good match"** instead of
+returning its least-bad guess. That last one is the failure mode that makes a matcher
+untrustworthy, and finding it took feeding the thing five deliberately messy job descriptions
+rather than the six I had written myself, which it passed 6/6.
 
 ### What can you claim?
 
@@ -103,7 +108,7 @@ somewhere they can be versioned, sourced and verified.
 ### Fundable — the full tool
 
 The calculator the three lite demos were cut from, in
-[`apps/fundable.html`](apps/fundable.html): a single 5.1 MB HTML file carrying **35 navigable
+[`apps/fundable.html`](apps/fundable.html): a single 5.0 MB HTML file carrying **35 navigable
 functions across ten sections**, from levy forecasting and cohort planning through to a report
 builder — press `/` or `Ctrl-K` inside it and the command palette lists all 35, plus five
 app-level commands. It is where
