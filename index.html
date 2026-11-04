@@ -484,8 +484,20 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .walkbar .wsay{font-size:13.5px;color:var(--muted);line-height:1.55;max-width:var(--measure);flex:1 1 300px}
 .walkbar .wsay b{color:var(--ink)}
 .walkbar .wyr{font-family:var(--mono);font-size:11px;color:var(--warm);white-space:nowrap}
-.caveat{margin:14px 0 0;font-size:12.5px;color:var(--muted-2);max-width:var(--measure);line-height:1.65}
+/* Boxed, so they run the card's full width instead of stopping 262px short
+   of it. Quieter than .caveat-vis on stage 1, which is a warning and keeps
+   its warm border: these are asides, so the box is neutral and the text
+   carries whatever colour the figure gives it.
+
+   Two pairs of these sit back to back on stage 7. As separate boxes a run
+   reads as a pile, so consecutive ones overlap their borders and square the
+   corners between them — a run becomes one box with a rule across it. */
+.caveat{margin:14px 0 0;font-size:12.5px;color:var(--muted-2);line-height:1.65;
+  border:1px solid var(--line);border-radius:var(--r-md);padding:13px 16px;
+  background:rgba(159,177,202,.035)}
 .caveat b{color:var(--muted)}
+.caveat + .caveat{margin-top:-1px;border-top-left-radius:0;border-top-right-radius:0}
+.caveat:has(+ .caveat){border-bottom-left-radius:0;border-bottom-right-radius:0}
 /* the provider-context card. Matches .prog's box so stage 6 reads as one
    stack of equal-width cards rather than cards with footnotes between them. */
 .stopcard{border:1px solid rgba(240,163,92,.38);border-radius:var(--r-md);padding:18px 20px;
@@ -1073,6 +1085,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=65"></script>
+<script src="journey.js?v=66"></script>
 </body>
 </html>
