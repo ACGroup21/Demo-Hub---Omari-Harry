@@ -33,9 +33,10 @@ and the page says that too.
 
 **It judges the jobs, and names which judgement it is making.** It ranks the ten on what their job
 descriptions evidence and puts three forward — and the page says *three have been preselected*
-rather than letting a shortlist look as though it arrived from nowhere. Who has *potential* is a
-different question, one it has no way to answer, so it does not pretend to. Nobody has to be *good*
-at managing to start learning it either: the bar is **opportunity, not competence**, because an
+rather than letting a shortlist look as though it arrived from nowhere. Who has *potential* is
+subjective, and worth a conversation in a real situation where nuance can be considered — for the
+purposes of illustration, selection here is limited to definite eligibility. Nobody has to be
+*good* at managing to start learning it either: the bar is **opportunity, not competence**, because an
 apprentice is assessed on work they actually do, so the role has to let them practise it somewhere.
 Five of the ten have jobs that give an assessor nothing to look at. Two more are argued against for
 this year rather than refused on their merits, with four things to do about it in the meantime — a
