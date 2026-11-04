@@ -148,8 +148,15 @@ page rather than by taste.
   these cards — one token, six edges.
 - **Content inside a bordered panel fills it.** The frame already shortens the line, so a measure
   inside a frame only adds a second ragged edge within the box.
+- **A control that closes something puts you back where it interrupted.** The panel explaining why
+  someone cannot be put forward opens below the roster, and the roster is a little taller than the
+  viewport — so reading one to the end pushed all ten people off the top of the screen, and closing
+  it left the viewport on the next button with nothing to choose from in sight.
 
-Twelve right-hand edges became one, measured across all seven stages with every card open.
+Measured on the live build, every stage reopened and all fourteen disclosures expanded: **one card
+edge** across the seven cards, **one inner edge** across the sixty-eight panels inside them, and the
+28.67px between those two edges is the card's own padding and border, not a ragged margin. It was
+twelve edges.
 
 Two typefaces, split by what the text is rather than for contrast: **mono for the machine-readable
 layer** — figures, codes, dates and the small labels that index them — and Inter for the argument.
