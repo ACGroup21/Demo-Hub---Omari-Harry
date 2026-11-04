@@ -31,11 +31,15 @@ removed by the tool's own filters and put back deliberately, and it says which f
 and why they are still there. The classification of which published duties count as "management" is mine,
 and the page says that too.
 
-**It refuses to guess.** Picking who has potential is a judgement an employer makes; the tool will
-not fake it. And nobody has to be *good* at managing to start learning it — the bar is **opportunity,
+**It judges the jobs, and says which judgement it is making.** It ranks the ten on what their job
+descriptions evidence and puts three forward — that part it does do, and the page says so plainly
+rather than letting the shortlist look as though it arrived from nowhere. Who has *potential* is a
+different question, one it has no way to answer, so it does not. And nobody has to be *good* at
+managing to start learning it — the bar is **opportunity,
 not competence**: an apprentice is assessed on work they actually do, so the role has to let them
 practise it somewhere. Five of the ten have jobs that give an assessor nothing to look at. Two more
-are held back a year rather than refused, with four things to do about it in the meantime — a dotted
+are argued against rather than refused — the panel explaining why carries a button that puts them
+forward anyway, and the figures downstream move when you use it — with four things to do instead — a dotted
 line, a project with a budget, an apprenticeship unit, and a named place in next year's cohort.
 Every one of those is a statement about the job, not the person, and the page says so.
 
