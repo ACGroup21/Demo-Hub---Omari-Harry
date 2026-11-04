@@ -137,3 +137,21 @@ page. A phone build is its own exercise, not a squeeze of this one.
 Vanilla JavaScript, HTML and CSS. No build step, no framework, no dependencies beyond what is in the
 file. Deployed as static pages. The constraint is deliberate — these go to small employers and
 training providers who need a link that works, not an install.
+
+What there is instead of a framework is a short set of rules, each one arrived at by measuring the
+page rather than by taste.
+
+- **Four corner radii** where thirteen had accumulated, encoding nesting: a panel inside a card is
+  less round than the card, so the hierarchy reads from the corners alone.
+- **One reading measure**, in pixels rather than ch. ch is relative to each element’s own font
+  size, so a single token in ch still resolved to six different widths across the text sizes in
+  these cards — one token, six edges.
+- **Content inside a bordered panel fills it.** The frame already shortens the line, so a measure
+  inside a frame only adds a second ragged edge within the box.
+
+Twelve right-hand edges became one, measured across all seven stages with every card open.
+
+Two typefaces, split by what the text is rather than for contrast: **mono for the machine-readable
+layer** — figures, codes, dates and the small labels that index them — and Inter for the argument.
+Figures quoted inside a sentence stay in the prose face, because there they are part of the
+sentence; it is the ones you would go and check that are set apart.
