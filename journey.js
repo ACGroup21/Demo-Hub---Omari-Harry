@@ -1508,7 +1508,7 @@ function deptCheck() {
     return '<li' + (over ? ' class="over"' : '') + '>' +
       '<span class="dn">' + esc(name) + '</span>' +
       '<span class="dw">' + d.who.map(esc).join(', ') + '</span>' +
-      '<span class="dc">' + d.who.length + ' of ' + d.size + '</span>' +
+      '<span class="dc"><i>' + d.who.length + '</i> of <i>' + d.size + '</i></span>' +
       '<span class="ds">' + Math.round(share * 100) + '%</span>' +
       '<span class="dv">' + (over ? 'over' : 'clear') + '</span></li>';
   }).join('');
@@ -1758,9 +1758,12 @@ function drawStep7() {
     'evidenced anything an assessor could look at, and the <b>' + fmt(otjAll) + '</b> of off-the-job ' +
     'time comes off a shop floor covered to the hour. Widening the ratio means widening roles and ' +
     'finding cover &mdash; not finding budget.</p>' +
+    /* said "the ratio below" from nine blocks underneath the ratio. What is
+       actually below this paragraph is the five-year pathway. Nothing needs a
+       direction here: the ratio and the ceiling are both already read. */
     '<p>Unspent levy does expire on a rolling ' + RULES.expiryMonths + '-month clock, about <b>' +
-    fmt(perYear) + ' a year</b> on this plan. Worth knowing; not the point. The point is the ratio ' +
-    'below.</p></div>' +
+    fmt(perYear) + ' a year</b> on this plan. Worth knowing, and <b>not the point</b>. The ratio ' +
+    'is, and the ceiling it runs into in any one department.</p></div>' +
 
     '<p class="subhead">After year five</p>' +
     '<p class="sub">Where ' + esc(two.name) + ' leads, if they stay. <b>' + above.length + '</b> funded ' +

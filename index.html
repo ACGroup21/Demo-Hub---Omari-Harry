@@ -822,14 +822,31 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 /* The department ceiling, on the same row grid as the rungs further down
    this stage, so the two lists read as one kind of thing. */
 .depts{list-style:none;margin:14px 0 0;padding:0;border-top:1px solid var(--line)}
-.depts li{display:grid;grid-template-columns:1fr 1fr 86px 52px 56px;align-items:baseline;gap:14px;
-  padding:11px 2px;border-bottom:1px solid rgba(159,177,202,.07)}
+/* ONE grid for the whole list, with the rows as display:contents, so the
+   five columns are shared and every row lines up. Each li being its own grid
+   was the bug behind two different problems: with 1fr columns the name cell
+   was 273px wide for 70px of text, piling all the slack into one gap (281px
+   from name to count against 77px from count to percentage), and with auto
+   columns each row then sized independently, so the counts landed at 688,
+   677 and 701.
+   Content-sized columns plus space-between gives even gaps; sharing them
+   gives alignment. Rows are separated by space rather than a rule, because
+   display:contents leaves no row box to draw one on. */
+.depts{display:grid;grid-template-columns:auto auto auto auto auto;justify-content:space-between;
+  align-items:baseline;column-gap:24px}
+.depts li{display:contents}
+.depts li > span{padding:11px 0}
 .depts .dn{font-weight:600;font-size:14px;color:var(--ink);min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .depts .dw{font-size:13px;color:var(--muted-2);min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .depts .dc,.depts .ds{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;
   font-variant-numeric:tabular-nums;white-space:nowrap}
+/* "1 of 14" and "1 of 7" were right-aligned as whole strings, so the shorter
+   one slid 7px right and the "1 of" never lined up down the column. Each
+   number gets a fixed box instead, so the figures align and the word between
+   them sits in the same place on every row. */
+.depts .dc i{display:inline-block;min-width:2ch;text-align:right;font-style:normal}
 .depts .ds{color:var(--ink)}
 .depts .dv{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
   text-align:right;color:var(--good)}
@@ -1132,6 +1149,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=69"></script>
+<script src="journey.js?v=73"></script>
 </body>
 </html>
