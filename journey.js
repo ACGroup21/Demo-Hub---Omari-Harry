@@ -554,29 +554,30 @@ function avatar(name) {
 
 function drawTeam() {
   $('team').innerHTML = TEAM.map(function (p) {
-    /* Recommended is not the same as permitted. The ranking puts three
-       forward; the other two eligible are advice against, not a locked door,
-       because the panel behind them has always said the choice is yours and
-       for a long time that was simply untrue — clicking them could never add
-       anyone. Only a role with nothing to assess is actually blocked. */
-    var rec = selectable(p.id);                       /* in the top three */
-    var on = !!picked[p.id];
-    var soon = eligible(p.id) && !rec && !on;         /* eligible, ranked below, not taken */
-    var blocked = !eligible(p.id);                    /* nothing an assessor could look at */
-    return '<button class="person' + (on ? ' on' : '') + (blocked ? ' blocked' : '') +
-      (soon ? ' soon' : '') +
-      '" data-p="' + p.id + '"' + (blocked ? ' aria-disabled="true"' : '') + '>' +
+    var ok = selectable(p.id);
+    var soon = eligible(p.id) && !ok;
+    return '<button class="person' + (picked[p.id] ? ' on' : '') + (ok ? '' : ' blocked') + (soon ? ' soon' : '') +
+      '" data-p="' + p.id + '"' + (ok ? '' : ' aria-disabled="true"') + '>' +
       avatar(p.name) +
       '<span class="nm">' + esc(p.name) + '</span>' +
       '<span class="rl">' + esc(p.role) + ' · ' + p.yrs + ' yr' + (p.yrs === 1 ? '' : 's') + '</span>' +
       '<span class="nt">' + esc(p.note) + '</span>' +
-      (blocked ? '<span class="flag">Nothing to assess — why?</span>'
-       : soon ? '<span class="flag soft">Not this year — what could you do?</span>' : '') +
-      '</button>';
+      (ok ? '' : soon ? '<span class="flag soft">Not this year — what could you do?</span>'
+                     : '<span class="flag">Nothing to assess — why?</span>') + '</button>';
   }).join('');
 
   var ready = TEAM.filter(function (p) { return eligible(p.id); }).length;
   var n = chosen().length;
+  /* The shortlist is already made, and until now the page never said so
+     plainly — a reader met ten cards, found five of them unclickable, and had
+     to work out why from the flags. This says it up front and points at the
+     other five.
+
+     "Suitable" is doing exact work here and has to keep doing it: it means
+     their job evidences a duty an assessor could look at, nothing more. The
+     page refuses elsewhere to rank who is best, so the pill says what the
+     shortlist is on and what it is not on, or it would quietly contradict
+     the stage it sits in. */
   /* The shortlist is already made and the page never said so plainly: a
      reader met ten cards, found seven of them unclickable, and had to infer
      the rule from the flags. This states it and points at the rest.
@@ -762,11 +763,13 @@ function couldDo(p) {
     'the three changes above as its conditions &mdash; not a vague undertaking. Deferral without a ' +
     'date reads as a refusal, and people leave over it.</p>' +
 
-    '<p class="scope">Advice, not a decision. The ranking puts three forward on the evidence; ' +
-    'whether ' + first + ' goes this year is yours, and the button below does it.</p>' +
-    '<p class="whyrow"><button class="btn" id="pickAnyway" data-p="' + p.id + '">Put ' + first +
-    ' forward anyway</button>' +
-    '<button class="dismiss" id="whyX">Close this</button></p></div>';
+    /* This said "nothing prevents enrolling Priya this year" — on a panel that
+       only appears because she cannot be picked. Verified: clicking her leaves
+       the cohort at zero. The advice was sound; the claim about what a reader
+       was free to do was not. */
+    '<p class="scope">The three preselected are the three with the most for an assessor to ' +
+    'look at. ' + first + ' is the argument for next year, not this one.</p>' +
+    '<p><button class="dismiss" id="whyX">Close this</button></p></div>';
   $('why3').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
 }
 
@@ -2630,24 +2633,16 @@ $('go2').addEventListener('click', function () {
 });
 document.addEventListener('click', function (e) {
   if (e.target.id === 'whyX') { $('why3').innerHTML = ''; return; }
-  if (e.target.id === 'pickAnyway') {
-    picked[+e.target.getAttribute('data-p')] = 1;
-    $('why3').innerHTML = '';
-    drawTeam();
-    return;
-  }
   var el = e.target.closest && e.target.closest('.person');
   if (!el) return;
   var id = +el.getAttribute('data-p');
   var person = TEAM.filter(function (p) { return p.id === id; })[0];
   if (!eligible(id)) { explain(person); return; }      /* nothing to assess at all */
-  if (picked[id]) { delete picked[id]; $('why3').innerHTML = ''; drawTeam(); return; }
-  /* Ranked below the top three: show the argument rather than the cohort
-     changing under you — and the panel carries the button that overrides it.
-     Deselecting is handled above, or taking someone off would re-open the
-     advice you have already read and acted on. */
-  if (!selectable(id)) { couldDo(person); return; }
-  picked[id] = 1; $('why3').innerHTML = '';
+  if (!selectable(id)) { couldDo(person); return; }    /* thin: not this year, here is why */
+  if (picked[id]) { delete picked[id]; $('why3').innerHTML = ''; }
+  else { picked[id] = 1; $('why3').innerHTML = ''; }   /* was adviseIfWeaker(), which
+    could never render: selectable() already excludes anyone isWeaker() flags, so its own
+    first line returned every time. Clearing the panel was the whole of its live effect. */
   drawTeam();
 });
 $('go3').addEventListener('click', function () {
