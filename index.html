@@ -164,7 +164,14 @@ h1 em{font-style:normal;color:var(--cyan)}
   text-decoration:underline;text-underline-offset:2px}
 .linklike:hover{filter:brightness(1.2)}
 .step.folded .card-body{display:none}
-.sub{margin:10px 0 20px;color:var(--muted);font-size:14.5px;line-height:1.68;max-width:70ch}
+/* Full width, matching stage 1. These eighteen intros were the last things
+   in the cards still stopping short of the edge, so every stage had one
+   ragged right edge near the top of it. The trade is a longer line than the
+   70ch they used to keep — about 100 characters on a full card — which is
+   wide for continuous reading and is the reason the limit was there. They
+   are short intros read once before the stage opens, not long passages, so
+   the alignment is worth more here than the measure. */
+.sub{margin:10px 0 20px;color:var(--muted);font-size:14.5px;line-height:1.68}
 .sub b{color:var(--ink);font-weight:600}
 
 /* ── payoff ───────────────────────────────────────────────────────────────
@@ -317,10 +324,6 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   border-radius:var(--r-md);background:rgba(240,163,92,.045);padding:14px 17px}
 .caveat-vis b{color:var(--ink)}
 
-/* Full width, as asked. A wider measure than the 70ch the other stage intros
-   keep, and this is the one that can carry it: read once, at the top, before
-   anything else on the page competes for the eye. */
-#s1 .sub{max-width:none}
 
 /* ── readout ──────────────────────────────────────────────────────────── */
 .readout{border:1px solid var(--cyan-dim);border-radius:var(--r-md);padding:20px 22px;
@@ -371,18 +374,6 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .person.on .nm{color:var(--cyan)}
 .person .rl{font-size:12.5px;color:var(--muted)}
 .person .nt{font-size:12px;color:var(--muted-2);margin-top:4px;line-height:1.45}
-/* Its own pill, centred under the grid. It was a left-aligned line of body
-   text sitting among ten cards, which is where a reader stops seeing it — and
-   it is the line that explains why half the grid cannot be clicked. */
-/* max-width is the card, not a ch cap: an 80ch cap was narrower than the
-   card and wrapped the longest state onto two lines, and a two-line capsule
-   stops reading as a pill. */
-.count{margin:20px auto 2px;width:fit-content;max-width:100%;text-align:center;
-  font-size:14px;line-height:1.5;color:var(--muted);
-  border:1px solid var(--line);border-radius:var(--r-pill);padding:11px 22px;
-  background:rgba(159,177,202,.045)}
-.count b{color:var(--ink)}
-.count .lede{color:var(--cyan)}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
 
 /* ── step 4 · duty coverage ───────────────────────────────────────────── */
@@ -972,7 +963,6 @@ footer b{color:var(--muted)}
         to look at yet. Click any of them to see why they are not among the three.</p>
         <div class="team" id="team"></div>
         <div id="why3"></div>
-        <p class="count" id="count3"></p>
         <div class="row"><button class="btn" id="go3" disabled>Match their job descriptions &rarr;</button></div>
         <details class="work"><summary>Why these ten <span class="chain" id="chain3"></span></summary>
           <table class="funnel" id="work3"></table>
@@ -1065,6 +1055,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=61"></script>
+<script src="journey.js?v=63"></script>
 </body>
 </html>
