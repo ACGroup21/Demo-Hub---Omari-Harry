@@ -279,6 +279,26 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
    "Here is your levy" was the pay bill. */
 .paybill{font-family:var(--mono);font-size:19px;font-weight:500;color:var(--muted);
   font-variant-numeric:tabular-nums;line-height:1.2;margin-bottom:10px}
+/* The stage was a single ragged column in an 882px card: measured, the rows
+   left between 242 and 374px of dead space down the right, and the two
+   things that belong together — the pay bill you set and the levy it
+   produces — were stacked, so you could not watch one move the other.
+
+   Side by side they read as cause and effect, and the card is filled by the
+   content rather than by widening the prose, which has a measure for a
+   reason. Below 1180 they stack again: two columns of ~380px start breaking
+   the slider scale and the big figure. */
+.s1-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);
+  gap:0 34px;align-items:start;margin-top:4px}
+.s1-set{min-width:0}
+.s1-set .hint{max-width:none}
+.s1-grid .levyout{margin:0;border:1px solid var(--cyan-dim);border-radius:var(--r-md);
+  padding:17px 19px;background:rgba(0,201,204,.045)}
+.s1-grid .levyout.nil{border-color:rgba(240,163,92,.4);background:rgba(240,163,92,.05)}
+@media screen and (max-width:1180px){
+  .s1-grid{grid-template-columns:minmax(0,1fr);gap:22px 0}
+  .s1-grid .levyout{max-width:520px}
+}
 .levyout{margin-top:22px}
 .levyout .lk{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--muted-2)}
@@ -867,16 +887,20 @@ footer b{color:var(--muted)}
         <p class="sub">Brayford employs <b>1,340 people across 42 stores</b>, paid at the UK average salary. The levy is charged
         on the whole pay bill &mdash; not just salaries above a threshold &mdash; so it is usually a bigger
         number than employers expect. Move it if you like; the story continues either way.</p>
-        <label for="paybill">Annual pay bill</label>
-        <div class="paybill" id="pbOut">&pound;54,820,740</div>
-        <div class="sliderwrap">
-          <input type="range" id="paybill" min="1000000" max="90000000" step="500000"
-                 aria-describedby="pbHint">
-          <div class="mark" id="pbMark"><i>Brayford</i></div>
+        <div class="s1-grid">
+          <div class="s1-set">
+            <label for="paybill">Annual pay bill</label>
+            <div class="paybill" id="pbOut">&pound;54,820,740</div>
+            <div class="sliderwrap">
+              <input type="range" id="paybill" min="1000000" max="90000000" step="500000"
+                     aria-describedby="pbHint">
+              <div class="mark" id="pbMark"><i>Brayford</i></div>
+            </div>
+            <div class="scale"><span>&pound;1m</span><span>&pound;45m</span><span>&pound;90m</span></div>
+            <p class="hint" id="pbHint" aria-live="polite"></p>
+          </div>
+          <div class="levyout" id="levyOut" aria-live="polite"></div>
         </div>
-        <div class="scale"><span>&pound;1m</span><span>&pound;45m</span><span>&pound;90m</span></div>
-        <div class="levyout" id="levyOut" aria-live="polite"></div>
-        <p class="hint" id="pbHint" aria-live="polite"></p>
         <p class="caveat-vis"><b>That average is the wrong one for retail, and it matters.</b>
         The published figure covers <b>full-time</b> staff in post a year or more. A real chain this
         size runs on part-time hours and high turnover, so its pay bill per head &mdash; and its levy
@@ -1029,6 +1053,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=59"></script>
+<script src="journey.js?v=60"></script>
 </body>
 </html>
