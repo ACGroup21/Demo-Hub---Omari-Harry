@@ -269,8 +269,12 @@ function paintRail() {
 
    Locked ones are not clickable and say why, because a dead control with no
    explanation is the thing that makes people give up on a page. */
+/* Title case, not every-word-capitalised: principal words take a capital,
+   an article or short preposition keeps lower case unless it leads. So
+   "Assign the Cohort", while "The Report" and "The Pathway" capitalise the
+   article because it is the first word. */
 var STEP_NAMES = ['Your Levy', 'The Readout', 'Choose Learners', 'Match JDs',
-                  'The Report', 'Assign The Cohort', 'The Pathway'];
+                  'The Report', 'Assign the Cohort', 'The Pathway'];
 
 function mountStepper() {
   if ($('stepper')) return;
