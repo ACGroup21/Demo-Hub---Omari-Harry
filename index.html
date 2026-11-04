@@ -29,6 +29,24 @@
   --r-md:10px;    /* a panel sitting inside one                           */
   --r-sm:6px;     /* a control: button, disclosure, tag                   */
   --r-pill:999px; /* anything capsule-shaped: chips, tracks, thin marks   */
+  /* One reading measure. Inside the stage cards there were seven different
+     ones — 48, 60, 62, 72, 74, 76 and 78ch — all doing the same job, which
+     put twelve different right edges in the cards and is why nothing looked
+     aligned with anything. Measured shortfalls ran 129, 191, 203, 224, 254,
+     262, 283, 298, 302, 310, 314, 492, 508 and 531px.
+
+     Not removed, unified: at 12.5px a full 882px card is about 125
+     characters a line, which is why the caps existed. With one value every
+     paragraph shares an edge, so a card now has two — things that run the
+     full width, and prose. */
+  /* In px, not ch. ch is relative to each element's OWN font-size, so one
+     token in ch resolved to 532, 583, 606, 620, 630 and 653px across the
+     text sizes in these cards — a single token that still produced six
+     edges. Absolute is the only way one value means one edge. 620px is the
+     centre of what those caps already were: about 86 characters at 14px and
+     96 at 12.5px, longer than the ideal measure and far shorter than the
+     882px card. */
+  --measure:620px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -193,7 +211,7 @@ h1 em{font-style:normal;color:var(--cyan)}
 .payoff>h3,.check h3,.verdict h3,.why h4{margin:0 0 10px;font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--cyan)}
 .payoff.warn>h3,.check h3,.why h4{color:var(--warm)}
 .payoff.stop>h3,.verdict.bad h3{color:var(--bad)}
-.payoff>p,.check p,.verdict p,.why p{margin:0 0 10px;font-size:14px;line-height:1.66;color:var(--muted);max-width:74ch}
+.payoff>p,.check p,.verdict p,.why p{margin:0 0 10px;font-size:14px;line-height:1.66;color:var(--muted);max-width:var(--measure)}
 .payoff>p:last-child,.check p:last-child,.verdict p:last-child,.why p:last-child{margin-bottom:0}
 .payoff b,.check b,.verdict b,.why b{color:var(--ink)}
 
@@ -205,13 +223,13 @@ details.work>summary::-webkit-details-marker{display:none}
 details.work>summary:hover{color:var(--cyan)}
 details.work>summary .chain{color:var(--muted)}
 details.work[open]>summary{color:var(--cyan);margin-bottom:12px}
-.funnel{font-family:var(--mono);font-size:12px;border-collapse:collapse;width:100%;max-width:580px}
+.funnel{font-family:var(--mono);font-size:12px;border-collapse:collapse;width:100%;max-width:var(--measure)}
 .funnel td{padding:5px 0;border-bottom:1px solid rgba(159,177,202,.07);vertical-align:baseline}
 .funnel td:last-child{text-align:right;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .funnel .drop{color:var(--bad);margin-left:12px;font-size:11px}
 .funnel tr.indent td:first-child{padding-left:16px;color:var(--muted)}
 .funnel tr.sum td{color:var(--cyan);border-bottom:0;padding-top:9px}
-.ours{margin:13px 0 0;font-size:12.5px;color:var(--warm);max-width:72ch;line-height:1.6}
+.ours{margin:13px 0 0;font-size:12.5px;color:var(--warm);max-width:var(--measure);line-height:1.6}
 .ours b{color:var(--ink)}
 
 /* ── controls ─────────────────────────────────────────────────────────── */
@@ -223,7 +241,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .btn.ghost{background:none;color:var(--muted);border-color:var(--line)}
 .btn.ghost:hover{color:var(--cyan);border-color:var(--cyan)}
 .btn:disabled{opacity:.28;cursor:not-allowed;filter:none}
-.gate-why{font-size:12.5px;color:var(--warm);max-width:48ch;line-height:1.5}
+.gate-why{font-size:12.5px;color:var(--warm);max-width:var(--measure);line-height:1.5}
 .gate-why.ok{color:var(--good)}
 .why .scope{color:var(--muted-2);font-size:12.5px;font-style:italic}
 
@@ -275,7 +293,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .mark i{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-style:normal;
   font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
   color:var(--warm);white-space:nowrap}
-.hint{margin:14px 0 0;font-size:13px;line-height:1.6;max-width:62ch;color:var(--muted)}
+.hint{margin:14px 0 0;font-size:13px;line-height:1.6;max-width:var(--measure);color:var(--muted)}
 .hint b{color:var(--ink)}
 .hint.off{color:var(--warm)}
 .hint.off b{color:var(--warm)}
@@ -356,7 +374,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .ip-h b{font-size:14px;color:var(--cyan)}
 .ip-h .dismiss{margin-left:auto}
 .infopack .funnel td{padding:6px 14px 6px 0;vertical-align:top;font-family:var(--mono);font-size:11.5px}
-.ip-why{margin:11px 0 0;font-size:13px;color:var(--muted);line-height:1.6;max-width:72ch}
+.ip-why{margin:11px 0 0;font-size:13px;color:var(--muted);line-height:1.6;max-width:var(--measure)}
 .ip-src{margin:10px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--muted-2)}
 .ip-src a{color:var(--muted)}
 .person.soon{border-style:dashed;opacity:.72;cursor:help}
@@ -463,17 +481,17 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .walker .av{width:30px;height:30px;font-size:11px;margin:0;box-shadow:0 0 0 3px #05080f}
 .walker .wt{margin-top:3px;width:1px;height:10px;background:var(--warm)}
 .walkbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:26px}
-.walkbar .wsay{font-size:13.5px;color:var(--muted);line-height:1.55;max-width:60ch;flex:1 1 300px}
+.walkbar .wsay{font-size:13.5px;color:var(--muted);line-height:1.55;max-width:var(--measure);flex:1 1 300px}
 .walkbar .wsay b{color:var(--ink)}
 .walkbar .wyr{font-family:var(--mono);font-size:11px;color:var(--warm);white-space:nowrap}
-.caveat{margin:14px 0 0;font-size:12.5px;color:var(--muted-2);max-width:76ch;line-height:1.65}
+.caveat{margin:14px 0 0;font-size:12.5px;color:var(--muted-2);max-width:var(--measure);line-height:1.65}
 .caveat b{color:var(--muted)}
 /* the provider-context card. Matches .prog's box so stage 6 reads as one
    stack of equal-width cards rather than cards with footnotes between them. */
 .stopcard{border:1px solid rgba(240,163,92,.38);border-radius:var(--r-md);padding:18px 20px;
   margin-top:14px;background:rgba(240,163,92,.05)}
 .stopcard h3{margin:0;font-size:16px;font-weight:700;color:var(--warm);letter-spacing:-.01em}
-.stopsub{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted);max-width:74ch}
+.stopsub{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted);max-width:var(--measure)}
 .stopgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
   margin-top:16px}
 .stopnote{border-left:2px solid rgba(240,163,92,.4);padding-left:13px}
@@ -596,7 +614,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .badge.gone{border-color:var(--bad);color:var(--bad)}
 .ometa{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:9px;font-size:12.5px;color:var(--muted)}
 .ometa b{color:var(--ink)}
-.oline{margin:9px 0 0;font-size:13px;color:var(--muted);max-width:78ch}
+.oline{margin:9px 0 0;font-size:13px;color:var(--muted);max-width:var(--measure)}
 .oline b{color:var(--ink)}
 .opt.dead .oline b{color:var(--bad)}
 
@@ -608,7 +626,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .doc-head .meta{font-family:var(--mono);font-size:10px;color:var(--muted-2);text-align:right;line-height:1.8}
 .doc h4{margin:22px 0 9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--cyan);font-weight:500}
-.doc p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:78ch}
+.doc p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:var(--measure)}
 .doc p b{color:var(--ink)}
 .doc table{width:100%;border-collapse:collapse;font-size:13px;margin:4px 0 2px}
 .doc th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.07em;
@@ -757,7 +775,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .rr-t i.now{background:var(--warm)}
 .rr-t i.could{background:var(--cyan)}
 .rr-t i.target{background:repeating-linear-gradient(90deg,var(--good) 0 7px,rgba(79,214,160,.35) 7px 13px)}
-.rr-s{margin-top:7px;font-size:12.5px;color:var(--muted-2);line-height:1.55;max-width:74ch}
+.rr-s{margin-top:7px;font-size:12.5px;color:var(--muted-2);line-height:1.55;max-width:var(--measure)}
 
 /* next rungs — a four-column grid so the level pebble, the duration and the
    band each sit in their own column and can be read down rather than hunted
@@ -1055,6 +1073,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=63"></script>
+<script src="journey.js?v=65"></script>
 </body>
 </html>
