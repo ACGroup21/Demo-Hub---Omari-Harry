@@ -31,13 +31,16 @@ removed by the tool's own filters and put back deliberately, and it says which f
 and why they are still there. The classification of which published duties count as "management" is mine,
 and the page says that too.
 
-**It refuses to guess.** Picking who has potential is a judgement an employer makes; the tool will
-not fake it. And nobody has to be *good* at managing to start learning it — the bar is **opportunity,
-not competence**: an apprentice is assessed on work they actually do, so the role has to let them
-practise it somewhere. Five of the ten have jobs that give an assessor nothing to look at. Two more
-are held back a year rather than refused, with four things to do about it in the meantime — a dotted
-line, a project with a budget, an apprenticeship unit, and a named place in next year's cohort.
-Every one of those is a statement about the job, not the person, and the page says so.
+**It judges the jobs, and names which judgement it is making.** It ranks the ten on what their job
+descriptions evidence and puts three forward — and the page says *three have been preselected*
+rather than letting a shortlist look as though it arrived from nowhere. Who has *potential* is a
+different question, one it has no way to answer, so it does not pretend to. Nobody has to be *good*
+at managing to start learning it either: the bar is **opportunity, not competence**, because an
+apprentice is assessed on work they actually do, so the role has to let them practise it somewhere.
+Five of the ten have jobs that give an assessor nothing to look at. Two more are argued against for
+this year rather than refused on their merits, with four things to do about it in the meantime — a
+dotted line, a project with a budget, an apprenticeship unit, and a named place in next year's
+cohort. Every one of those is a statement about the job, not the person.
 
 **It measures against the published standards, not a summary of them.** Each job description was
 read against all 21 knowledge, skills and behaviours of Business administrator and all 16 published
