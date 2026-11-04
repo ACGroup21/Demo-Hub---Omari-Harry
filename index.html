@@ -306,9 +306,21 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
   font-variant-numeric:tabular-nums;line-height:1.18;margin-top:5px}
 .levyout .ls{font-size:13px;color:var(--muted);margin-top:5px}
 .levyout.nil .lv{color:var(--warm)}
-.caveat-vis{margin:16px 0 0;font-size:12.5px;line-height:1.65;color:var(--warm);max-width:72ch;
-  border-left:2px solid rgba(240,163,92,.4);padding-left:14px}
+/* Boxed rather than hung off a left bar. Measured inside stage 1's 882px
+   card, the rows ended at four different places — the intro 242px short of
+   the edge, the hint 454, this 314, the buttons flush — and a bar-and-indent
+   paragraph at its own width was the most obviously stray of them. As a box
+   it has the same edges as the grid above it and the controls below, so the
+   stage reads as a stack of aligned blocks. */
+.caveat-vis{margin:18px 0 0;font-size:12.5px;line-height:1.65;color:var(--warm);
+  border:1px solid rgba(240,163,92,.3);border-left:2px solid rgba(240,163,92,.55);
+  border-radius:var(--r-md);background:rgba(240,163,92,.045);padding:14px 17px}
 .caveat-vis b{color:var(--ink)}
+
+/* Full width, as asked. A wider measure than the 70ch the other stage intros
+   keep, and this is the one that can carry it: read once, at the top, before
+   anything else on the page competes for the eye. */
+#s1 .sub{max-width:none}
 
 /* ── readout ──────────────────────────────────────────────────────────── */
 .readout{border:1px solid var(--cyan-dim);border-radius:var(--r-md);padding:20px 22px;
@@ -1053,6 +1065,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=60"></script>
+<script src="journey.js?v=61"></script>
 </body>
 </html>
