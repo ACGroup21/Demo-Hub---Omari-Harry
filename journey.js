@@ -1491,15 +1491,26 @@ function deptCheck() {
     var d = byDept[p.dept] || (byDept[p.dept] = { size: p.deptSize, who: [] });
     d.who.push(p.name);
   });
+  /* Was a two-column table capped at 620px, and the last block on the page
+     not reaching the card edge. Full width made it worse, not better: with
+     only a label column and a figure column the label stretched to 611px,
+     stranding "1 of 14 · 7%" four hundred pixels from the department it
+     belongs to.
+
+     The content was never two columns. It is a department, who is in it, how
+     many of how many, the share, and the verdict. Given those as real columns
+     it fills the width with nothing stranded, on the same row grid the
+     five-year rungs use further down this stage. */
   var rows = Object.keys(byDept).map(function (name) {
     var d = byDept[name];
     var share = d.who.length / d.size;
     var over = share > cap;
-    return '<tr' + (over ? ' class="indent"' : '') + '><td>' + esc(name) +
-      ' <span style="color:var(--muted-2)">· ' + d.who.map(esc).join(', ') + '</span></td>' +
-      '<td style="color:' + (over ? 'var(--bad)' : 'var(--good)') + '">' +
-      d.who.length + ' of ' + d.size + ' · ' + Math.round(share * 100) + '%' +
-      (over ? ' — over' : '') + '</td></tr>';
+    return '<li' + (over ? ' class="over"' : '') + '>' +
+      '<span class="dn">' + esc(name) + '</span>' +
+      '<span class="dw">' + d.who.map(esc).join(', ') + '</span>' +
+      '<span class="dc">' + d.who.length + ' of ' + d.size + '</span>' +
+      '<span class="ds">' + Math.round(share * 100) + '%</span>' +
+      '<span class="dv">' + (over ? 'over' : 'clear') + '</span></li>';
   }).join('');
   var breaches = Object.keys(byDept).filter(function (k) {
     return byDept[k].who.length / byDept[k].size > cap;
@@ -1510,7 +1521,7 @@ function deptCheck() {
     '1,340 is nothing; three out of one team of eight is a morning a week with a third of that ' +
     'team gone. So the limit is <b>' + Math.round(cap * 100) + '% of any one department</b>, not ' +
     'of the workforce.</p>' +
-    '<table class="funnel" style="max-width:620px">' + rows + '</table>' +
+    '<ul class="depts">' + rows + '</ul>' +
     '<p class="caveat"><b>This rule is mine, not a published standard.</b> There is no statutory ' +
     'departmental limit. It is here because it is the constraint a real operator hits first &mdash; ' +
     'and because a ratio measured only across a whole workforce will tell you everything is fine ' +
@@ -2570,6 +2581,10 @@ aim();
 
   TINT = wantTint().slice();       /* so the single static frame is not red */
   size();
+  /* the splash is opaque and sits above the page canvas, so it takes its own
+     surface of the same field rather than showing a still black screen */
+  var sp = document.querySelector('.sp-bg');
+  if (sp) window.setTimeout(function () { bgSurface.add(sp); }, 0);
   window.addEventListener('resize', size, { passive: true });
   if (reduced()) return;           /* the one frame above is the whole of it */
 
@@ -2582,6 +2597,8 @@ aim();
 
 /* ── wiring ──────────────────────────────────────────────────────────────── */
 $('enter').addEventListener('click', function () {
+  var sp = document.querySelector('.sp-bg');
+  if (sp && window.bgSurface) bgSurface.remove(sp);   /* stop painting a hidden canvas */
   $('splash').classList.add('gone');
   setTimeout(function () { goTo(1); }, 200);
 });

@@ -73,11 +73,32 @@ a{color:var(--cyan)}
 #splash{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:26px;padding:24px;transition:opacity .5s ease,visibility .5s}
 #splash.gone{opacity:0;visibility:hidden}
-#splash img{width:min(540px,86vw);height:auto;animation:rise .9s cubic-bezier(.2,.7,.3,1) both}
-#splash .tag{color:var(--muted);font-size:16px;text-align:center;max-width:46ch;margin:0;
+/* The lockup is one flat SVG with no groups, so "powered by Fundable"
+   cannot be scaled on its own inside it. It is sliced instead: measured, the
+   artwork has a clean empty band between y608 and y640 of its 887 height, so
+   the wordmark is everything above 624 and the credit everything below 640.
+   Two boxes, each showing its own slice as a background, and the lower one
+   is 70% as wide — which is the 30% reduction, since the background scales
+   with the box. */
+.sp-logo{display:flex;flex-direction:column;align-items:center;gap:10px;
+  width:min(540px,86vw);position:relative;z-index:1;
+  animation:rise .9s cubic-bezier(.2,.7,.3,1) both}
+.sp-logo i{display:block;background-image:url(assets/sandbox-logo-transparent.svg);
+  background-repeat:no-repeat;background-size:100% auto}
+.sl-mark{width:100%;aspect-ratio:1774/624;background-position:top center}
+.sl-by{width:70%;aspect-ratio:1774/247;background-position:bottom center}
+
+/* Its own surface of the page's star field. The splash is opaque, so without
+   this it is the one screen with nothing moving on it — and the field is
+   already shared this way with the recap, same nodes, same drift, so the
+   stars behind the logo are the stars you then scroll into. */
+.sp-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block;
+  pointer-events:none;opacity:0;animation:spFade 2.4s .2s ease both}
+@keyframes spFade{to{opacity:1}}
+#splash .tag{position:relative;z-index:1;color:var(--muted);font-size:16px;text-align:center;max-width:46ch;margin:0;
   animation:rise .9s .25s cubic-bezier(.2,.7,.3,1) both}
 #splash .tag b{color:var(--ink);font-weight:600}
-#enter{animation:rise .9s .45s cubic-bezier(.2,.7,.3,1) both}
+#enter{position:relative;z-index:1;animation:rise .9s .45s cubic-bezier(.2,.7,.3,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* ── chrome ───────────────────────────────────────────────────────────── */
@@ -798,6 +819,21 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 /* next rungs — a four-column grid so the level pebble, the duration and the
    band each sit in their own column and can be read down rather than hunted
    for. They were inline before, which put every figure at a different x. */
+/* The department ceiling, on the same row grid as the rungs further down
+   this stage, so the two lists read as one kind of thing. */
+.depts{list-style:none;margin:14px 0 0;padding:0;border-top:1px solid var(--line)}
+.depts li{display:grid;grid-template-columns:1fr 1fr 86px 52px 56px;align-items:baseline;gap:14px;
+  padding:11px 2px;border-bottom:1px solid rgba(159,177,202,.07)}
+.depts .dn{font-weight:600;font-size:14px;color:var(--ink);min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.depts .dw{font-size:13px;color:var(--muted-2);min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.depts .dc,.depts .ds{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.depts .ds{color:var(--ink)}
+.depts .dv{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  text-align:right;color:var(--good)}
+.depts li.over .ds,.depts li.over .dv{color:var(--bad)}
 .rungs{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .rungs li{display:grid;grid-template-columns:1fr 42px 92px 78px;align-items:center;gap:14px;
   padding:12px 2px;border-bottom:1px solid rgba(159,177,202,.07)}
@@ -856,7 +892,8 @@ footer b{color:var(--muted)}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  #splash,#splash img,#splash .tag,#enter,.step.active .node,.rc-card{animation:none}
+  #splash,.sp-logo,#splash .tag,#enter,.step.active .node,.rc-card{animation:none}
+  .sp-bg{animation:none;opacity:1}
   .walker{transition:none}
   .rc-card,.rc-note,.rc-in-r,.rc-in-l,.rc-out-l,.rc-out-r{animation:none;opacity:1}
   .rc-track i{transition:none}
@@ -889,7 +926,11 @@ footer b{color:var(--muted)}
 </div>
 
 <div id="splash">
-  <img src="assets/sandbox-logo-transparent.svg" alt="Sandbox by Omari Harry, powered by Fundable">
+  <canvas class="sp-bg" aria-hidden="true"></canvas>
+  <div class="sp-logo" role="img" aria-label="Sandbox by Omari Harry, powered by Fundable">
+    <i class="sl-mark" aria-hidden="true"></i>
+    <i class="sl-by" aria-hidden="true"></i>
+  </div>
   <p class="tag">A retail chain. Forty-two stores, a &pound;54.8m pay bill,<br>
     and five years to build its own managers.<br><b>Where does the money actually go?</b></p>
   <button class="btn" id="enter">Start the walkthrough</button>
@@ -1091,6 +1132,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=67"></script>
+<script src="journey.js?v=69"></script>
 </body>
 </html>
