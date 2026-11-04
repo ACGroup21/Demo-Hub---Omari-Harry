@@ -269,8 +269,8 @@ function paintRail() {
 
    Locked ones are not clickable and say why, because a dead control with no
    explanation is the thing that makes people give up on a page. */
-var STEP_NAMES = ['Your levy', 'The readout', 'Choose learners', 'Match JDs',
-                  'The report', 'Assign the cohort', 'The pathway'];
+var STEP_NAMES = ['Your Levy', 'The Readout', 'Choose Learners', 'Match JDs',
+                  'The Report', 'Assign The Cohort', 'The Pathway'];
 
 function mountStepper() {
   if ($('stepper')) return;
@@ -2627,7 +2627,19 @@ $('go2').addEventListener('click', function () {
   goTo(3);
 });
 document.addEventListener('click', function (e) {
-  if (e.target.id === 'whyX') { $('why3').innerHTML = ''; return; }
+  if (e.target.id === 'whyX') {
+    $('why3').innerHTML = '';
+    /* The explainer opens BELOW the roster, and the roster is 900px against
+       a ~894px viewport -- so reading one to the end put the ten people off
+       the top of the screen, and closing it left the viewport parked on the
+       Match button with nothing to choose from in sight. Closing a "why not
+       them" panel is a request to look at the choice again, so it goes back
+       to the roster. block:'start' because the roster is taller than the
+       viewport, with scroll-margin-top on #team to clear the fixed stepper. */
+    var team = $('team');
+    if (team) team.scrollIntoView({ block: 'start', behavior: reduced() ? 'auto' : 'smooth' });
+    return;
+  }
   var el = e.target.closest && e.target.closest('.person');
   if (!el) return;
   var id = +el.getAttribute('data-p');
