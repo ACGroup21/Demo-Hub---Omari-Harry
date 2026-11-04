@@ -47,6 +47,12 @@
      96 at 12.5px, longer than the ideal measure and far shorter than the
      882px card. */
   --measure:620px;
+  /* The measure is for prose with nothing around it. Inside a bordered panel
+     the frame already shortens the line, so a measure there leaves a SECOND
+     ragged edge inside the box — which is what the reality check looked
+     like: its heading filling the box and its three paragraphs stopping
+     213px short of the same inner edge. The rule is now: outside a box, the
+     measure; inside one, fill it. */
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -211,7 +217,7 @@ h1 em{font-style:normal;color:var(--cyan)}
 .payoff>h3,.check h3,.verdict h3,.why h4{margin:0 0 10px;font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--cyan)}
 .payoff.warn>h3,.check h3,.why h4{color:var(--warm)}
 .payoff.stop>h3,.verdict.bad h3{color:var(--bad)}
-.payoff>p,.check p,.verdict p,.why p{margin:0 0 10px;font-size:14px;line-height:1.66;color:var(--muted);max-width:var(--measure)}
+.payoff>p,.check p,.verdict p,.why p{margin:0 0 10px;font-size:14px;line-height:1.66;color:var(--muted)}
 .payoff>p:last-child,.check p:last-child,.verdict p:last-child,.why p:last-child{margin-bottom:0}
 .payoff b,.check b,.verdict b,.why b{color:var(--ink)}
 
@@ -374,7 +380,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .ip-h b{font-size:14px;color:var(--cyan)}
 .ip-h .dismiss{margin-left:auto}
 .infopack .funnel td{padding:6px 14px 6px 0;vertical-align:top;font-family:var(--mono);font-size:11.5px}
-.ip-why{margin:11px 0 0;font-size:13px;color:var(--muted);line-height:1.6;max-width:var(--measure)}
+.ip-why{margin:11px 0 0;font-size:13px;color:var(--muted);line-height:1.6}
 .ip-src{margin:10px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--muted-2)}
 .ip-src a{color:var(--muted)}
 .person.soon{border-style:dashed;opacity:.72;cursor:help}
@@ -503,7 +509,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .stopcard{border:1px solid rgba(240,163,92,.38);border-radius:var(--r-md);padding:18px 20px;
   margin-top:14px;background:rgba(240,163,92,.05)}
 .stopcard h3{margin:0;font-size:16px;font-weight:700;color:var(--warm);letter-spacing:-.01em}
-.stopsub{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted);max-width:var(--measure)}
+.stopsub{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted)}
 .stopgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
   margin-top:16px}
 .stopnote{border-left:2px solid rgba(240,163,92,.4);padding-left:13px}
@@ -626,7 +632,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .badge.gone{border-color:var(--bad);color:var(--bad)}
 .ometa{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:9px;font-size:12.5px;color:var(--muted)}
 .ometa b{color:var(--ink)}
-.oline{margin:9px 0 0;font-size:13px;color:var(--muted);max-width:var(--measure)}
+.oline{margin:9px 0 0;font-size:13px;color:var(--muted)}
 .oline b{color:var(--ink)}
 .opt.dead .oline b{color:var(--bad)}
 
@@ -638,7 +644,7 @@ input[type=range]{width:100%;max-width:520px;accent-color:var(--cyan);margin:4px
 .doc-head .meta{font-family:var(--mono);font-size:10px;color:var(--muted-2);text-align:right;line-height:1.8}
 .doc h4{margin:22px 0 9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--cyan);font-weight:500}
-.doc p{margin:0 0 9px;font-size:13.5px;color:var(--muted);max-width:var(--measure)}
+.doc p{margin:0 0 9px;font-size:13.5px;color:var(--muted)}
 .doc p b{color:var(--ink)}
 .doc table{width:100%;border-collapse:collapse;font-size:13px;margin:4px 0 2px}
 .doc th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.07em;
@@ -1085,6 +1091,6 @@ footer b{color:var(--muted)}
   addEventListener('resize', set, { passive: true });
 })();
 </script>
-<script src="journey.js?v=66"></script>
+<script src="journey.js?v=67"></script>
 </body>
 </html>
